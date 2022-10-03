@@ -74,15 +74,11 @@ class TestReflectionBuilder:
         [
             (
                 "そういうのってどうなんですか。",
-                "cannot extract sentence root",
+                "cannot extract one sentence not in ROOT_POS_SET",
             ),
             (
-                "ここはどこですか。",
-                "cannot extract one sentence PRON",
-            ),
-            (
-                "そういうのってどうなんですか。ここはどこですか。",
-                "cannot extract sentence not in ROOT_POS_SET before PRON",
+                "そういうのってどうなんですか。ここはどこですか。まだですか。",
+                "cannot extract sentences not in ROOT_POS_SET",
             ),
         ],
     )
