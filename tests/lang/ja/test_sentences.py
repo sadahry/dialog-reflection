@@ -66,8 +66,8 @@ class TestReflectionBuilder:
         assert_message,
     ):
         doc = reflector.nlp(message)
-        response = reflector.builder._select_sentence(doc)
-        assert response.text == expected, assert_message
+        sentence = reflector.builder._select_sentence(doc)
+        assert sentence.text == expected, assert_message
 
     @pytest.mark.parametrize(
         "message, assert_message",
@@ -89,5 +89,5 @@ class TestReflectionBuilder:
         assert_message,
     ):
         doc = reflector.nlp(message)
-        response = reflector.builder._select_sentence(doc)
-        assert response is None, assert_message
+        sentence = reflector.builder._select_sentence(doc)
+        assert sentence is None, assert_message
