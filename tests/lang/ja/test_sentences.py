@@ -68,3 +68,30 @@ class TestReflectionBuilder:
         doc = reflector.nlp(message)
         response = reflector.builder._select_sentence(doc)
         assert response.text == expected, assert_message
+
+    @pytest.mark.parametrize(
+        "message, assert_message",
+        [
+            (
+                "そういうのってどうなんですか。",
+                "cannot extract sentence root",
+            ),
+            (
+                "ここはどこですか。",
+                "cannot extract one sentence PRON",
+            ),
+            (
+                "そういうのってどうなんですか。ここはどこですか。",
+                "cannot extract sentence not in ROOT_POS_SET before PRON",
+            ),
+        ],
+    )
+    def test_select_no_entence(
+        self,
+        reflector: Reflector,
+        message,
+        assert_message,
+    ):
+        doc = reflector.nlp(message)
+        response = reflector.builder._select_sentence(doc)
+        assert response is None, assert_message
