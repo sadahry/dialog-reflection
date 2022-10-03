@@ -1,14 +1,15 @@
-import time
 import spacy
 
+# fmt: off
 # TODO パッケージが完成したら消して、以下のように書き換える
 import sys
 dir = sys.path[0]
-sys.path.append(dir + '/../')
+sys.path.append(dir + "/../")
 from spacy_dialog_reflection.reflector import Reflector
 # from spacy_dialog_reflection import Reflector
+# fmt: on
 
-nlp = spacy.load('ja_ginza')
+nlp = spacy.load("ja_ginza")
 refactor = Reflector(nlp)
 
 print("Ctrl+C to exit")
