@@ -27,6 +27,9 @@ class ReflectionBuilder:
             print("empty message")
             return None
         sent = self._select_sentence(doc)
+        if sent is None:
+            print("no valid sentenses")
+            return None
 
         return sent.text
 
@@ -38,5 +41,4 @@ class ReflectionBuilder:
             if sent.root.pos_ in self.ROOT_POS_SET:
                 return sent
 
-        print("no valid sentenses")
         return None
