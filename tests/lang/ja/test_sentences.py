@@ -8,13 +8,13 @@ def reflector(nlp_ja):
 
 
 @pytest.mark.parametrize(
-    "message",
+    "message, assert_message",
     [
-        "",
-        " ",  # 半角スペース
-        "　",  # 全角スペース
+        ("", "empty message"),
+        (" ", "half-width space"),
+        ("　", "full-width space"),
     ],
 )
-def test_no_sentence(reflector, message):
+def test_no_sentence(reflector, message, assert_message):
     response = reflector.reflect(message)
-    assert response is None
+    assert response is None, assert_message
