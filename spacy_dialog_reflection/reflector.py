@@ -24,14 +24,24 @@ class ReflectionBuilder:
         doc: spacy.tokens.Doc,
     ) -> Optional[str]:
         if doc.text.strip() == "":
-            print("empty message")
+            print("[WARNING] empty message")
             return None
         sent = self._select_sentence(doc)
         if sent is None:
-            print("no valid sentenses")
+            print("[WARNING] no valid sentenses")
             return None
 
         return sent.text
+
+    def _select_sentence(
+        self,
+        doc: spacy.tokens.Doc,
+    ) -> Optional[spacy.tokens.Span]:
+        for sent in reversed(list(doc.sents)):
+            if sent.root.pos_ in self.ROOT_POS_SET:
+                return sent
+
+        return None
 
     def _select_sentence(
         self,

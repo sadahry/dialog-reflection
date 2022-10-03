@@ -20,4 +20,7 @@ print("システム: たとえば「今日は旅行へ行った」という言�
 while True:
     message = input("あなた: ")
     response = refactor.reflect(message)
-    print(f"システム: {response}")
+    if response is None:
+        print("システム: 続けてください。")
+    else:
+        print(f"システム: {response}")
