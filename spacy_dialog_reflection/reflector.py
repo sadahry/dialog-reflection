@@ -18,7 +18,7 @@ class Reflector:
 
 class ReflectionBuilder:
     def build(self, doc: spacy.tokens.Doc) -> Optional[str]:
-        if doc.text == "":
+        if doc.text.strip() == "":
             return None
         sent = self._select_sentence(doc)
 
