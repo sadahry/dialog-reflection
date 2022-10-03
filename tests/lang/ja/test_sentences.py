@@ -7,6 +7,14 @@ def reflector(nlp_ja):
     return Reflector(nlp_ja)
 
 
-def test_no_sentence(reflector):
-    response = reflector.reflect("")
+@pytest.mark.parametrize(
+    "message",
+    [
+        "",
+        " ",  # 半角スペース
+        "　",  # 全角スペース
+    ],
+)
+def test_no_sentence(reflector, message):
+    response = reflector.reflect(message)
     assert response is None
