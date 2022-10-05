@@ -111,7 +111,7 @@ class TestReflectionBuilder:
                 "obj dependency does not extract distant dependencies",
             ),
             (
-                "する。",
+                "働く。",
                 "",
                 "no dependencies",
             ),
@@ -128,4 +128,41 @@ class TestReflectionBuilder:
         func = reflector.builder._extract_tokens_with_nearest_root_deps
         tokens = func(sent)
         text = "".join([token.text for token in tokens])
+        assert text == expected, assert_message
+
+    @pytest.mark.parametrize(
+        "message, expected, assert_message",
+        [
+            (
+                "社員をする。",
+                "するんですね。",
+                "obj dependency",
+            ),
+            (
+                "民間の社員をする。",
+                "するんですね。",
+                "obj dependency multi-word",
+            ),
+            (
+                "今年から社員をする。",
+                "するんですね。",
+                "obj dependency does not extract distant dependencies",
+            ),
+            (
+                "働く。",
+                "働くんですね。",
+                "no dependencies",
+            ),
+        ],
+    )
+    def test_build_suffix(
+        self,
+        reflector: Reflector,
+        message,
+        expected,
+        assert_message,
+    ):
+        sent = next(reflector.nlp(message).sents)
+        func = reflector.builder._build_suffix
+        text = func(sent.root)
         assert text == expected, assert_message
