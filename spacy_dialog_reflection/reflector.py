@@ -1,4 +1,5 @@
 from typing import List, Optional
+import warnings
 import spacy
 
 
@@ -30,11 +31,11 @@ class ReflectionBuilder:
         doc: spacy.tokens.Doc,
     ) -> Optional[str]:
         if doc.text.strip() == "":
-            print("[WARNING] empty message")
+            warnings.warn("empty message", UserWarning)
             return None
         sent = self._select_sentence(doc)
         if sent is None:
-            print("[WARNING] no valid sentenses")
+            warnings.warn("no valid sentenses", UserWarning)
             return None
         root = sent.root
         reflection_text = self._extract_text_with_nearest_root_deps(root)
