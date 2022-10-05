@@ -20,7 +20,6 @@ class Reflector:
 class ReflectionBuilder:
     def __init__(self) -> None:
         self.wordEnding = "んですね。"
-        self.wordEndingPast = "たんですね。"
 
     # VERB (5100; 63% instances), -NOUN (2328; 29% instances), -ADJ (529; 7% instances), -PROPN (62; 1% instances) in UD_Japanese-GSD
     # ref. https://universaldependencies.org/treebanks/ja_gsd/ja_gsd-dep-root.html
@@ -97,7 +96,7 @@ class ReflectionBuilder:
     ) -> str:
         """
         Build suffixes of reflection
-        Reflection suffixes(=root in Japanese) should be placed carefully in Japanese
+        suffix(=root in Japanese) should be placed carefully in Japanese
         """
 
         # There is no VBD tokens in Japanese
