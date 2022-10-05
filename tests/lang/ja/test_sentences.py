@@ -91,3 +91,41 @@ class TestReflectionBuilder:
         doc = reflector.nlp(message)
         sentence = reflector.builder._select_sentence(doc)
         assert sentence is None, assert_message
+
+    @pytest.mark.parametrize(
+        "message, expected, assert_message",
+        [
+            (
+                "社員をする。",
+                "社員を",
+                "obj dependency",
+            ),
+            (
+                "民間の社員をする。",
+                "民間の社員を",
+                "obj dependency multi-word",
+            ),
+            (
+                "今年から社員をする。",
+                "社員を",
+                "obj dependency does not extract distant dependencies",
+            ),
+            (
+                "する。",
+                "",
+                "no dependencies",
+            ),
+        ],
+    )
+    def test_extract_tokens_with_nearest_root_deps(
+        self,
+        reflector: Reflector,
+        message,
+        expected,
+        assert_message,
+    ):
+        sent = next(reflector.nlp(message).sents)
+        func = reflector.builder._extract_tokens_with_nearest_root_deps
+        tokens = func(sent)
+        text = "".join([token.text for token in tokens])
+        assert text == expected, assert_message

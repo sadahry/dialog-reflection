@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 import spacy
 
 
@@ -17,6 +17,8 @@ class Reflector:
 
 
 class ReflectionBuilder:
+    # VERB (5100; 63% instances), -NOUN (2328; 29% instances), -ADJ (529; 7% instances), -PROPN (62; 1% instances) in UD_Japanese-GSD
+    # ref. https://universaldependencies.org/treebanks/ja_gsd/ja_gsd-dep-root.html
     ROOT_POS_SET = {"VERB", "NOUN", "PROPN", "ADJ"}
 
     def build(
@@ -30,6 +32,7 @@ class ReflectionBuilder:
         if sent is None:
             print("[WARNING] no valid sentenses")
             return None
+        tokens = self._extract_tokens_with_nearest_root_deps(sent)
 
         return sent.text
 
@@ -37,18 +40,45 @@ class ReflectionBuilder:
         self,
         doc: spacy.tokens.Doc,
     ) -> Optional[spacy.tokens.Span]:
-        for sent in reversed(list(doc.sents)):
-            if sent.root.pos_ in self.ROOT_POS_SET:
-                return sent
+        # extract last sentence
+        # ref. https://stackoverflow.com/a/2138894
+        sent = None
+        for sent in filter(
+            lambda sent: sent.root.pos_ in self.ROOT_POS_SET,
+            doc.sents,
+        ):
+            pass
 
-        return None
+        return sent
 
-    def _select_sentence(
+    def _extract_tokens_with_nearest_root_deps(
         self,
-        doc: spacy.tokens.Doc,
-    ) -> Optional[spacy.tokens.Span]:
-        for sent in reversed(list(doc.sents)):
-            if sent.root.pos_ in self.ROOT_POS_SET:
-                return sent
+        sent: spacy.tokens.Span,
+    ) -> List[spacy.tokens.Token]:
+        """Extract tokens with nearest root dependencies"""
 
-        return None
+        # process recursively
+        def _extract_deps_tokens(token, is_root=True):
+            tokens = []
+
+            # extract deps_token with nearest token dependencies
+            deps_token = None
+            for deps_token in filter(
+                lambda t: t.head.i == token.i,
+                # the search is done from left in Japanese
+                token.lefts,
+            ):
+                pass
+            if deps_token is not None:
+                tokens += _extract_deps_tokens(deps_token, is_root=False)
+
+            # Do not add root token
+            # Reflection suffixes(=root in Japanese) should be placed carefully
+            if not is_root:
+                tokens.append(token)
+                tokens += token.rights
+
+            return tokens
+
+        # Dependency path from root
+        return _extract_deps_tokens(sent.root)
