@@ -58,7 +58,7 @@ class ReflectionBuilder:
         """Extract tokens with nearest root dependencies"""
 
         # process recursively
-        def _extract_deps_tokens(token, is_root=True):
+        def _extract_deps_tokens(token, is_root=False):
             tokens = []
 
             # extract deps_token with nearest token dependencies
@@ -70,7 +70,7 @@ class ReflectionBuilder:
             ):
                 pass
             if deps_token is not None:
-                tokens += _extract_deps_tokens(deps_token, is_root=False)
+                tokens += _extract_deps_tokens(deps_token)
 
             # Do not add root token
             # Reflection suffixes(=root in Japanese) should be placed carefully
@@ -81,4 +81,4 @@ class ReflectionBuilder:
             return tokens
 
         # Dependency path from root
-        return _extract_deps_tokens(sent.root)
+        return _extract_deps_tokens(sent.root, is_root=True)
