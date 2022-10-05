@@ -117,17 +117,16 @@ class TestReflectionBuilder:
             ),
         ],
     )
-    def test_extract_tokens_with_nearest_root_deps(
+    def test_extract_text_with_nearest_root_deps(
         self,
         reflector: Reflector,
         message,
         expected,
         assert_message,
     ):
-        sent = next(reflector.nlp(message).sents)
-        func = reflector.builder._extract_tokens_with_nearest_root_deps
-        tokens = func(sent)
-        text = "".join([token.text for token in tokens])
+        root = next(reflector.nlp(message).sents).root
+        func = reflector.builder._extract_text_with_nearest_root_deps
+        text = func(root)
         assert text == expected, assert_message
 
     @pytest.mark.parametrize(
@@ -162,7 +161,7 @@ class TestReflectionBuilder:
         expected,
         assert_message,
     ):
-        sent = next(reflector.nlp(message).sents)
+        root = next(reflector.nlp(message).sents).root
         func = reflector.builder._build_suffix
-        text = func(sent.root)
+        text = func(root)
         assert text == expected, assert_message

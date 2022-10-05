@@ -36,10 +36,11 @@ class ReflectionBuilder:
         if sent is None:
             print("[WARNING] no valid sentenses")
             return None
-        tokens = self._extract_tokens_with_nearest_root_deps(sent)
-        suffix = self._build_suffix(sent.root)
+        root = sent.root
+        reflection_text = self._extract_text_with_nearest_root_deps(root)
+        reflection_text_suffix = self._build_suffix(root)
 
-        return sent.text
+        return reflection_text + reflection_text_suffix
 
     def _select_sentence(
         self,
@@ -56,15 +57,15 @@ class ReflectionBuilder:
 
         return sent
 
-    def _extract_tokens_with_nearest_root_deps(
+    def _extract_text_with_nearest_root_deps(
         self,
-        sent: spacy.tokens.Span,
+        root: spacy.tokens.Token,
     ) -> List[spacy.tokens.Token]:
         """Extract tokens with nearest root dependencies"""
 
         # process recursively
-        def _extract_deps_tokens(token, is_root=False):
-            tokens = []
+        def _extract_deps_texts(token, is_root=False):
+            text = ""
 
             # extract deps_token with nearest token dependencies
             deps_token = None
@@ -75,18 +76,19 @@ class ReflectionBuilder:
             ):
                 pass
             if deps_token is not None:
-                tokens += _extract_deps_tokens(deps_token)
+                text += _extract_deps_texts(deps_token)
 
             # Do not add root token
             # will be added in self._build_suffix()
             if not is_root:
-                tokens.append(token)
-                tokens += token.rights
+                text += token.text
+                for token in token.rights:
+                    text += token.text
 
-            return tokens
+            return text
 
         # Dependency path from root
-        return _extract_deps_tokens(sent.root, is_root=True)
+        return _extract_deps_texts(root, is_root=True)
 
     def _build_suffix(
         self,
