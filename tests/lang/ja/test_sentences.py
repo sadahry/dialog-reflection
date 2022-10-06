@@ -15,6 +15,7 @@ def reflector(nlp_ja):
         ("　", "full-width space"),
     ],
 )
+@pytest.mark.filterwarnings("ignore:empty message")
 def test_no_sentence(reflector, message, assert_message):
     response = reflector.reflect(message)
     assert response is None, assert_message
