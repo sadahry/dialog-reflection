@@ -83,6 +83,7 @@ class TestReflectionBuilder:
             ),
         ],
     )
+    @pytest.mark.filterwarnings("ignore:no valid sentenses")
     def test_select_no_sentence(
         self,
         reflector: Reflector,
@@ -90,7 +91,7 @@ class TestReflectionBuilder:
         assert_message,
     ):
         doc = reflector.nlp(message)
-        sentence = reflector.builder._select_sentence(doc)
+        sentence = reflector.builder.build(doc)
         assert sentence is None, assert_message
 
     @pytest.mark.parametrize(
