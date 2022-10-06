@@ -83,7 +83,7 @@ class TestReflectionBuilder:
             ),
         ],
     )
-    def test_select_no_entence(
+    def test_select_no_sentence(
         self,
         reflector: Reflector,
         message,
