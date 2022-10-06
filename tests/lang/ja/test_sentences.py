@@ -91,6 +91,7 @@ class TestReflectionBuilder:
         assert_message,
     ):
         doc = reflector.nlp(message)
+        # instead of `sentence = reflector.builder._select_sentence(doc)`
         sentence = reflector.builder.build(doc)
         assert sentence is None, assert_message
 
