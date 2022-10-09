@@ -29,7 +29,7 @@ class ReflectionTextBuilder:
     def check_valid(
         self,
         doc: spacy.tokens.Doc,
-    ) -> Tuple[bool, str]:
+    ) -> Tuple[bool, Optional[str]]:
         """
         Check if the doc is valid for reflection
         """
@@ -37,7 +37,7 @@ class ReflectionTextBuilder:
             message = "empty text"
             warnings.warn(message, UserWarning)
             return False, message
-        return True, "valid doc"
+        return True, None
 
     def build(
         self,
