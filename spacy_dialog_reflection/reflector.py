@@ -6,7 +6,7 @@ import spacy
 class Reflector:
     def __init__(self, nlp: spacy.Language):
         self.nlp = nlp
-        self.builder = ReflectionBuilder()
+        self.builder = ReflectionTextBuilder()
 
     @classmethod
     def from_name(cls, name: str):
@@ -17,7 +17,7 @@ class Reflector:
         return self.builder.build(doc)
 
 
-class ReflectionBuilder:
+class ReflectionTextBuilder:
     def __init__(self) -> None:
         self.wordEnding = "んですね。"
 
