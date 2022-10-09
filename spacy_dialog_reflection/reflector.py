@@ -22,8 +22,8 @@ class ReflectionTextBuilder:
         self.wordEnding = "んですね。"
 
     # restrict root pos tags to facilitate handling of suffixes in Japanese
-    # VERB (5100; 63% instances), -NOUN (2328; 29% instances), -ADJ (529; 7% instances), -PROPN (62; 1% instances) in UD_Japanese-GSD # noqa: E501
-    # ref. https://universaldependencies.org/treebanks/ja_gsd/ja_gsd-dep-root.html # noqa: E501
+    # VERB (5100; 63% instances), -NOUN (2328; 29% instances), -ADJ (529; 7% instances), -PROPN (62; 1% instances) in UD_Japanese-GSD
+    # ref. https://universaldependencies.org/treebanks/ja_gsd/ja_gsd-dep-root.html
     ALLOWED_ROOT_POS_TAGS = {"VERB", "NOUN", "PROPN", "ADJ"}
 
     def check_valid(
@@ -118,7 +118,7 @@ class ReflectionTextBuilder:
         root: spacy.tokens.Token,
     ) -> str:
         # There is no VBD tokens in Japanese
-        # ref. https://universaldependencies.org/treebanks/ja_gsd/index.html#pos-tags # noqa: E501
+        # ref. https://universaldependencies.org/treebanks/ja_gsd/index.html#pos-tags
         # if root.pos_ == "VBD":
 
         if root.pos_ == "VERB":
