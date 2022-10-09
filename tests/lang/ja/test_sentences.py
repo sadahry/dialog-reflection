@@ -91,8 +91,7 @@ class TestReflectionBuilder:
         assert_message,
     ):
         doc = reflector.nlp(message)
-        # instead of `sentence = reflector.builder._select_sentence(doc)`
-        sentence = reflector.builder.build(doc)
+        sentence = reflector.builder._select_sentence(doc)
         assert sentence is None, assert_message
 
     @pytest.mark.parametrize(
@@ -120,7 +119,7 @@ class TestReflectionBuilder:
             ),
         ],
     )
-    def test_extract_text_with_nearest_root_deps(
+    def test_extract_tokens_with_nearest_root_heads(
         self,
         reflector: Reflector,
         message,
@@ -128,8 +127,9 @@ class TestReflectionBuilder:
         assert_message,
     ):
         root = next(reflector.nlp(message).sents).root
-        func = reflector.builder._extract_text_with_nearest_root_deps
-        text = func(root)
+        func = reflector.builder._extract_tokens_with_nearest_root_heads
+        tokens = func(root)
+        text = "".join(map(lambda t: t.text, tokens))
         assert text == expected, assert_message
 
     @pytest.mark.parametrize(

@@ -21,26 +21,38 @@ class ReflectionBuilder:
     def __init__(self) -> None:
         self.wordEnding = "んですね。"
 
+    # 語尾のハンドリングに影響するのでパターンを絞る
     # VERB (5100; 63% instances), -NOUN (2328; 29% instances), -ADJ (529; 7% instances), -PROPN (62; 1% instances) in UD_Japanese-GSD
     # ref. https://universaldependencies.org/treebanks/ja_gsd/ja_gsd-dep-root.html
-    ROOT_POS_SET = {"VERB", "NOUN", "PROPN", "ADJ"}
+    ALLOWED_ROOT_POSES = {"VERB", "NOUN", "PROPN", "ADJ"}
+
+    def check_valid(
+        self,
+        doc: spacy.tokens.Doc,
+    ) -> bool:
+        """
+        Check if the doc is valid for reflection
+        """
+        if doc.text.strip() == "":
+            message = "empty message"
+            warnings.warn(message, UserWarning)
+            return False, message
+        return True
 
     def build(
         self,
         doc: spacy.tokens.Doc,
     ) -> Optional[str]:
-        if doc.text.strip() == "":
-            warnings.warn("empty message", UserWarning)
+        valid, _ = self.check_valid(doc)
+        if not valid:
             return None
         sent = self._select_sentence(doc)
         if sent is None:
-            warnings.warn("no valid sentenses", UserWarning)
             return None
-        root = sent.root
-        reflection_text = self._extract_text_with_nearest_root_deps(root)
-        reflection_text_suffix = self._build_suffix(root)
 
-        return reflection_text + reflection_text_suffix
+        root = sent.root
+        reflection_tokens = self._extract_tokens_with_nearest_root_heads(root)
+        return self._build_text(reflection_tokens, root)
 
     def _select_sentence(
         self,
@@ -50,52 +62,61 @@ class ReflectionBuilder:
         # ref. https://stackoverflow.com/a/2138894
         sent = None
         for sent in filter(
-            lambda sent: sent.root.pos_ in self.ROOT_POS_SET,
+            lambda sent: sent.root.pos_ in self.ALLOWED_ROOT_POSES,
             doc.sents,
         ):
             pass
 
+        if sent is None:
+            warnings.warn("no valid sentenses", UserWarning)
         return sent
 
-    def _extract_text_with_nearest_root_deps(
+    def _extract_tokens_with_nearest_root_heads(
         self,
-        root: spacy.tokens.Token,
+        root: spacy.tokens.Span,
     ) -> List[spacy.tokens.Token]:
-        """Extract tokens with nearest root dependencies"""
+        """
+        Extract tokens with nearest root dependencies
+        e.g. "私は彼女を愛している。" -> ["私", "は", "彼女", "を"]
+        """
 
         # process recursively
-        def _extract_deps_texts(token, is_root=False):
-            text = ""
-
-            # extract deps_token with nearest token dependencies
-            deps_token = None
-            for deps_token in filter(
+        def _extract_head_token(token):
+            # extract head_token with nearest token dependencies
+            head_token = None
+            for head_token in filter(
                 lambda t: t.head.i == token.i,
                 # the search is done from left in Japanese
                 token.lefts,
             ):
                 pass
-            if deps_token is not None:
-                text += _extract_deps_texts(deps_token)
+            if head_token is not None:
+                return _extract_head_token(head_token)
 
-            # Do not add root token
-            # will be added in self._build_suffix()
-            if not is_root:
-                text += token.text
-                for token in token.rights:
-                    text += token.text
+            return token
 
-            return text
+        head_token = _extract_head_token(root)
+        return root.doc[head_token.i:root.i]
 
-        # Dependency path from root
-        return _extract_deps_texts(root, is_root=True)
+    def _build_text(
+        self,
+        tokens: List[spacy.tokens.Token],
+        root: spacy.tokens.Token,
+    ) -> str:
+        """
+        Build text of reflection
+        """
+        reflection_text = ""
+        reflection_text += "".join(map(lambda t: t.text, tokens))
+        reflection_text += self._build_suffix(root)
+        return reflection_text
 
     def _build_suffix(
         self,
         root: spacy.tokens.Token,
     ) -> str:
         """
-        Build suffixes of reflection
+        Build suffix of reflection
         suffix(=root in Japanese) should be placed carefully in Japanese
         """
 
