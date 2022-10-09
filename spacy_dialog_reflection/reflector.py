@@ -21,7 +21,7 @@ class ReflectionBuilder:
     def __init__(self) -> None:
         self.wordEnding = "んですね。"
 
-    # 語尾のハンドリングに影響するのでパターンを絞る
+    # restrict root pos tags to ease the handling of suffix in Japanese
     # VERB (5100; 63% instances), -NOUN (2328; 29% instances), -ADJ (529; 7% instances), -PROPN (62; 1% instances) in UD_Japanese-GSD
     # ref. https://universaldependencies.org/treebanks/ja_gsd/ja_gsd-dep-root.html
     ALLOWED_ROOT_POS_TAGS = {"VERB", "NOUN", "PROPN", "ADJ"}
