@@ -5,7 +5,7 @@ import spacy
 import sys
 dir = sys.path[0]
 sys.path.append(dir + "/../")
-from spacy_dialog_reflection.reflector import Reflector
+from spacy_dialog_reflection.reflector import Reflector # noqa: E402,E261
 # from spacy_dialog_reflection import Reflector
 # fmt: on
 

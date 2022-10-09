@@ -96,7 +96,7 @@ class ReflectionTextBuilder:
             return token
 
         head_token = _extract_head_token(root)
-        return root.doc[head_token.i:root.i]
+        return root.doc[head_token.i : root.i]
 
     def _build_text(
         self,
