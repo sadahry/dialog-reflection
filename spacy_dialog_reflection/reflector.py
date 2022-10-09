@@ -24,7 +24,7 @@ class ReflectionBuilder:
     # 語尾のハンドリングに影響するのでパターンを絞る
     # VERB (5100; 63% instances), -NOUN (2328; 29% instances), -ADJ (529; 7% instances), -PROPN (62; 1% instances) in UD_Japanese-GSD
     # ref. https://universaldependencies.org/treebanks/ja_gsd/ja_gsd-dep-root.html
-    ALLOWED_ROOT_POSES = {"VERB", "NOUN", "PROPN", "ADJ"}
+    ALLOWED_ROOT_POS_TAGS = {"VERB", "NOUN", "PROPN", "ADJ"}
 
     def check_valid(
         self,
@@ -62,7 +62,7 @@ class ReflectionBuilder:
         # ref. https://stackoverflow.com/a/2138894
         sent = None
         for sent in filter(
-            lambda sent: sent.root.pos_ in self.ALLOWED_ROOT_POSES,
+            lambda sent: sent.root.pos_ in self.ALLOWED_ROOT_POS_TAGS,
             doc.sents,
         ):
             pass
