@@ -108,6 +108,8 @@ class ReflectionBuilder:
         """
         reflection_text = ""
         reflection_text += "".join(map(lambda t: t.text, tokens))
+        # build suffix in other method
+        # suffix(=root in Japanese) should be placed carefully in Japanese
         reflection_text += self._build_suffix(root)
         return reflection_text
 
@@ -115,11 +117,6 @@ class ReflectionBuilder:
         self,
         root: spacy.tokens.Token,
     ) -> str:
-        """
-        Build suffix of reflection
-        suffix(=root in Japanese) should be placed carefully in Japanese
-        """
-
         # There is no VBD tokens in Japanese
         # ref. https://universaldependencies.org/treebanks/ja_gsd/index.html#pos-tags
         # if root.pos_ == "VBD":
