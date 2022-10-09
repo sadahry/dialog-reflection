@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Tuple
 import warnings
 import spacy
 
@@ -29,15 +29,15 @@ class ReflectionBuilder:
     def check_valid(
         self,
         doc: spacy.tokens.Doc,
-    ) -> bool:
+    ) -> Tuple[bool, str]:
         """
         Check if the doc is valid for reflection
         """
         if doc.text.strip() == "":
-            message = "empty message"
+            message = "empty text"
             warnings.warn(message, UserWarning)
             return False, message
-        return True
+        return True, "valid doc"
 
     def build(
         self,

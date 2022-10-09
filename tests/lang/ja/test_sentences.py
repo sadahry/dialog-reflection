@@ -7,25 +7,36 @@ def reflector(nlp_ja):
     return Reflector(nlp_ja)
 
 
-@pytest.mark.parametrize(
-    "message, assert_message",
-    [
-        ("", "empty message"),
-        (" ", "half-width space"),
-        ("　", "full-width space"),
-    ],
-)
-@pytest.mark.filterwarnings("ignore:empty message")
-def test_no_sentence(reflector, message, assert_message):
+def test_work_well(reflector):
+    message = "今日は旅行へ行く"
     response = reflector.reflect(message)
-    assert response is None, assert_message
+    assert response == "旅行へ行くんですね。"
 
 
 class TestReflectionBuilder:
     """Test of ReflectionBuilder private methods"""
 
     @pytest.mark.parametrize(
-        "message, expected, assert_message",
+        "text, assert_message",
+        [
+            ("", "empty text"),
+            (" ", "half-width space"),
+            ("　", "full-width space"),
+        ],
+    )
+    @pytest.mark.filterwarnings("ignore:empty text")
+    def test_no_sentence(
+        self,
+        reflector: Reflector,
+        text,
+        assert_message,
+    ):
+        doc = reflector.nlp(text)
+        vaild, _ = reflector.builder.check_valid(doc)
+        assert not vaild, assert_message
+
+    @pytest.mark.parametrize(
+        "text, expected, assert_message",
         [
             (
                 "今日は旅行に行きました。",
@@ -62,16 +73,16 @@ class TestReflectionBuilder:
     def test_select_sentence(
         self,
         reflector: Reflector,
-        message,
+        text,
         expected,
         assert_message,
     ):
-        doc = reflector.nlp(message)
+        doc = reflector.nlp(text)
         sentence = reflector.builder._select_sentence(doc)
         assert sentence.text == expected, assert_message
 
     @pytest.mark.parametrize(
-        "message, assert_message",
+        "text, assert_message",
         [
             (
                 "そういうのってどうなんですか。",
@@ -87,15 +98,15 @@ class TestReflectionBuilder:
     def test_select_no_sentence(
         self,
         reflector: Reflector,
-        message,
+        text,
         assert_message,
     ):
-        doc = reflector.nlp(message)
+        doc = reflector.nlp(text)
         sentence = reflector.builder._select_sentence(doc)
         assert sentence is None, assert_message
 
     @pytest.mark.parametrize(
-        "message, expected, assert_message",
+        "text, expected, assert_message",
         [
             (
                 "社員をする。",
@@ -122,18 +133,18 @@ class TestReflectionBuilder:
     def test_extract_tokens_with_nearest_root_heads(
         self,
         reflector: Reflector,
-        message,
+        text,
         expected,
         assert_message,
     ):
-        root = next(reflector.nlp(message).sents).root
+        root = next(reflector.nlp(text).sents).root
         func = reflector.builder._extract_tokens_with_nearest_root_heads
         tokens = func(root)
         text = "".join(map(lambda t: t.text, tokens))
         assert text == expected, assert_message
 
     @pytest.mark.parametrize(
-        "message, expected, assert_message",
+        "text, expected, assert_message",
         [
             (
                 "社員をする。",
@@ -160,11 +171,11 @@ class TestReflectionBuilder:
     def test_build_suffix(
         self,
         reflector: Reflector,
-        message,
+        text,
         expected,
         assert_message,
     ):
-        root = next(reflector.nlp(message).sents).root
+        root = next(reflector.nlp(text).sents).root
         func = reflector.builder._build_suffix
         text = func(root)
         assert text == expected, assert_message
