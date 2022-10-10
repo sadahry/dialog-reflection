@@ -1,6 +1,7 @@
 import spacy_dialog_reflection.lang.ja.katsuyo as k
 from dataclasses import dataclass
 
+
 @dataclass(frozen=True)
 class KatsuyoHinshi:
     gokan: str

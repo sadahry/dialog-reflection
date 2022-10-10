@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+
 @dataclass(frozen=True)
 class Katsuyo:
     mizen: str
@@ -9,6 +10,7 @@ class Katsuyo:
     katei: str
     meirei: str
 
+
 @dataclass(frozen=True)
 class GodanKatsuyo(Katsuyo):
     # 未然形（ア段）が意思・推量の語尾（あるいは助動詞）の「う」に接続する際にオ段となる。
@@ -16,11 +18,13 @@ class GodanKatsuyo(Katsuyo):
     # 五段活用の連用形に「た・て」などが続くとき、活用語尾が変化する。
     renyo_ta: str
 
+
 @dataclass(frozen=True)
-class KAMI_ICHIDANKatsuyo(Katsuyo):
+class KamiIchidanKatsuyo(Katsuyo):
     # 命令形「-○よ」は登録しない
     # 「-○ろ」のほうが口語的だと判断
     pass
+
 
 @dataclass(frozen=True)
 class ShimoIchidanKatsuyo(Katsuyo):
@@ -28,9 +32,11 @@ class ShimoIchidanKatsuyo(Katsuyo):
     # 「-○ろ」のほうが口語的だと判断
     pass
 
+
 @dataclass(frozen=True)
 class KaGyoHenkakuKatsuyo(Katsuyo):
     pass
+
 
 @dataclass(frozen=True)
 class SaGyoHenkakuKatsuyo(Katsuyo):
@@ -41,6 +47,7 @@ class SaGyoHenkakuKatsuyo(Katsuyo):
     # 命令形「せよ」は登録しない
     # 「しろ」のほうが口語的だと判断
     pass
+
 
 # ==============================================================================
 # 五段活用
@@ -173,7 +180,7 @@ GODAN_IKU = GodanKatsuyo(
 # ==============================================================================
 
 # ア行
-KAMI_ICHIDAN_A_GYO = KAMI_ICHIDANKatsuyo(
+KAMI_ICHIDAN_A_GYO = KamiIchidanKatsuyo(
     mizen="い",
     renyo="い",
     shushi="いる",
@@ -183,7 +190,7 @@ KAMI_ICHIDAN_A_GYO = KAMI_ICHIDANKatsuyo(
 )
 
 # カ行
-KAMI_ICHIDAN_KA_GYO = KAMI_ICHIDANKatsuyo(
+KAMI_ICHIDAN_KA_GYO = KamiIchidanKatsuyo(
     mizen="き",
     renyo="き",
     shushi="きる",
@@ -193,7 +200,7 @@ KAMI_ICHIDAN_KA_GYO = KAMI_ICHIDANKatsuyo(
 )
 
 # ザ行
-KAMI_ICHIDAN_ZA_GYO = KAMI_ICHIDANKatsuyo(
+KAMI_ICHIDAN_ZA_GYO = KamiIchidanKatsuyo(
     mizen="じ",
     renyo="じ",
     shushi="じる",
@@ -203,7 +210,7 @@ KAMI_ICHIDAN_ZA_GYO = KAMI_ICHIDANKatsuyo(
 )
 
 # タ行
-KAMI_ICHIDAN_TA_GYO = KAMI_ICHIDANKatsuyo(
+KAMI_ICHIDAN_TA_GYO = KamiIchidanKatsuyo(
     mizen="ち",
     renyo="ち",
     shushi="ちる",
@@ -213,7 +220,7 @@ KAMI_ICHIDAN_TA_GYO = KAMI_ICHIDANKatsuyo(
 )
 
 # バ行
-KAMI_ICHIDAN_BA_GYO = KAMI_ICHIDANKatsuyo(
+KAMI_ICHIDAN_BA_GYO = KamiIchidanKatsuyo(
     mizen="び",
     renyo="び",
     shushi="びる",
@@ -223,7 +230,7 @@ KAMI_ICHIDAN_BA_GYO = KAMI_ICHIDANKatsuyo(
 )
 
 # マ行
-KAMI_ICHIDAN_MA_GYO = KAMI_ICHIDANKatsuyo(
+KAMI_ICHIDAN_MA_GYO = KamiIchidanKatsuyo(
     mizen="み",
     renyo="み",
     shushi="みる",
@@ -233,7 +240,7 @@ KAMI_ICHIDAN_MA_GYO = KAMI_ICHIDANKatsuyo(
 )
 
 # ラ行
-KAMI_ICHIDAN_RA_GYO = KAMI_ICHIDANKatsuyo(
+KAMI_ICHIDAN_RA_GYO = KamiIchidanKatsuyo(
     mizen="り",
     renyo="り",
     shushi="りる",
@@ -244,7 +251,7 @@ KAMI_ICHIDAN_RA_GYO = KAMI_ICHIDANKatsuyo(
 
 # 語幹なし
 # e.g. 居（い）る, 着（き）る, 煮（に）る, 見（み）る
-KAMI_ICHIDAN_NO_GOKAN = KAMI_ICHIDANKatsuyo(
+KAMI_ICHIDAN_NO_GOKAN = KamiIchidanKatsuyo(
     mizen="",
     renyo="",
     shushi="る",
