@@ -7,6 +7,7 @@ class Katsuyo:
     renyo: str
     shushi: str
     rentai: str
+    # 已然形もkateiに含める
     katei: str
     meirei: str
 
