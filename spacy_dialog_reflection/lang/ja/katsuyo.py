@@ -11,6 +11,9 @@ class Katsuyo:
     katei: str
     meirei: str
 
+    def __str__(self) -> str:
+        return self.shushi
+
 
 @dataclass(frozen=True)
 class GodanKatsuyo(Katsuyo):
