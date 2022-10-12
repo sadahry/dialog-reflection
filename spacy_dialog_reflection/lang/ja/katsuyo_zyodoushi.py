@@ -10,6 +10,9 @@ import spacy_dialog_reflection.lang.ja.katsuyo as k
 class IZyodoushiBuilder(abc.ABC):
     @abc.abstractmethod
     def build(self, katsuyo_text: KatsuyoText) -> KatsuyoText:
+        """
+        不適切な値が代入された際は、ValueErrorを発生させる。
+        """
         raise NotImplementedError()
 
     def __str__(self):
