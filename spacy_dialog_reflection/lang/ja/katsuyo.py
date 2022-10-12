@@ -1,4 +1,13 @@
 from dataclasses import dataclass
+from enum import Enum, auto
+import abc
+
+
+class KatsuyoHinshi(Enum):
+    DOUSHI = auto()
+    ZYODOUSHI = auto()
+    KEIYOUSHI = auto()
+    KEIYOUDOUSHI = auto()
 
 
 @dataclass(frozen=True)
@@ -11,12 +20,29 @@ class Katsuyo:
     katei: str
     meirei: str
 
+    @property
+    @abc.abstractmethod
+    def hinshi(self) -> KatsuyoHinshi:
+        raise NotImplementedError()
+
     def __str__(self) -> str:
         return self.shushi
 
 
+class DoushiKatsuyo(Katsuyo):
+    @property
+    def hinshi(self) -> KatsuyoHinshi:
+        return KatsuyoHinshi.DOUSHI
+
+
+class ZyodoushiKatsuyo(Katsuyo):
+    @property
+    def hinshi(self) -> KatsuyoHinshi:
+        return KatsuyoHinshi.ZYODOUSHI
+
+
 @dataclass(frozen=True)
-class GodanKatsuyo(Katsuyo):
+class GodanKatsuyo(DoushiKatsuyo):
     # 未然形（ア段）が意思・推量の語尾（あるいは助動詞）の「う」に接続する際にオ段となる。
     mizen_u: str
     # 五段活用の連用形に「た・て」などが続くとき、活用語尾が変化する。
@@ -24,26 +50,26 @@ class GodanKatsuyo(Katsuyo):
 
 
 @dataclass(frozen=True)
-class KamiIchidanKatsuyo(Katsuyo):
+class KamiIchidanKatsuyo(DoushiKatsuyo):
     # 命令形「-○よ」は登録しない
     # 「-○ろ」のほうが口語的だと判断
     pass
 
 
 @dataclass(frozen=True)
-class ShimoIchidanKatsuyo(Katsuyo):
+class ShimoIchidanKatsuyo(DoushiKatsuyo):
     # 命令形「-○よ」は登録しない
     # 「-○ろ」のほうが口語的だと判断
     pass
 
 
 @dataclass(frozen=True)
-class KaGyoHenkakuKatsuyo(Katsuyo):
+class KaGyoHenkakuKatsuyo(DoushiKatsuyo):
     pass
 
 
 @dataclass(frozen=True)
-class SaGyoHenkakuKatsuyo(Katsuyo):
+class SaGyoHenkakuKatsuyo(DoushiKatsuyo):
     # せる/れる
     mizen_reru: str
     # ぬ/られる

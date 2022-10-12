@@ -1,4 +1,5 @@
-from dataclasses import dataclass, replace
+# ref. https://ja.wikipedia.org/wiki/助動詞_(国文法)
+from dataclasses import replace
 from typing import List
 from spacy_dialog_reflection.lang.ja.katsuyo_text import KatsuyoText
 import abc
@@ -6,12 +7,6 @@ import warnings
 import spacy_dialog_reflection.lang.ja.katsuyo as k
 
 
-@dataclass(frozen=True)
-class ZyodoushiKatsuyo(k.Katsuyo):
-    pass
-
-
-# ref. https://ja.wikipedia.org/wiki助動詞_(国文法)
 class IZyodoushiBuilder(abc.ABC):
     @abc.abstractmethod
     def build(self, katsuyo_text: KatsuyoText) -> KatsuyoText:
@@ -19,34 +14,6 @@ class IZyodoushiBuilder(abc.ABC):
 
     def __str__(self):
         return self.__class__.__name__
-
-
-# 受身
-class Ukemi(IZyodoushiBuilder):
-    RERU = ZyodoushiKatsuyo(
-        mizen="れ",
-        renyo="れ",
-        shushi="れる",
-        rentai="れる",
-        katei="れれ",
-        # 命令形「れよ」は省略
-        meirei="れろ",
-    )
-    RARERU = ZyodoushiKatsuyo(
-        mizen="られ",
-        renyo="られ",
-        shushi="られる",
-        rentai="られる",
-        katei="られれ",
-        # 命令形「られよ」は省略
-        meirei="られろ",
-    )
-
-    def build(self, katsuyo_text: KatsuyoText) -> KatsuyoText:
-        return KatsuyoText(
-            gokan=katsuyo_text.gokan + katsuyo_text.katsuyo.mizen,
-            katsuyo=self.RARERU,
-        )
 
 
 def build_zyodoushi(
@@ -64,3 +31,36 @@ def build_zyodoushi(
                 UserWarning,
             )
     return result
+
+
+# ==============================================================================
+# 受身
+# ==============================================================================
+
+RERU = k.ZyodoushiKatsuyo(
+    mizen="れ",
+    renyo="れ",
+    shushi="れる",
+    rentai="れる",
+    katei="れれ",
+    # 命令形「れよ」は省略
+    meirei="れろ",
+)
+
+RARERU = k.ZyodoushiKatsuyo(
+    mizen="られ",
+    renyo="られ",
+    shushi="られる",
+    rentai="られる",
+    katei="られれ",
+    # 命令形「られよ」は省略
+    meirei="られろ",
+)
+
+
+class Ukemi(IZyodoushiBuilder):
+    def build(self, katsuyo_text: KatsuyoText) -> KatsuyoText:
+        return KatsuyoText(
+            gokan=katsuyo_text.gokan + katsuyo_text.katsuyo.mizen,
+            katsuyo=RARERU,
+        )
