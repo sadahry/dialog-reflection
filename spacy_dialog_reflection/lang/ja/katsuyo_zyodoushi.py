@@ -7,12 +7,12 @@ import spacy_dialog_reflection.lang.ja.katsuyo as k
 
 
 @dataclass(frozen=True)
-class ZyodohshiKatsuyo(k.Katsuyo):
+class ZyodoushiKatsuyo(k.Katsuyo):
     pass
 
 
 # ref. https://ja.wikipedia.org/wiki助動詞_(国文法)
-class IZyodohshiBuilder(abc.ABC):
+class IZyodoushiBuilder(abc.ABC):
     @abc.abstractmethod
     def build(self, katsuyo_text: KatsuyoText) -> KatsuyoText:
         raise NotImplementedError()
@@ -22,8 +22,8 @@ class IZyodohshiBuilder(abc.ABC):
 
 
 # 受身
-class Ukemi(IZyodohshiBuilder):
-    RERU = ZyodohshiKatsuyo(
+class Ukemi(IZyodoushiBuilder):
+    RERU = ZyodoushiKatsuyo(
         mizen="れ",
         renyo="れ",
         shushi="れる",
@@ -32,7 +32,7 @@ class Ukemi(IZyodohshiBuilder):
         # 命令形「れよ」は省略
         meirei="れろ",
     )
-    RARERU = ZyodohshiKatsuyo(
+    RARERU = ZyodoushiKatsuyo(
         mizen="られ",
         renyo="られ",
         shushi="られる",
@@ -49,18 +49,18 @@ class Ukemi(IZyodohshiBuilder):
         )
 
 
-def build_zyodohshi(
-    src: KatsuyoText, zyodohshi_builders: List[IZyodohshiBuilder]
+def build_zyodoushi(
+    src: KatsuyoText, zyodoushi_builders: List[IZyodoushiBuilder]
 ) -> KatsuyoText:
     # clone katsuyo_text
     result = replace(src)
-    for zodohshi_builder in zyodohshi_builders:
+    for zodoushi_builder in zyodoushi_builders:
         try:
-            result = zodohshi_builder.build(result)
+            result = zodoushi_builder.build(result)
         except ValueError as e:
             warnings.warn(f"ValueError: {e}", UserWarning)
             warnings.warn(
-                f"Invalid zodohshi_builder:{zodohshi_builder}. katsuyo_text: {result}",
+                f"Invalid zodoushi_builder:{zodoushi_builder}. katsuyo_text: {result}",
                 UserWarning,
             )
     return result
