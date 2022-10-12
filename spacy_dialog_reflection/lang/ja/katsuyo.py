@@ -4,6 +4,10 @@ import abc
 
 
 class KatsuyoHinshi(Enum):
+    # ref. https://docs.python.org/ja/3/library/enum.html#using-automatic-values
+    def _generate_next_value_(name, start, count, last_values):
+        return name
+
     DOUSHI = auto()
     ZYODOUSHI = auto()
     KEIYOUSHI = auto()
