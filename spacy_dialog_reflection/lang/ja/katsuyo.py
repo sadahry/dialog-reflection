@@ -1,8 +1,9 @@
 from dataclasses import dataclass
-from enum import Enum, auto
+from enum import Enum, auto, unique
 import abc
 
 
+@unique
 class KatsuyoHinshi(Enum):
     # ref. https://docs.python.org/ja/3/library/enum.html#using-automatic-values
     def _generate_next_value_(name, start, count, last_values):
