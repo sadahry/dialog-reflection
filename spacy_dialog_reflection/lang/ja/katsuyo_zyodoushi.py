@@ -22,7 +22,7 @@ class IZyodoushiBuilder(abc.ABC):
 def build_zyodoushi(
     src: KatsuyoText, zyodoushi_builders: List[IZyodoushiBuilder]
 ) -> KatsuyoText:
-    # clone katsuyo_text
+    # clone KatsuyoText
     result = replace(src)
     for zodoushi_builder in zyodoushi_builders:
         try:
