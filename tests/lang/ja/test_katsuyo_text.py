@@ -69,7 +69,7 @@ def test_katsuyo_text_warning_value_error():
     zyodoushi_builders = [
         BuilderRaiseValueError(),
     ]
-    result = build_zyodoushi(
+    result, has_error = build_zyodoushi(
         katsuyo_text,
         zyodoushi_builders,
     )

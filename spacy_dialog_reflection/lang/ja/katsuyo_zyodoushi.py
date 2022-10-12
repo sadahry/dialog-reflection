@@ -1,6 +1,6 @@
 # ref. https://ja.wikipedia.org/wiki/助動詞_(国文法)
 from dataclasses import replace
-from typing import List
+from typing import List, Tuple
 from spacy_dialog_reflection.lang.ja.katsuyo_text import KatsuyoText
 import abc
 import warnings
@@ -21,9 +21,10 @@ class IZyodoushiBuilder(abc.ABC):
 
 def build_zyodoushi(
     src: KatsuyoText, zyodoushi_builders: List[IZyodoushiBuilder]
-) -> KatsuyoText:
+) -> Tuple[KatsuyoText, bool]:
     # clone KatsuyoText
     result = replace(src)
+    has_error = False
     for zodoushi_builder in zyodoushi_builders:
         try:
             result = zodoushi_builder.build(result)
@@ -33,7 +34,8 @@ def build_zyodoushi(
                 f"Invalid zodoushi_builder:{zodoushi_builder}. katsuyo_text: {result}",
                 UserWarning,
             )
-    return result
+            has_error = True
+    return result, has_error
 
 
 # ==============================================================================
