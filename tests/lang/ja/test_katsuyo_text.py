@@ -52,7 +52,7 @@ def test_katsuyo_text_generate(nlp_ja):
 def test_zohdoushi_builder_ukemi(katsuyo_text, expected):
     zohdoushi_builder = Ukemi()
     result = zohdoushi_builder.build(katsuyo_text)
-    assert result == expected
+    assert str(result) == str(expected)
 
 
 @pytest.mark.filterwarnings("ignore:ValueError")
