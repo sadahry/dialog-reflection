@@ -63,7 +63,9 @@ RARERU = k.ZyodoushiKatsuyo(
 
 class Ukemi(IZyodoushiBuilder):
     def build(self, katsuyo_text: KatsuyoText) -> KatsuyoText:
-        return KatsuyoText(
-            gokan=katsuyo_text.gokan + katsuyo_text.katsuyo.mizen,
-            katsuyo=RARERU,
-        )
+        # TODO サ行変格活用の扱い
+        mizen_text = katsuyo_text.gokan + katsuyo_text.katsuyo.mizen
+        if mizen_text[-1] in k.DAN["あ"]:
+            return KatsuyoText(gokan=mizen_text, katsuyo=RERU)
+        else:
+            return KatsuyoText(gokan=mizen_text, katsuyo=RARERU)

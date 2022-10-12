@@ -3,9 +3,12 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text import (
     KatsuyoText,
 )
 from spacy_dialog_reflection.lang.ja.katsuyo import (
+    GODAN_BA_GYO,
     KA_GYO_HENKAKU_KURU,
 )
 from spacy_dialog_reflection.lang.ja.katsuyo_zyodoushi import (
+    RARERU,
+    RERU,
     IZyodoushiBuilder,
     Ukemi,
     build_zyodoushi,
@@ -20,15 +23,36 @@ def test_katsuyo_text_generate(nlp_ja):
     assert kuru.katsuyo.shushi == "くる"
 
 
-def test_zohdoushi_builder():
-    katsuyo_text = KatsuyoText(
-        gokan="",
-        katsuyo=KA_GYO_HENKAKU_KURU,
-    )
+@pytest.mark.parametrize(
+    "katsuyo_text, expected",
+    [
+        # TODO もっとテストケースを増やす
+        (
+            KatsuyoText(
+                gokan="",
+                katsuyo=KA_GYO_HENKAKU_KURU,
+            ),
+            KatsuyoText(
+                gokan="こ",
+                katsuyo=RARERU,
+            ),
+        ),
+        (
+            KatsuyoText(
+                gokan="遊",
+                katsuyo=GODAN_BA_GYO,
+            ),
+            KatsuyoText(
+                gokan="遊ば",
+                katsuyo=RERU,
+            ),
+        ),
+    ],
+)
+def test_zohdoushi_builder_ukemi(katsuyo_text, expected):
     zohdoushi_builder = Ukemi()
-    katsuyo_w_zyodoushi = zohdoushi_builder.build(katsuyo_text)
-    assert katsuyo_w_zyodoushi.gokan == "こ"
-    assert katsuyo_w_zyodoushi.katsuyo.shushi == "られる"
+    result = zohdoushi_builder.build(katsuyo_text)
+    assert result == expected
 
 
 @pytest.mark.filterwarnings("ignore:ValueError")
