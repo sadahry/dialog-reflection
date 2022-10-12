@@ -25,4 +25,4 @@ class KatsuyoText:
         )
 
     def __str__(self):
-        return f"{self.gokan}{self.katsuyo.shushi}"
+        return self.gokan + self.katsuyo.shushi
