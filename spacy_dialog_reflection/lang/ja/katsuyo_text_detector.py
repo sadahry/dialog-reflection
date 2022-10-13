@@ -21,11 +21,10 @@ class IKatsuyoTextDetector(abc.ABC):
 class SpacyKatsuyoTextDetector(IKatsuyoTextDetector):
     def detect(self, src: spacy.tokens.Token) -> Optional[KatsuyoText]:
         pos_tag = src.pos_
-        # TODO 動詞の実装
-        # if pos_tag == "VERB":
-        #     return KatsuyoText(gokan=src.lemma_, katsuyo=NO_KATSUYO)
-        # elif pos_tag == "ADJ":
-        if pos_tag == "ADJ":
+        if pos_tag == "VERB":
+            # TODO 動詞の実装
+            return NotImplementedError()
+        elif pos_tag == "ADJ":
             # ==================================================
             # 形容動詞の判定
             # ==================================================
@@ -48,7 +47,7 @@ class SpacyKatsuyoTextDetector(IKatsuyoTextDetector):
                 return KatsuyoText(gokan=src.lemma_[:-1], katsuyo=KEIYOUSHI)
             else:
                 warnings.warn(
-                    f"Unsupported Inflections in ADJ: {inflection}", UserWarning
+                    f"Unsupported Inflections of ADJ: {inflection}", UserWarning
                 )
                 return None
         elif pos_tag == "NOUN":
