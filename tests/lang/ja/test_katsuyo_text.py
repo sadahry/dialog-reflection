@@ -74,3 +74,30 @@ def test_katsuyo_text_warning_value_error():
         zyodoushi_builders,
     )
     assert result == katsuyo_text, "No changes"
+    assert has_error, "has_error is True"
+
+
+@pytest.mark.filterwarnings("ignore:None value TypeError Detected")
+@pytest.mark.filterwarnings("ignore:Invalid zodoushi_builder")
+def test_katsuyo_text_warning_none_type_error():
+    class BuilderRaiseTypeError(IZyodoushiBuilder):
+        def build(self, _):
+            return KatsuyoText(
+                # raise TypeError
+                gokan="あ" + None,
+                katsuyo=KA_GYO_HENKAKU_KURU,
+            )
+
+    katsuyo_text = KatsuyoText(
+        gokan="",
+        katsuyo=KA_GYO_HENKAKU_KURU,
+    )
+    zyodoushi_builders = [
+        BuilderRaiseTypeError(),
+    ]
+    result, has_error = build_zyodoushi(
+        katsuyo_text,
+        zyodoushi_builders,
+    )
+    assert result == katsuyo_text, "No changes"
+    assert has_error, "has_error is True"

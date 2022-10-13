@@ -35,6 +35,16 @@ def build_zyodoushi(
                 UserWarning,
             )
             has_error = True
+        except TypeError as e:
+            # see: https://github.com/sadahry/spacy-dialog-reflection/issues/1
+            if "NoneType" not in str(e):
+                raise e
+            warnings.warn(f"None value TypeError Detected: {e}", UserWarning)
+            warnings.warn(
+                f"Invalid zodoushi_builder:{zodoushi_builder}. katsuyo_text: {result}",
+                UserWarning,
+            )
+            has_error = True
     return result, has_error
 
 
