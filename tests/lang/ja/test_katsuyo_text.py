@@ -15,14 +15,6 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text_builder import (
 )
 
 
-def test_katsuyo_text_generate(nlp_ja):
-    doc = nlp_ja("明日が来る")
-    kuru_token = doc[-1]
-    kuru = KatsuyoText.from_token(kuru_token)
-    assert kuru.gokan == ""
-    assert kuru.katsuyo.shushi == "くる"
-
-
 @pytest.mark.parametrize(
     "katsuyo_text, expected",
     [

@@ -16,13 +16,5 @@ class KatsuyoText:
     """
     katsuyo: k.Katsuyo
 
-    @classmethod
-    def from_token(cls, token):
-        # TODO: tokenからの活用の判定
-        return KatsuyoText(
-            gokan="",
-            katsuyo=k.KA_GYO_HENKAKU_KURU,
-        )
-
     def __str__(self):
         return f"{self.gokan}{self.katsuyo}"
