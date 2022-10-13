@@ -6,10 +6,10 @@ from spacy_dialog_reflection.lang.ja.katsuyo import (
     GODAN_BA_GYO,
     KA_GYO_HENKAKU_KURU,
 )
-from spacy_dialog_reflection.lang.ja.katsuyo_zyodoushi import (
+from spacy_dialog_reflection.lang.ja.katsuyo_text_builder import (
     RARERU,
     RERU,
-    IZyodoushiBuilder,
+    IKatsuyoTextBuilder,
     Ukemi,
     build_zyodoushi,
 )
@@ -56,9 +56,9 @@ def test_zohdoushi_builder_ukemi(katsuyo_text, expected):
 
 
 @pytest.mark.filterwarnings("ignore:ValueError")
-@pytest.mark.filterwarnings("ignore:Invalid zodoushi_builder")
+@pytest.mark.filterwarnings("ignore:Invalid katsuyo_text_builder")
 def test_katsuyo_text_warning_value_error():
-    class BuilderRaiseValueError(IZyodoushiBuilder):
+    class BuilderRaiseValueError(IKatsuyoTextBuilder):
         def build(self, _):
             raise ValueError("HOGE")
 
@@ -66,21 +66,21 @@ def test_katsuyo_text_warning_value_error():
         gokan="",
         katsuyo=KA_GYO_HENKAKU_KURU,
     )
-    zyodoushi_builders = [
+    katsuyo_text_builders = [
         BuilderRaiseValueError(),
     ]
     result, has_error = build_zyodoushi(
         katsuyo_text,
-        zyodoushi_builders,
+        katsuyo_text_builders,
     )
     assert result == katsuyo_text, "No changes"
     assert has_error, "has_error is True"
 
 
 @pytest.mark.filterwarnings("ignore:None value TypeError Detected")
-@pytest.mark.filterwarnings("ignore:Invalid zodoushi_builder")
+@pytest.mark.filterwarnings("ignore:Invalid katsuyo_text_builder")
 def test_katsuyo_text_warning_none_type_error():
-    class BuilderRaiseTypeError(IZyodoushiBuilder):
+    class BuilderRaiseTypeError(IKatsuyoTextBuilder):
         def build(self, _):
             return KatsuyoText(
                 # raise TypeError
@@ -92,12 +92,12 @@ def test_katsuyo_text_warning_none_type_error():
         gokan="",
         katsuyo=KA_GYO_HENKAKU_KURU,
     )
-    zyodoushi_builders = [
+    katsuyo_text_builders = [
         BuilderRaiseTypeError(),
     ]
     result, has_error = build_zyodoushi(
         katsuyo_text,
-        zyodoushi_builders,
+        katsuyo_text_builders,
     )
     assert result == katsuyo_text, "No changes"
     assert has_error, "has_error is True"

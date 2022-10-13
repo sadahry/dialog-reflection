@@ -16,7 +16,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo import (
     KeiyoudoushiKatsuyo,
     ZyodoushiKatsuyo,
 )
-from spacy_dialog_reflection.lang.ja.katsuyo_zyodoushi import (
+from spacy_dialog_reflection.lang.ja.katsuyo_text_builder import (
     RERU,
 )
 import pytest
