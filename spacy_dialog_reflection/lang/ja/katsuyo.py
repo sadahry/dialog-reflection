@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum, auto, unique
+from typing import Optional
 import abc
 
 DAN = {
@@ -49,7 +50,7 @@ class Katsuyo:
     rentai: str
     # 已然形もkateiに含める
     katei: str
-    meirei: str
+    meirei: Optional[str]
 
     @property
     @abc.abstractmethod
@@ -60,16 +61,21 @@ class Katsuyo:
         return self.shushi
 
 
+# ==============================================================================
+# 動詞
+# ==============================================================================
+
+
 class DoushiKatsuyo(Katsuyo):
     @property
     def hinshi(self) -> KatsuyoHinshi:
         return KatsuyoHinshi.DOUSHI
 
 
-class ZyodoushiKatsuyo(Katsuyo):
-    @property
-    def hinshi(self) -> KatsuyoHinshi:
-        return KatsuyoHinshi.ZYODOUSHI
+# ==============================================================================
+# 五段活用
+# see: https://ja.wikipedia.org/wiki/五段活用
+# ==============================================================================
 
 
 @dataclass(frozen=True)
@@ -79,41 +85,6 @@ class GodanKatsuyo(DoushiKatsuyo):
     # 五段活用の連用形に「た・て」などが続くとき、活用語尾が変化する。
     renyo_ta: str
 
-
-@dataclass(frozen=True)
-class KamiIchidanKatsuyo(DoushiKatsuyo):
-    # 命令形「-○よ」は登録しない
-    # 「-○ろ」のほうが口語的だと判断
-    pass
-
-
-@dataclass(frozen=True)
-class ShimoIchidanKatsuyo(DoushiKatsuyo):
-    # 命令形「-○よ」は登録しない
-    # 「-○ろ」のほうが口語的だと判断
-    pass
-
-
-@dataclass(frozen=True)
-class KaGyoHenkakuKatsuyo(DoushiKatsuyo):
-    pass
-
-
-@dataclass(frozen=True)
-class SaGyoHenkakuKatsuyo(DoushiKatsuyo):
-    # せる/れる
-    mizen_reru: str
-    # ぬ/られる
-    mizen_rareru: str
-    # 命令形「せよ」は登録しない
-    # 「しろ」のほうが口語的だと判断
-    pass
-
-
-# ==============================================================================
-# 五段活用
-# see: https://ja.wikipedia.org/wiki/五段活用
-# ==============================================================================
 
 # カ行
 GODAN_KA_GYO = GodanKatsuyo(
@@ -240,6 +211,14 @@ GODAN_IKU = GodanKatsuyo(
 # see: https://ja.wikipedia.org/wiki/上一段活用
 # ==============================================================================
 
+
+@dataclass(frozen=True)
+class KamiIchidanKatsuyo(DoushiKatsuyo):
+    # 命令形「-○よ」は登録しない
+    # 「-○ろ」のほうが口語的だと判断
+    pass
+
+
 # ア行
 KAMI_ICHIDAN_A_GYO = KamiIchidanKatsuyo(
     mizen="い",
@@ -325,6 +304,14 @@ KAMI_ICHIDAN_NO_GOKAN = KamiIchidanKatsuyo(
 # 下一段活用
 # see: https://ja.wikipedia.org/wiki/下一段活用
 # ==============================================================================
+
+
+@dataclass(frozen=True)
+class ShimoIchidanKatsuyo(DoushiKatsuyo):
+    # 命令形「-○よ」は登録しない
+    # 「-○ろ」のほうが口語的だと判断
+    pass
+
 
 # ア行
 SHIMO_ICHIDAN_A_GYO = ShimoIchidanKatsuyo(
@@ -441,6 +428,12 @@ SHIMO_ICHIDAN_RA_GYO = ShimoIchidanKatsuyo(
 # see: https://ja.wikipedia.org/wiki/カ行変格活用
 # ==============================================================================
 
+
+@dataclass(frozen=True)
+class KaGyoHenkakuKatsuyo(DoushiKatsuyo):
+    pass
+
+
 # 「くる」のみ特殊な活用形を持つ。
 KA_GYO_HENKAKU_KURU = KaGyoHenkakuKatsuyo(
     mizen="こ",
@@ -455,6 +448,17 @@ KA_GYO_HENKAKU_KURU = KaGyoHenkakuKatsuyo(
 # サ行変格活用
 # see: https://ja.wikipedia.org/wiki/サ行変格活用
 # ==============================================================================
+
+
+@dataclass(frozen=True)
+class SaGyoHenkakuKatsuyo(DoushiKatsuyo):
+    # せる/れる
+    mizen_reru: str
+    # ぬ/られる
+    mizen_rareru: str
+    # 命令形「せよ」は登録しない
+    # 「しろ」のほうが口語的だと判断
+
 
 # 「〜する」の特殊な活用形
 # e.g. 愛（あい）する
@@ -481,3 +485,71 @@ SA_GYO_HENKAKU_ZURU = SaGyoHenkakuKatsuyo(
     katei="ずれ",
     meirei="じろ",
 )
+
+
+# ==============================================================================
+# 形容詞
+# see: https://www.kokugobunpou.com/用言/形容詞-2-活用/#gsc.tab=0
+# ==============================================================================
+
+
+@dataclass(frozen=True)
+class KeiyoushiKatsuyo(Katsuyo):
+    # 連用形に「た」が続くとき、活用語尾が変化する。
+    renyo_ta: str
+
+    @property
+    def hinshi(self) -> KatsuyoHinshi:
+        return KatsuyoHinshi.KEIYOUSHI
+
+
+KEIYOUSHI = KeiyoushiKatsuyo(
+    mizen="かろ",
+    renyo="く",
+    renyo_ta="かっ",
+    shushi="い",
+    rentai="い",
+    katei="けれ",
+    meirei=None,
+)
+
+# ==============================================================================
+# 形容動詞
+# see: https://www.kokugobunpou.com/用言/形容動詞-2-活用/#gsc.tab=0
+# ==============================================================================
+
+
+@dataclass(frozen=True)
+class KeiyoudoushiKatsuyo(Katsuyo):
+    # 連用形に「た」が続くとき、活用語尾が変化する。
+    renyo_ta: str
+    # 連用形に「なる」「する」などが続くとき、活用語尾が変化する。
+    renyo_naru: str
+
+    @property
+    def hinshi(self) -> KatsuyoHinshi:
+        return KatsuyoHinshi.KEIYOUDOUSHI
+
+
+KEIYOUDOUSHI = KeiyoudoushiKatsuyo(
+    mizen="だろ",
+    renyo="で",
+    renyo_ta="だっ",
+    renyo_naru="に",
+    shushi="だ",
+    rentai="な",
+    katei="なら",
+    meirei=None,
+)
+
+# ==============================================================================
+# 助動詞
+# see: ./katsuyo_zyodoushi.py
+# ==============================================================================
+
+
+@dataclass(frozen=True)
+class ZyodoushiKatsuyo(Katsuyo):
+    @property
+    def hinshi(self) -> KatsuyoHinshi:
+        return KatsuyoHinshi.ZYODOUSHI

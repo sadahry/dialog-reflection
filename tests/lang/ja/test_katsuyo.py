@@ -5,11 +5,15 @@ from spacy_dialog_reflection.lang.ja.katsuyo import (
     SHIMO_ICHIDAN_A_GYO,
     KA_GYO_HENKAKU_KURU,
     SA_GYO_HENKAKU_SURU,
+    KEIYOUSHI,
+    KEIYOUDOUSHI,
     GodanKatsuyo,
     KamiIchidanKatsuyo,
     ShimoIchidanKatsuyo,
     SaGyoHenkakuKatsuyo,
     KaGyoHenkakuKatsuyo,
+    KeiyoushiKatsuyo,
+    KeiyoudoushiKatsuyo,
     ZyodoushiKatsuyo,
 )
 from spacy_dialog_reflection.lang.ja.katsuyo_zyodoushi import (
@@ -45,6 +49,16 @@ import pytest
             SA_GYO_HENKAKU_SURU,
             SaGyoHenkakuKatsuyo,
             KatsuyoHinshi.DOUSHI,
+        ),
+        (
+            KEIYOUSHI,
+            KeiyoushiKatsuyo,
+            KatsuyoHinshi.KEIYOUSHI,
+        ),
+        (
+            KEIYOUDOUSHI,
+            KeiyoudoushiKatsuyo,
+            KatsuyoHinshi.KEIYOUDOUSHI,
         ),
         (
             RERU,
