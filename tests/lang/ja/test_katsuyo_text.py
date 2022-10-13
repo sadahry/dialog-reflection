@@ -11,7 +11,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo import (
 from spacy_dialog_reflection.lang.ja.katsuyo_text_builder import (
     IKatsuyoTextBuilder,
     Ukemi,
-    build_zyodoushi,
+    build_multiple,
 )
 
 
@@ -69,7 +69,7 @@ def test_katsuyo_text_warning_value_error():
     katsuyo_text_builders = [
         BuilderRaiseValueError(),
     ]
-    result, has_error = build_zyodoushi(
+    result, has_error = build_multiple(
         katsuyo_text,
         katsuyo_text_builders,
     )
@@ -95,7 +95,7 @@ def test_katsuyo_text_warning_none_type_error():
     katsuyo_text_builders = [
         BuilderRaiseTypeError(),
     ]
-    result, has_error = build_zyodoushi(
+    result, has_error = build_multiple(
         katsuyo_text,
         katsuyo_text_builders,
     )

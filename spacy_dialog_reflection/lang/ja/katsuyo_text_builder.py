@@ -18,7 +18,7 @@ class IKatsuyoTextBuilder(abc.ABC):
         return self.__class__.__name__
 
 
-def build_zyodoushi(
+def build_multiple(
     src: KatsuyoText, katsuyo_text_builders: List[IKatsuyoTextBuilder]
 ) -> Tuple[KatsuyoText, bool]:
     # clone KatsuyoText
