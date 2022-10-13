@@ -26,25 +26,42 @@ class SpacyKatsuyoTextDetector(IKatsuyoTextDetector):
         #     return KatsuyoText(gokan=src.lemma_, katsuyo=NO_KATSUYO)
         # elif pos_tag == "ADJ":
         if pos_tag == "ADJ":
-            inflection = src.morph.get("Inflection")
-            if "形容詞" in inflection:
-                # e.g. 楽しい -> gokan=楽し + katsuyo=い
-                return KatsuyoText(gokan=src.lemma_[-1], katsuyo=KEIYOUSHI)
-            elif "形容動詞" in inflection:
+            # ==================================================
+            # 形容動詞の判定
+            # ==================================================
+            tag = src.tag_
+            # 「形状詞」=「形容動詞の語幹」
+            if "形状詞" in tag:
                 # universaldependenciesの形容動詞に語幹は含まれない
                 # see: https://universaldependencies.org/treebanks/ja_gsd/ja_gsd-pos-ADJ.html
                 # e.g. 健康 -> gokan=健康 + katsuyo=だ
                 return KatsuyoText(gokan=src.lemma_, katsuyo=KEIYOUDOUSHI)
+            # ==================================================
+            # 形容詞の判定
+            # ==================================================
+            inflection = "".join(src.morph.get("Inflection"))
+            if not inflection:
+                warnings.warn("No Inflections in ADJ", UserWarning)
+                return None
+            if "形容詞" in inflection:
+                # e.g. 楽しい -> gokan=楽し + katsuyo=い
+                return KatsuyoText(gokan=src.lemma_[:-1], katsuyo=KEIYOUSHI)
             else:
                 warnings.warn(
-                    f"Unsupported Inflection as ADJ: {inflection}", UserWarning
+                    f"Unsupported Inflections in ADJ: {inflection}", UserWarning
                 )
                 return None
         elif pos_tag == "NOUN":
+            # ==================================================
+            # 名詞の変形
+            # ==================================================
             # 名詞は形容動詞的に扱う
             # e.g. 健康 -> gokan=健康 + katsuyo=だ
             return KatsuyoText(gokan=src.text, katsuyo=KEIYOUDOUSHI)
         elif pos_tag == "PROPN":
+            # ==================================================
+            # 固有名詞の変形
+            # ==================================================
             # 固有名詞は形容動詞的に扱う
             # e.g. ジョニー -> gokan=ジョニー + katsuyo=だ
             return KatsuyoText(gokan=src.text, katsuyo=KEIYOUDOUSHI)

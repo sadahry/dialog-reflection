@@ -4,6 +4,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text import (
 )
 from spacy_dialog_reflection.lang.ja.katsuyo import (
     KEIYOUDOUSHI,
+    KEIYOUSHI,
 )
 from spacy_dialog_reflection.lang.ja.katsuyo_text_detector import (
     SpacyKatsuyoTextDetector,
@@ -34,6 +35,24 @@ def spacy_detector():
             "PROPN",
             KatsuyoText(
                 gokan="ステファン",
+                katsuyo=KEIYOUDOUSHI,
+            ),
+        ),
+        (
+            "あなたは美しい",
+            "美しい",
+            "ADJ",
+            KatsuyoText(
+                gokan="美し",
+                katsuyo=KEIYOUSHI,
+            ),
+        ),
+        (
+            "あなたは傲慢だ",
+            "傲慢",
+            "ADJ",
+            KatsuyoText(
+                gokan="傲慢",
                 katsuyo=KEIYOUDOUSHI,
             ),
         ),
