@@ -73,8 +73,8 @@ class ReflectionTextBuilder:
 
     def _extract_tokens_with_nearest_root_heads(
         self,
-        root: spacy.tokens.Span,
-    ) -> List[spacy.tokens.Token]:
+        root: spacy.tokens.Token,
+    ) -> spacy.tokens.Span:
         """
         Extract tokens with nearest root dependencies
         e.g. "私は彼女を愛している。" -> ["私", "は", "彼女", "を"]
@@ -100,7 +100,7 @@ class ReflectionTextBuilder:
 
     def _build_text(
         self,
-        tokens: List[spacy.tokens.Token],
+        tokens: spacy.tokens.Span,
         root: spacy.tokens.Token,
     ) -> str:
         """
