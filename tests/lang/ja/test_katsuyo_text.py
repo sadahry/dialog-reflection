@@ -5,10 +5,10 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text import (
 from spacy_dialog_reflection.lang.ja.katsuyo import (
     GODAN_BA_GYO,
     KA_GYO_HENKAKU_KURU,
-)
-from spacy_dialog_reflection.lang.ja.katsuyo_text_builder import (
     RARERU,
     RERU,
+)
+from spacy_dialog_reflection.lang.ja.katsuyo_text_builder import (
     IKatsuyoTextBuilder,
     Ukemi,
     build_zyodoushi,

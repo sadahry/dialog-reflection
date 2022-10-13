@@ -7,6 +7,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo import (
     SA_GYO_HENKAKU_SURU,
     KEIYOUSHI,
     KEIYOUDOUSHI,
+    RERU,
     GodanKatsuyo,
     KamiIchidanKatsuyo,
     ShimoIchidanKatsuyo,
@@ -15,9 +16,6 @@ from spacy_dialog_reflection.lang.ja.katsuyo import (
     KeiyoushiKatsuyo,
     KeiyoudoushiKatsuyo,
     ZyodoushiKatsuyo,
-)
-from spacy_dialog_reflection.lang.ja.katsuyo_text_builder import (
-    RERU,
 )
 import pytest
 
