@@ -11,8 +11,22 @@ from spacy_dialog_reflection.lang.ja.katsuyo import (
 from spacy_dialog_reflection.lang.ja.katsuyo_text_appender import (
     IKatsuyoTextAppender,
     Ukemi,
-    append_multiple,
 )
+from spacy_dialog_reflection.lang.ja.katsuyo_text_builder import (
+    IKatsuyoTextBuilder,
+)
+
+
+@pytest.fixture(scope="session")
+def append_multiple():
+    class DummyAppender(IKatsuyoTextBuilder):
+        def detect_appender(self, _):
+            raise NotImplementedError()
+
+        def detect_root(self, _):
+            raise NotImplementedError()
+
+    return DummyAppender().append_multiple
 
 
 @pytest.mark.parametrize(
@@ -48,8 +62,8 @@ def test_zohdoushi_appender_ukemi(katsuyo_text, expected):
 
 
 @pytest.mark.filterwarnings("ignore:ValueError")
-@pytest.mark.filterwarnings("ignore:Invalid katsuyo_text_appender")
-def test_katsuyo_text_warning_value_error():
+@pytest.mark.filterwarnings("ignore:Invalid appender")
+def test_katsuyo_text_warning_value_error(append_multiple):
     class AppenderRaiseValueError(IKatsuyoTextAppender):
         def append(self, _):
             raise ValueError("HOGE")
@@ -70,8 +84,8 @@ def test_katsuyo_text_warning_value_error():
 
 
 @pytest.mark.filterwarnings("ignore:None value TypeError Detected")
-@pytest.mark.filterwarnings("ignore:Invalid katsuyo_text_appender")
-def test_katsuyo_text_warning_none_type_error():
+@pytest.mark.filterwarnings("ignore:Invalid appender")
+def test_katsuyo_text_warning_none_type_error(append_multiple):
     class AppenderRaiseTypeError(IKatsuyoTextAppender):
         def append(self, _):
             return KatsuyoText(

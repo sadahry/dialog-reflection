@@ -1,8 +1,5 @@
-from dataclasses import replace
-from typing import List, Tuple
 from spacy_dialog_reflection.lang.ja.katsuyo_text import KatsuyoText
 import abc
-import warnings
 import spacy_dialog_reflection.lang.ja.katsuyo as k
 
 
@@ -16,35 +13,6 @@ class IKatsuyoTextAppender(abc.ABC):
 
     def __str__(self):
         return self.__class__.__name__
-
-
-def append_multiple(
-    src: KatsuyoText, katsuyo_text_appenders: List[IKatsuyoTextAppender]
-) -> Tuple[KatsuyoText, bool]:
-    # clone KatsuyoText
-    result = replace(src)
-    has_error = False
-    for katsuyo_text_appender in katsuyo_text_appenders:
-        try:
-            result = katsuyo_text_appender.append(result)
-        except ValueError as e:
-            warnings.warn(f"ValueError: {e}", UserWarning)
-            warnings.warn(
-                f"Invalid katsuyo_text_appender:{katsuyo_text_appender}. katsuyo_text: {result}",
-                UserWarning,
-            )
-            has_error = True
-        except TypeError as e:
-            # see: https://github.com/sadahry/spacy-dialog-reflection/issues/1
-            if "NoneType" not in str(e):
-                raise e
-            warnings.warn(f"None value TypeError Detected: {e}", UserWarning)
-            warnings.warn(
-                f"Invalid katsuyo_text_appender:{katsuyo_text_appender}. katsuyo_text: {result}",
-                UserWarning,
-            )
-            has_error = True
-    return result, has_error
 
 
 class Ukemi(IKatsuyoTextAppender):

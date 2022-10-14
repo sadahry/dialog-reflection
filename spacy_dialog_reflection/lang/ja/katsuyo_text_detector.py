@@ -1,6 +1,7 @@
-from typing import Optional
+from typing import Optional, List
 from spacy_dialog_reflection.lang.ja.katsuyo import KEIYOUDOUSHI, KEIYOUSHI
 from spacy_dialog_reflection.lang.ja.katsuyo_text import KatsuyoText
+from spacy_dialog_reflection.lang.ja.katsuyo_text_appender import IKatsuyoTextAppender
 import abc
 import warnings
 import spacy
@@ -9,6 +10,18 @@ import spacy
 class IKatsuyoTextDetector(abc.ABC):
     @abc.abstractmethod
     def detect(self, src: any) -> Optional[KatsuyoText]:
+        """
+        不適切な値が代入された際は、Noneを返却する。
+        """
+        raise NotImplementedError()
+
+    def __str__(self):
+        return self.__class__.__name__
+
+
+class IKatsuyoTextAppenderDetector(abc.ABC):
+    @abc.abstractmethod
+    def detect(self, src: any) -> Optional[List[IKatsuyoTextAppender]]:
         """
         不適切な値が代入された際は、Noneを返却する。
         """
