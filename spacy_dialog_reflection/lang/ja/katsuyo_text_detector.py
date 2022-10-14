@@ -25,10 +25,11 @@ class SpacyKatsuyoTextDetector(IKatsuyoTextDetector):
         tag = src.tag_
         inflection = "".join(src.morph.get("Inflection"))
 
-        if pos_tag == "VERB":
-            # TODO 動詞の実装
-            return NotImplementedError()
-        elif pos_tag == "ADJ":
+        # TODO 動詞の実装
+        # if pos_tag == "VERB":
+        #     return NotImplementedError()
+        # elif pos_tag == "ADJ":
+        if pos_tag == "ADJ":
             # ==================================================
             # 形容動詞の判定
             # ==================================================
