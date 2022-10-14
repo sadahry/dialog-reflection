@@ -8,8 +8,8 @@ from spacy_dialog_reflection.lang.ja.katsuyo import (
     RARERU,
     RERU,
 )
-from spacy_dialog_reflection.lang.ja.katsuyo_text_builder import (
-    IKatsuyoTextBuilder,
+from spacy_dialog_reflection.lang.ja.katsuyo_text_appender import (
+    IKatsuyoTextAppender,
     Ukemi,
     build_multiple,
 )
@@ -41,16 +41,16 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text_builder import (
         ),
     ],
 )
-def test_zohdoushi_builder_ukemi(katsuyo_text, expected):
-    zohdoushi_builder = Ukemi()
-    result = zohdoushi_builder.build(katsuyo_text)
+def test_zohdoushi_appender_ukemi(katsuyo_text, expected):
+    zohdoushi_appender = Ukemi()
+    result = zohdoushi_appender.build(katsuyo_text)
     assert str(result) == str(expected)
 
 
 @pytest.mark.filterwarnings("ignore:ValueError")
-@pytest.mark.filterwarnings("ignore:Invalid katsuyo_text_builder")
+@pytest.mark.filterwarnings("ignore:Invalid katsuyo_text_appender")
 def test_katsuyo_text_warning_value_error():
-    class BuilderRaiseValueError(IKatsuyoTextBuilder):
+    class AppenderRaiseValueError(IKatsuyoTextAppender):
         def build(self, _):
             raise ValueError("HOGE")
 
@@ -58,21 +58,21 @@ def test_katsuyo_text_warning_value_error():
         gokan="",
         katsuyo=KA_GYO_HENKAKU_KURU,
     )
-    katsuyo_text_builders = [
-        BuilderRaiseValueError(),
+    katsuyo_text_appenders = [
+        AppenderRaiseValueError(),
     ]
     result, has_error = build_multiple(
         katsuyo_text,
-        katsuyo_text_builders,
+        katsuyo_text_appenders,
     )
     assert result == katsuyo_text, "No changes"
     assert has_error, "has_error is True"
 
 
 @pytest.mark.filterwarnings("ignore:None value TypeError Detected")
-@pytest.mark.filterwarnings("ignore:Invalid katsuyo_text_builder")
+@pytest.mark.filterwarnings("ignore:Invalid katsuyo_text_appender")
 def test_katsuyo_text_warning_none_type_error():
-    class BuilderRaiseTypeError(IKatsuyoTextBuilder):
+    class AppenderRaiseTypeError(IKatsuyoTextAppender):
         def build(self, _):
             return KatsuyoText(
                 # raise TypeError
@@ -84,12 +84,12 @@ def test_katsuyo_text_warning_none_type_error():
         gokan="",
         katsuyo=KA_GYO_HENKAKU_KURU,
     )
-    katsuyo_text_builders = [
-        BuilderRaiseTypeError(),
+    katsuyo_text_appenders = [
+        AppenderRaiseTypeError(),
     ]
     result, has_error = build_multiple(
         katsuyo_text,
-        katsuyo_text_builders,
+        katsuyo_text_appenders,
     )
     assert result == katsuyo_text, "No changes"
     assert has_error, "has_error is True"

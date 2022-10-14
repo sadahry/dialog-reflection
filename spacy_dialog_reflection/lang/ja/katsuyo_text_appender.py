@@ -6,7 +6,7 @@ import warnings
 import spacy_dialog_reflection.lang.ja.katsuyo as k
 
 
-class IKatsuyoTextBuilder(abc.ABC):
+class IKatsuyoTextAppender(abc.ABC):
     @abc.abstractmethod
     def build(self, katsuyo_text: KatsuyoText) -> KatsuyoText:
         """
@@ -19,18 +19,18 @@ class IKatsuyoTextBuilder(abc.ABC):
 
 
 def build_multiple(
-    src: KatsuyoText, katsuyo_text_builders: List[IKatsuyoTextBuilder]
+    src: KatsuyoText, katsuyo_text_appenders: List[IKatsuyoTextAppender]
 ) -> Tuple[KatsuyoText, bool]:
     # clone KatsuyoText
     result = replace(src)
     has_error = False
-    for katsuyo_text_builder in katsuyo_text_builders:
+    for katsuyo_text_appender in katsuyo_text_appenders:
         try:
-            result = katsuyo_text_builder.build(result)
+            result = katsuyo_text_appender.build(result)
         except ValueError as e:
             warnings.warn(f"ValueError: {e}", UserWarning)
             warnings.warn(
-                f"Invalid katsuyo_text_builder:{katsuyo_text_builder}. katsuyo_text: {result}",
+                f"Invalid katsuyo_text_appender:{katsuyo_text_appender}. katsuyo_text: {result}",
                 UserWarning,
             )
             has_error = True
@@ -40,14 +40,14 @@ def build_multiple(
                 raise e
             warnings.warn(f"None value TypeError Detected: {e}", UserWarning)
             warnings.warn(
-                f"Invalid katsuyo_text_builder:{katsuyo_text_builder}. katsuyo_text: {result}",
+                f"Invalid katsuyo_text_appender:{katsuyo_text_appender}. katsuyo_text: {result}",
                 UserWarning,
             )
             has_error = True
     return result, has_error
 
 
-class Ukemi(IKatsuyoTextBuilder):
+class Ukemi(IKatsuyoTextAppender):
     def build(self, katsuyo_text: KatsuyoText) -> KatsuyoText:
         # TODO サ行変格活用の扱い
         mizen_text = katsuyo_text.gokan + katsuyo_text.katsuyo.mizen
