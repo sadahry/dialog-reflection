@@ -20,7 +20,11 @@ class IKatsuyoTextDetector(abc.ABC):
 
 class SpacyKatsuyoTextDetector(IKatsuyoTextDetector):
     def detect(self, src: spacy.tokens.Token) -> Optional[KatsuyoText]:
+        # spacy.tokens.Tokenから抽出される活用形の特徴を表す変数
         pos_tag = src.pos_
+        tag = src.tag_
+        inflection = "".join(src.morph.get("Inflection"))
+
         if pos_tag == "VERB":
             # TODO 動詞の実装
             return NotImplementedError()
@@ -28,7 +32,6 @@ class SpacyKatsuyoTextDetector(IKatsuyoTextDetector):
             # ==================================================
             # 形容動詞の判定
             # ==================================================
-            tag = src.tag_
             # 「形状詞」=「形容動詞の語幹」
             if "形状詞" in tag:
                 # universaldependenciesの形容動詞に語幹は含まれない
@@ -38,7 +41,6 @@ class SpacyKatsuyoTextDetector(IKatsuyoTextDetector):
             # ==================================================
             # 形容詞の判定
             # ==================================================
-            inflection = "".join(src.morph.get("Inflection"))
             if not inflection:
                 warnings.warn("No Inflections in ADJ", UserWarning)
                 return None

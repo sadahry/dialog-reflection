@@ -19,25 +19,6 @@ def spacy_detector():
 @pytest.mark.parametrize(
     "text, root, pos, expected",
     [
-        # TODO もっとテストケースを増やす
-        (
-            "それは明日かな",
-            "明日",
-            "NOUN",
-            KatsuyoText(
-                gokan="明日",
-                katsuyo=KEIYOUDOUSHI,
-            ),
-        ),
-        (
-            "それはステファンだ",
-            "ステファン",
-            "PROPN",
-            KatsuyoText(
-                gokan="ステファン",
-                katsuyo=KEIYOUDOUSHI,
-            ),
-        ),
         (
             "あなたは美しい",
             "美しい",
@@ -53,6 +34,24 @@ def spacy_detector():
             "ADJ",
             KatsuyoText(
                 gokan="傲慢",
+                katsuyo=KEIYOUDOUSHI,
+            ),
+        ),
+        (
+            "それは明日かな",
+            "明日",
+            "NOUN",
+            KatsuyoText(
+                gokan="明日",
+                katsuyo=KEIYOUDOUSHI,
+            ),
+        ),
+        (
+            "それはステファンだ",
+            "ステファン",
+            "PROPN",
+            KatsuyoText(
+                gokan="ステファン",
                 katsuyo=KEIYOUDOUSHI,
             ),
         ),
