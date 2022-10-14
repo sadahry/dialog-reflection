@@ -11,7 +11,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo import (
 from spacy_dialog_reflection.lang.ja.katsuyo_text_appender import (
     IKatsuyoTextAppender,
     Ukemi,
-    build_multiple,
+    append_multiple,
 )
 
 
@@ -61,7 +61,7 @@ def test_katsuyo_text_warning_value_error():
     katsuyo_text_appenders = [
         AppenderRaiseValueError(),
     ]
-    result, has_error = build_multiple(
+    result, has_error = append_multiple(
         katsuyo_text,
         katsuyo_text_appenders,
     )
@@ -87,7 +87,7 @@ def test_katsuyo_text_warning_none_type_error():
     katsuyo_text_appenders = [
         AppenderRaiseTypeError(),
     ]
-    result, has_error = build_multiple(
+    result, has_error = append_multiple(
         katsuyo_text,
         katsuyo_text_appenders,
     )

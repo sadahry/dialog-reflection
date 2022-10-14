@@ -18,7 +18,7 @@ class IKatsuyoTextAppender(abc.ABC):
         return self.__class__.__name__
 
 
-def build_multiple(
+def append_multiple(
     src: KatsuyoText, katsuyo_text_appenders: List[IKatsuyoTextAppender]
 ) -> Tuple[KatsuyoText, bool]:
     # clone KatsuyoText
