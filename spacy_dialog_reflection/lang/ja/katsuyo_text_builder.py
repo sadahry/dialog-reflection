@@ -66,11 +66,11 @@ class IKatsuyoTextBuilder(abc.ABC):
             has_error = True
             return None, has_error
 
-        appenders, _has_error = self.detect_appender(src)
-        has_error = has_error or _has_error
+        appenders, is_error = self.detect_appender(src)
+        has_error = has_error or is_error
 
-        result, _has_error = self.append_multiple(root, appenders)
-        has_error = has_error or _has_error
+        result, is_error = self.append_multiple(root, appenders)
+        has_error = has_error or is_error
 
         return result, has_error
 
