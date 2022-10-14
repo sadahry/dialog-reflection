@@ -43,7 +43,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text_appender import (
 )
 def test_zohdoushi_appender_ukemi(katsuyo_text, expected):
     zohdoushi_appender = Ukemi()
-    result = zohdoushi_appender.build(katsuyo_text)
+    result = zohdoushi_appender.append(katsuyo_text)
     assert str(result) == str(expected)
 
 
@@ -51,7 +51,7 @@ def test_zohdoushi_appender_ukemi(katsuyo_text, expected):
 @pytest.mark.filterwarnings("ignore:Invalid katsuyo_text_appender")
 def test_katsuyo_text_warning_value_error():
     class AppenderRaiseValueError(IKatsuyoTextAppender):
-        def build(self, _):
+        def append(self, _):
             raise ValueError("HOGE")
 
     katsuyo_text = KatsuyoText(
@@ -73,7 +73,7 @@ def test_katsuyo_text_warning_value_error():
 @pytest.mark.filterwarnings("ignore:Invalid katsuyo_text_appender")
 def test_katsuyo_text_warning_none_type_error():
     class AppenderRaiseTypeError(IKatsuyoTextAppender):
-        def build(self, _):
+        def append(self, _):
             return KatsuyoText(
                 # raise TypeError
                 gokan="あ" + None,

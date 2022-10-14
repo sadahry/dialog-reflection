@@ -8,7 +8,7 @@ import spacy_dialog_reflection.lang.ja.katsuyo as k
 
 class IKatsuyoTextAppender(abc.ABC):
     @abc.abstractmethod
-    def build(self, katsuyo_text: KatsuyoText) -> KatsuyoText:
+    def append(self, katsuyo_text: KatsuyoText) -> KatsuyoText:
         """
         不適切な値が代入された際は、ValueErrorを発生させる。
         """
@@ -26,7 +26,7 @@ def append_multiple(
     has_error = False
     for katsuyo_text_appender in katsuyo_text_appenders:
         try:
-            result = katsuyo_text_appender.build(result)
+            result = katsuyo_text_appender.append(result)
         except ValueError as e:
             warnings.warn(f"ValueError: {e}", UserWarning)
             warnings.warn(
@@ -48,7 +48,7 @@ def append_multiple(
 
 
 class Ukemi(IKatsuyoTextAppender):
-    def build(self, katsuyo_text: KatsuyoText) -> KatsuyoText:
+    def append(self, katsuyo_text: KatsuyoText) -> KatsuyoText:
         # TODO サ行変格活用の扱い
         mizen_text = katsuyo_text.gokan + katsuyo_text.katsuyo.mizen
         if mizen_text[-1] in k.DAN["あ"]:
