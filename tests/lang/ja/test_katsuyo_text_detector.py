@@ -1,3 +1,4 @@
+from tkinter import E
 import pytest
 from spacy_dialog_reflection.lang.ja.katsuyo_text import (
     KatsuyoText,
@@ -82,7 +83,9 @@ def test_spacy_katsuyo_text_detector(nlp_ja, spacy_detector, text, root, pos, ex
             "あなたに愛される",
             "れる",
             "AUX",
-            Ukemi,
+            [
+                Ukemi,
+            ],
         ),
     ],
 )
@@ -95,4 +98,5 @@ def test_spacy_katsuyo_text_appender_detector(
     assert last_token.pos_ == pos, "last token is not correct"
     result, has_error = spacy_appender_detector.detect(sent)
     assert not has_error, "has error in detection"
-    assert type(result[0]) is expected
+    types = [type(appender) for appender in result]
+    assert types == expected
