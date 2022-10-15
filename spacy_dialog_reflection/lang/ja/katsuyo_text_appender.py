@@ -35,3 +35,20 @@ class Shieki(IKatsuyoTextAppender):
             return KatsuyoText(gokan=mizen_text, katsuyo=k.SERU)
         else:
             return KatsuyoText(gokan=mizen_text, katsuyo=k.SASERU)
+
+
+# 否定
+class Hitei(IKatsuyoTextAppender):
+    # 現状、出力文字列としては「ない」のみサポート
+    # TODO オプションで「ぬ」を選択できるように
+    NAI = KatsuyoText(
+        gokan="な",
+        katsuyo=k.KEIYOUSHI,
+    )
+
+    def append(self, katsuyo_text: KatsuyoText) -> KatsuyoText:
+        mizen_text = katsuyo_text.gokan + katsuyo_text.katsuyo.mizen
+        return KatsuyoText(
+            gokan=mizen_text + self.NAI.gokan,
+            katsuyo=self.NAI.katsuyo,
+        )

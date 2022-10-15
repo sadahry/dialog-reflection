@@ -5,12 +5,14 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text import (
 from spacy_dialog_reflection.lang.ja.katsuyo import (
     GODAN_BA_GYO,
     KA_GYO_HENKAKU_KURU,
+    KEIYOUSHI,
     RARERU,
     RERU,
     SASERU,
     SERU,
 )
 from spacy_dialog_reflection.lang.ja.katsuyo_text_appender import (
+    Hitei,
     IKatsuyoTextAppender,
     Shieki,
     Ukemi,
@@ -109,6 +111,39 @@ def test_katsuyo_text_warning_value_error(append_multiple):
     )
     assert result == katsuyo_text, "No changes"
     assert has_error, "has_error is True"
+
+
+@pytest.mark.parametrize(
+    "katsuyo_text, expected",
+    [
+        # TODO もっとテストケースを増やす
+        # TODO 「らしい」など未然形が存在しないケースを追加
+        (
+            KatsuyoText(
+                gokan="",
+                katsuyo=KA_GYO_HENKAKU_KURU,
+            ),
+            KatsuyoText(
+                gokan="こな",
+                katsuyo=KEIYOUSHI,
+            ),
+        ),
+        (
+            KatsuyoText(
+                gokan="遊",
+                katsuyo=GODAN_BA_GYO,
+            ),
+            KatsuyoText(
+                gokan="遊ばな",
+                katsuyo=KEIYOUSHI,
+            ),
+        ),
+    ],
+)
+def test_zohdoushi_appender_hitei(katsuyo_text, expected):
+    zohdoushi_appender = Hitei()
+    result = zohdoushi_appender.append(katsuyo_text)
+    assert str(result) == str(expected)
 
 
 @pytest.mark.filterwarnings("ignore:None value TypeError Detected")
