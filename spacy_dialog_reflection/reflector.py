@@ -123,25 +123,24 @@ class ReflectionTextBuilder:
         self,
         root: spacy.tokens.Token,
     ) -> str:
-        # There is no VBD tokens in Japanese
-        # ref. https://universaldependencies.org/treebanks/ja_gsd/index.html#pos-tags
-        # if root.pos_ == "VBD":
-
+        # TODO 動詞の実装が終わったら消す。暫定実装
         if root.pos_ == "VERB":
             return root.lemma_ + self.word_ending
         return ""
 
         # TODO 動詞の実装が終わったら、以下のコメントアウトを外す
-        try:
-            katsuyo_text, _ = self.text_builder.build(root)
+        # try:
+        #     # 現状rootのsuffixを構築するにはsentが必要
+        #     sent = root.sent
 
-            if katsuyo_text is None:
-                warnings.warn(
-                    f"unsupported parse. root: {root} sent: {root.sent}", UserWarning
-                )
-                return str(root) + self.word_ending_unpersed
+        #     katsuyo_text, _ = self.text_builder.build(sent)
 
-            return str(katsuyo_text) + self.word_ending
-        except Exception as e:
-            warnings.warn(f"failed to parse root: {e}", UserWarning)
-            return str(root) + self.word_ending_unpersed
+        #     if katsuyo_text is None:
+        #         raise Exception(
+        #             f"unsupported parse. root: {root} sent: {sent}", UserWarning
+        #         )
+
+        #     return str(katsuyo_text) + self.word_ending
+        # except Exception as e:
+        #     warnings.warn(f"unexpected error on _build_suffix: {e}", UserWarning)
+        #     return str(root) + self.word_ending_unpersed
