@@ -7,9 +7,12 @@ from spacy_dialog_reflection.lang.ja.katsuyo import (
     KA_GYO_HENKAKU_KURU,
     RARERU,
     RERU,
+    SASERU,
+    SERU,
 )
 from spacy_dialog_reflection.lang.ja.katsuyo_text_appender import (
     IKatsuyoTextAppender,
+    Shieki,
     Ukemi,
 )
 from spacy_dialog_reflection.lang.ja.katsuyo_text_builder import (
@@ -50,6 +53,38 @@ def append_multiple():
 )
 def test_zohdoushi_appender_ukemi(katsuyo_text, expected):
     zohdoushi_appender = Ukemi()
+    result = zohdoushi_appender.append(katsuyo_text)
+    assert str(result) == str(expected)
+
+
+@pytest.mark.parametrize(
+    "katsuyo_text, expected",
+    [
+        # TODO もっとテストケースを増やす
+        (
+            KatsuyoText(
+                gokan="",
+                katsuyo=KA_GYO_HENKAKU_KURU,
+            ),
+            KatsuyoText(
+                gokan="こ",
+                katsuyo=SASERU,
+            ),
+        ),
+        (
+            KatsuyoText(
+                gokan="遊",
+                katsuyo=GODAN_BA_GYO,
+            ),
+            KatsuyoText(
+                gokan="遊ば",
+                katsuyo=SERU,
+            ),
+        ),
+    ],
+)
+def test_zohdoushi_appender_shieki(katsuyo_text, expected):
+    zohdoushi_appender = Shieki()
     result = zohdoushi_appender.append(katsuyo_text)
     assert str(result) == str(expected)
 
