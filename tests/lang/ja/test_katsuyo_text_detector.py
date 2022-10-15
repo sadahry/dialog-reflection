@@ -6,7 +6,9 @@ from spacy_dialog_reflection.lang.ja.katsuyo import (
     KEIYOUDOUSHI,
     KEIYOUSHI,
 )
+from spacy_dialog_reflection.lang.ja.katsuyo_text_appender import Ukemi
 from spacy_dialog_reflection.lang.ja.katsuyo_text_detector import (
+    SpacyKatsuyoTextAppenderDetector,
     SpacyKatsuyoTextDetector,
 )
 
@@ -14,6 +16,14 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text_detector import (
 @pytest.fixture(scope="session")
 def spacy_detector():
     return SpacyKatsuyoTextDetector()
+
+
+@pytest.fixture(scope="session")
+def spacy_appender_detector():
+    appender_dict = {
+        Ukemi: Ukemi(),
+    }
+    return SpacyKatsuyoTextAppenderDetector(appender_dict)
 
 
 @pytest.mark.parametrize(
@@ -63,3 +73,30 @@ def test_spacy_katsuyo_text_detector(nlp_ja, spacy_detector, text, root, pos, ex
     assert root_token.pos_ == pos, "root token is not correct"
     result = spacy_detector.detect(root_token)
     assert str(result) == str(expected)
+
+
+@pytest.mark.parametrize(
+    "text, norm, pos, infrection, expected",
+    [
+        (
+            "あなたに愛される",
+            "れる",
+            "AUX",
+            "",
+            Ukemi,
+        ),
+    ],
+)
+def test_spacy_katsuyo_text_appender_detector(
+    nlp_ja, spacy_appender_detector, text, norm, pos, infrection, expected
+):
+    sent = next(nlp_ja(text).sents)
+    last_token = sent[-1]
+    assert last_token.norm_ == norm, "last token is not correct"
+    assert last_token.pos_ == pos, "last token is not correct"
+    assert infrection in "".join(
+        last_token.morph.get("Inflection")
+    ), "last token is not correct"
+    result, has_error = spacy_appender_detector.detect(sent)
+    assert not has_error, "has error in detection"
+    assert type(result[0]) is expected

@@ -1,7 +1,11 @@
-from typing import Optional, List
+from typing import Dict, Optional, List, Tuple
+from itertools import dropwhile
 from spacy_dialog_reflection.lang.ja.katsuyo import KEIYOUDOUSHI, KEIYOUSHI
 from spacy_dialog_reflection.lang.ja.katsuyo_text import KatsuyoText
-from spacy_dialog_reflection.lang.ja.katsuyo_text_appender import IKatsuyoTextAppender
+from spacy_dialog_reflection.lang.ja.katsuyo_text_appender import (
+    IKatsuyoTextAppender,
+    Ukemi,
+)
 import abc
 import warnings
 import spacy
@@ -20,8 +24,28 @@ class IKatsuyoTextDetector(abc.ABC):
 
 
 class IKatsuyoTextAppenderDetector(abc.ABC):
+    APPENDERS = [
+        Ukemi,
+    ]
+
+    def __init__(self, appender_dict: Dict[type, IKatsuyoTextAppender]) -> None:
+        self.appender_dict = appender_dict
+        # check appender_dict
+        for appender in self.APPENDERS:
+            if appender not in self.appender_dict:
+                warnings.warn(f"appender_dict doesn't have appender: {appender}")
+
+    def try_append(self, type: type, appenders: List[IKatsuyoTextAppender]) -> bool:
+        if type not in self.appender_dict:
+            warnings.warn(
+                f"couldn't append: {type} since appender_dict doesn't have it"
+            )
+            return False
+        appenders.append(self.appender_dict[type])
+        return True
+
     @abc.abstractmethod
-    def detect(self, src: any) -> Optional[List[IKatsuyoTextAppender]]:
+    def detect(self, src: any) -> Tuple[List[IKatsuyoTextAppender], bool]:
         """
         不適切な値が代入された際は、Noneを返却する。
         """
@@ -61,11 +85,9 @@ class SpacyKatsuyoTextDetector(IKatsuyoTextDetector):
             if "形容詞" in inflection:
                 # e.g. 楽しい -> gokan=楽し + katsuyo=い
                 return KatsuyoText(gokan=src.lemma_[:-1], katsuyo=KEIYOUSHI)
-            else:
-                warnings.warn(
-                    f"Unsupported Inflections of ADJ: {inflection}", UserWarning
-                )
-                return None
+
+            warnings.warn(f"Unsupported Inflections of ADJ: {inflection}", UserWarning)
+            return None
         elif pos_tag == "NOUN":
             # ==================================================
             # 名詞の変形
@@ -83,3 +105,38 @@ class SpacyKatsuyoTextDetector(IKatsuyoTextDetector):
         else:
             warnings.warn(f"Unsupported POS Tag: {pos_tag}", UserWarning)
             return None
+
+
+class SpacyKatsuyoTextAppenderDetector(IKatsuyoTextAppenderDetector):
+    def detect(self, src: spacy.tokens.Span) -> Tuple[List[IKatsuyoTextAppender], bool]:
+        appenders = []
+        has_error = False
+
+        # NOTE: rootに紐づくトークンを取得するのに、依存関係を見ずにrootトークンのindex以降のトークンを見る
+        #       これは、rootの意味に関連する助動詞がroot位置以降に連続することと、rootに紐づかない助動詞も意味に影響することを前提としている
+        candidate_tokens = dropwhile(lambda t: t.i > src.root.i, src)
+        for candidate_token in candidate_tokens:
+            pos_tag = candidate_token.pos_
+            norm = candidate_token.norm_
+
+            if pos_tag == "AUX":
+                # ==================================================
+                # 助動詞の判定
+                # ==================================================
+                if norm in ["れる", "られる"]:
+                    is_succeeded = self.try_append(Ukemi, appenders)
+                    has_error = has_error or not is_succeeded
+                    continue
+
+                warnings.warn(f"Unsupported AUX: {norm}", UserWarning)
+                has_error = True
+                continue
+            # TODO Hiteiの実装
+            # elif pos_tag == "ADJ":
+            #     # 「ない」のみ対応
+            #     if norm == "ない":
+            #        is_succeeded = self.try_append(Hitei, appenders)
+            #        has_error = has_error or not is_succeeded
+            #        continue
+
+        return appenders, has_error
