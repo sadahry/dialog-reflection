@@ -15,6 +15,7 @@ class IKatsuyoTextAppender(abc.ABC):
         return self.__class__.__name__
 
 
+# 受身,尊敬,自発,可能
 class Ukemi(IKatsuyoTextAppender):
     def append(self, katsuyo_text: KatsuyoText) -> KatsuyoText:
         # TODO サ行変格活用の扱い
@@ -23,3 +24,14 @@ class Ukemi(IKatsuyoTextAppender):
             return KatsuyoText(gokan=mizen_text, katsuyo=k.RERU)
         else:
             return KatsuyoText(gokan=mizen_text, katsuyo=k.RARERU)
+
+
+# 使役
+class Shieki(IKatsuyoTextAppender):
+    def append(self, katsuyo_text: KatsuyoText) -> KatsuyoText:
+        # TODO サ行変格活用の扱い
+        mizen_text = katsuyo_text.gokan + katsuyo_text.katsuyo.mizen
+        if mizen_text[-1] in k.DAN["あ"]:
+            return KatsuyoText(gokan=mizen_text, katsuyo=k.SERU)
+        else:
+            return KatsuyoText(gokan=mizen_text, katsuyo=k.SASERU)

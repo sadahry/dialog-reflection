@@ -3,6 +3,7 @@ from typing import Optional, List, Tuple
 from spacy_dialog_reflection.lang.ja.katsuyo_text import KatsuyoText
 from spacy_dialog_reflection.lang.ja.katsuyo_text_appender import (
     IKatsuyoTextAppender,
+    Shieki,
     Ukemi,
 )
 from spacy_dialog_reflection.lang.ja.katsuyo_text_detector import (
@@ -86,6 +87,7 @@ class SpacyKatsuyoTextBuilder(IKatsuyoTextBuilder):
             appender_detector=SpacyKatsuyoTextAppenderDetector(
                 {
                     Ukemi: Ukemi(),
+                    Shieki: Shieki(),
                 }
             ),
         )

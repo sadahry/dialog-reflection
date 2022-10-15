@@ -6,7 +6,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo import (
     KEIYOUDOUSHI,
     KEIYOUSHI,
 )
-from spacy_dialog_reflection.lang.ja.katsuyo_text_appender import Ukemi
+from spacy_dialog_reflection.lang.ja.katsuyo_text_appender import Shieki, Ukemi
 from spacy_dialog_reflection.lang.ja.katsuyo_text_detector import (
     SpacyKatsuyoTextAppenderDetector,
     SpacyKatsuyoTextDetector,
@@ -22,6 +22,7 @@ def spacy_detector():
 def spacy_appender_detector():
     appender_dict = {
         Ukemi: Ukemi(),
+        Shieki: Shieki(),
     }
     return SpacyKatsuyoTextAppenderDetector(appender_dict)
 
@@ -87,6 +88,14 @@ def test_spacy_katsuyo_text_detector(
             "AUX",
             [
                 Ukemi,
+            ],
+        ),
+        (
+            "あなたを愛させる",
+            "せる",
+            "AUX",
+            [
+                Shieki,
             ],
         ),
     ],

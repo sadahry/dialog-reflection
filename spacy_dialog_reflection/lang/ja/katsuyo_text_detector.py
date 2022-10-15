@@ -4,6 +4,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo import KEIYOUDOUSHI, KEIYOUSHI
 from spacy_dialog_reflection.lang.ja.katsuyo_text import KatsuyoText
 from spacy_dialog_reflection.lang.ja.katsuyo_text_appender import (
     IKatsuyoTextAppender,
+    Shieki,
     Ukemi,
 )
 import abc
@@ -136,6 +137,10 @@ class SpacyKatsuyoTextAppenderDetector(IKatsuyoTextAppenderDetector):
                 # ==================================================
                 if norm in ["れる", "られる"]:
                     is_succeeded = self.try_append(Ukemi, appenders)
+                    has_error = has_error or not is_succeeded
+                    continue
+                elif norm in ["せる", "させる"]:
+                    is_succeeded = self.try_append(Shieki, appenders)
                     has_error = has_error or not is_succeeded
                     continue
 
