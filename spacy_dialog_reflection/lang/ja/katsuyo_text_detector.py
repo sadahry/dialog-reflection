@@ -135,32 +135,32 @@ class SpacyKatsuyoTextAppenderDetector(IKatsuyoTextAppenderDetector):
         candidate_tokens = dropwhile(lambda t: t.i > root.i, sent)
         for candidate_token in candidate_tokens:
             pos_tag = candidate_token.pos_
-            norm = candidate_token.norm_
+            lemma = candidate_token.lemma_
 
             if pos_tag == "AUX":
                 # ==================================================
                 # 助動詞の判定
                 # ==================================================
-                if norm in ["れる", "られる"]:
+                if lemma in ["れる", "られる"]:
                     is_succeeded = self.try_append(Ukemi, appenders)
                     has_error = has_error or not is_succeeded
                     continue
-                elif norm in ["せる", "させる"]:
+                elif lemma in ["せる", "させる"]:
                     is_succeeded = self.try_append(Shieki, appenders)
                     has_error = has_error or not is_succeeded
                     continue
-                elif norm in ["ない", "ぬ"]:
+                elif lemma in ["ない", "ぬ"]:
                     # 「ぬ」も「ない」として扱う
                     is_succeeded = self.try_append(Nai, appenders)
                     has_error = has_error or not is_succeeded
                     continue
 
-                warnings.warn(f"Unsupported AUX: {norm}", UserWarning)
+                warnings.warn(f"Unsupported AUX: {lemma}", UserWarning)
                 has_error = True
                 continue
             elif pos_tag == "ADJ":
                 # 「ない」のみ対応
-                if norm in ["ない", "無い"]:
+                if lemma in ["ない", "無い"]:
                     is_succeeded = self.try_append(Nai, appenders)
                     has_error = has_error or not is_succeeded
                     continue
