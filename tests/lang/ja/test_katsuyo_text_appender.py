@@ -12,7 +12,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo import (
     SERU,
 )
 from spacy_dialog_reflection.lang.ja.katsuyo_text_appender import (
-    Hitei,
+    Nai,
     IKatsuyoTextAppender,
     Shieki,
     Ukemi,
@@ -140,8 +140,8 @@ def test_katsuyo_text_warning_value_error(append_multiple):
         ),
     ],
 )
-def test_zohdoushi_appender_hitei(katsuyo_text, expected):
-    zohdoushi_appender = Hitei()
+def test_zohdoushi_appender_Nai(katsuyo_text, expected):
+    zohdoushi_appender = Nai()
     result = zohdoushi_appender.append(katsuyo_text)
     assert str(result) == str(expected)
 

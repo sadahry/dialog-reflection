@@ -6,7 +6,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo import (
     KEIYOUDOUSHI,
     KEIYOUSHI,
 )
-from spacy_dialog_reflection.lang.ja.katsuyo_text_appender import Hitei, Shieki, Ukemi
+from spacy_dialog_reflection.lang.ja.katsuyo_text_appender import Nai, Shieki, Ukemi
 from spacy_dialog_reflection.lang.ja.katsuyo_text_builder import SpacyKatsuyoTextBuilder
 
 
@@ -103,13 +103,13 @@ def test_spacy_katsuyo_text_detector(
             "子供を愛さない",
             "ない",
             "AUX",
-            [Hitei],
+            [Nai],
         ),
         (
             "子供が寝ない",
             "ない",
             "AUX",
-            [Hitei],
+            [Nai],
         ),
         (
             "それは仕方ない",
@@ -117,9 +117,9 @@ def test_spacy_katsuyo_text_detector(
             "ADJ",
             [],
         ),
-        # 現状、Hiteiとして取れてしまう。言語の返答には
+        # 現状、Naiとして取れてしまう。言語の返答には
         # 直接的には関係ないので、現状はこのままとする。
-        # TODO 「仕方が無い」のような、Hiteiとして取れるものを取れなくする
+        # TODO 「仕方が無い」のような、Naiとして取れるものを取れなくする
         # (
         #     "それは仕方がない",
         #     "無い",

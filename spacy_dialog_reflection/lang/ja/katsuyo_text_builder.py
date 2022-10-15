@@ -5,7 +5,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text_appender import (
     IKatsuyoTextAppender,
     Shieki,
     Ukemi,
-    Hitei,
+    Nai,
 )
 from spacy_dialog_reflection.lang.ja.katsuyo_text_detector import (
     IKatsuyoTextDetector,
@@ -89,7 +89,7 @@ class SpacyKatsuyoTextBuilder(IKatsuyoTextBuilder):
                 {
                     Ukemi: Ukemi(),
                     Shieki: Shieki(),
-                    Hitei: Hitei(),
+                    Nai: Nai(),
                 }
             ),
         )
