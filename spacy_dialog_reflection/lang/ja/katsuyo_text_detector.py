@@ -1,6 +1,10 @@
 from typing import Dict, Optional, List, Tuple
 from itertools import dropwhile
-from spacy_dialog_reflection.lang.ja.katsuyo import KEIYOUDOUSHI, KEIYOUSHI
+from spacy_dialog_reflection.lang.ja.katsuyo import (
+    GODAN_KA_GYO,
+    KEIYOUDOUSHI,
+    KEIYOUSHI,
+)
 from spacy_dialog_reflection.lang.ja.katsuyo_text import KatsuyoText
 from spacy_dialog_reflection.lang.ja.katsuyo_text_appender import (
     Nai,
@@ -65,6 +69,7 @@ class SpacyKatsuyoTextDetector(IKatsuyoTextDetector):
         # spacy.tokens.Tokenから抽出される活用形の特徴を表す変数
         pos_tag = root.pos_
         tag = root.tag_
+        lemma = root.lemma_
         inflection = "".join(root.morph.get("Inflection"))
 
         # There is no VBD tokens in Japanese
@@ -72,10 +77,10 @@ class SpacyKatsuyoTextDetector(IKatsuyoTextDetector):
         # if pos_tag == "VBD":
 
         # TODO 動詞の実装
-        # if pos_tag == "VERB":
-        #     return NotImplementedError()
-        # elif pos_tag == "ADJ":
-        if pos_tag == "ADJ":
+        if pos_tag == "VERB":
+            if "五段-カ行" in inflection:
+                return KatsuyoText(gokan=lemma[:-1], katsuyo=GODAN_KA_GYO)
+        elif pos_tag == "ADJ":
             # ==================================================
             # 形容動詞の判定
             # ==================================================

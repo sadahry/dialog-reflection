@@ -3,6 +3,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text import (
     KatsuyoText,
 )
 from spacy_dialog_reflection.lang.ja.katsuyo import (
+    GODAN_KA_GYO,
     KEIYOUDOUSHI,
     KEIYOUSHI,
 )
@@ -23,6 +24,15 @@ def spacy_appender_detector():
 @pytest.mark.parametrize(
     "text, root_text, pos, expected",
     [
+        (
+            "あなたと歩く",
+            "歩く",
+            "VERB",
+            KatsuyoText(
+                gokan="歩",
+                katsuyo=GODAN_KA_GYO,
+            ),
+        ),
         (
             "あなたは美しい",
             "美しい",
