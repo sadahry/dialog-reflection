@@ -93,14 +93,11 @@ class SpacyKatsuyoTextDetector(IKatsuyoTextDetector):
             # ==================================================
             # 形容詞の判定
             # ==================================================
-            if not inflection:
-                warnings.warn("No Inflections in ADJ", UserWarning)
-                return None
-            if "形容詞" in inflection:
+            if "形容詞" in tag:
                 # e.g. 楽しい -> gokan=楽し + katsuyo=い
                 return KatsuyoText(gokan=root.lemma_[:-1], katsuyo=KEIYOUSHI)
 
-            warnings.warn(f"Unsupported Inflections of ADJ: {inflection}", UserWarning)
+            warnings.warn(f"Unsupported tag of ADJ: {tag}", UserWarning)
             return None
         elif pos_tag == "NOUN":
             # ==================================================
