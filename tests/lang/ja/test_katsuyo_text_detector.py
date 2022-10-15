@@ -86,17 +86,25 @@ def test_spacy_katsuyo_text_detector(
             "あなたに愛される",
             "れる",
             "AUX",
-            [
-                Ukemi,
-            ],
+            [Ukemi],
+        ),
+        (
+            "称号が与えられる",
+            "られる",
+            "AUX",
+            [Ukemi],
         ),
         (
             "あなたを愛させる",
             "せる",
             "AUX",
-            [
-                Shieki,
-            ],
+            [Shieki],
+        ),
+        (
+            "子供を寝させる",
+            "させる",
+            "AUX",
+            [Shieki],
         ),
     ],
 )
