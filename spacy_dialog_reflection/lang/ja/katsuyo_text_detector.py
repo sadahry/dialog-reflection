@@ -56,11 +56,18 @@ class IKatsuyoTextAppenderDetector(abc.ABC):
 
 
 class SpacyKatsuyoTextDetector(IKatsuyoTextDetector):
-    def detect(self, src: spacy.tokens.Token) -> Optional[KatsuyoText]:
+    def detect(self, src: spacy.tokens.Span) -> Optional[KatsuyoText]:
+        sent = src
+        root = sent.root
+
         # spacy.tokens.Tokenから抽出される活用形の特徴を表す変数
-        pos_tag = src.pos_
-        tag = src.tag_
-        inflection = "".join(src.morph.get("Inflection"))
+        pos_tag = root.pos_
+        tag = root.tag_
+        inflection = "".join(root.morph.get("Inflection"))
+
+        # There is no VBD tokens in Japanese
+        # ref. https://universaldependencies.org/treebanks/ja_gsd/index.html#pos-tags
+        # if pos_tag == "VBD":
 
         # TODO 動詞の実装
         # if pos_tag == "VERB":
@@ -75,7 +82,7 @@ class SpacyKatsuyoTextDetector(IKatsuyoTextDetector):
                 # universaldependenciesの形容動詞に語幹は含まれない
                 # see: https://universaldependencies.org/treebanks/ja_gsd/ja_gsd-pos-ADJ.html
                 # e.g. 健康 -> gokan=健康 + katsuyo=だ
-                return KatsuyoText(gokan=src.lemma_, katsuyo=KEIYOUDOUSHI)
+                return KatsuyoText(gokan=root.lemma_, katsuyo=KEIYOUDOUSHI)
             # ==================================================
             # 形容詞の判定
             # ==================================================
@@ -84,7 +91,7 @@ class SpacyKatsuyoTextDetector(IKatsuyoTextDetector):
                 return None
             if "形容詞" in inflection:
                 # e.g. 楽しい -> gokan=楽し + katsuyo=い
-                return KatsuyoText(gokan=src.lemma_[:-1], katsuyo=KEIYOUSHI)
+                return KatsuyoText(gokan=root.lemma_[:-1], katsuyo=KEIYOUSHI)
 
             warnings.warn(f"Unsupported Inflections of ADJ: {inflection}", UserWarning)
             return None
@@ -94,14 +101,14 @@ class SpacyKatsuyoTextDetector(IKatsuyoTextDetector):
             # ==================================================
             # 名詞は形容動詞的に扱う
             # e.g. 健康 -> gokan=健康 + katsuyo=だ
-            return KatsuyoText(gokan=src.text, katsuyo=KEIYOUDOUSHI)
+            return KatsuyoText(gokan=root.text, katsuyo=KEIYOUDOUSHI)
         elif pos_tag == "PROPN":
             # ==================================================
             # 固有名詞の変形
             # ==================================================
             # 固有名詞は形容動詞的に扱う
             # e.g. ジョニー -> gokan=ジョニー + katsuyo=だ
-            return KatsuyoText(gokan=src.text, katsuyo=KEIYOUDOUSHI)
+            return KatsuyoText(gokan=root.text, katsuyo=KEIYOUDOUSHI)
         else:
             warnings.warn(f"Unsupported POS Tag: {pos_tag}", UserWarning)
             return None
@@ -109,12 +116,16 @@ class SpacyKatsuyoTextDetector(IKatsuyoTextDetector):
 
 class SpacyKatsuyoTextAppenderDetector(IKatsuyoTextAppenderDetector):
     def detect(self, src: spacy.tokens.Span) -> Tuple[List[IKatsuyoTextAppender], bool]:
+        sent = src
+        # 現状はroot固定で処理
+        root = sent.root
+
         appenders = []
         has_error = False
 
         # NOTE: rootに紐づくトークンを取得するのに、依存関係を見ずにrootトークンのindex以降のトークンを見る
         #       これは、rootの意味に関連する助動詞がroot位置以降に連続することと、rootに紐づかない助動詞も意味に影響することを前提としている
-        candidate_tokens = dropwhile(lambda t: t.i > src.root.i, src)
+        candidate_tokens = dropwhile(lambda t: t.i > root.i, sent)
         for candidate_token in candidate_tokens:
             pos_tag = candidate_token.pos_
             norm = candidate_token.norm_

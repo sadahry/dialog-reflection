@@ -27,7 +27,7 @@ def spacy_appender_detector():
 
 
 @pytest.mark.parametrize(
-    "text, root, pos, expected",
+    "text, root_text, pos, expected",
     [
         (
             "あなたは美しい",
@@ -67,11 +67,14 @@ def spacy_appender_detector():
         ),
     ],
 )
-def test_spacy_katsuyo_text_detector(nlp_ja, spacy_detector, text, root, pos, expected):
-    root_token = next(nlp_ja(text).sents).root
-    assert root_token.text == root, "root token is not correct"
+def test_spacy_katsuyo_text_detector(
+    nlp_ja, spacy_detector, text, root_text, pos, expected
+):
+    sent = next(nlp_ja(text).sents)
+    root_token = sent.root
+    assert root_token.text == root_text, "root token is not correct"
     assert root_token.pos_ == pos, "root token is not correct"
-    result = spacy_detector.detect(root_token)
+    result = spacy_detector.detect(sent)
     assert str(result) == str(expected)
 
 

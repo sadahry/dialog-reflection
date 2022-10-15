@@ -13,20 +13,13 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text_appender import (
     Ukemi,
 )
 from spacy_dialog_reflection.lang.ja.katsuyo_text_builder import (
-    IKatsuyoTextBuilder,
+    SpacyKatsuyoTextBuilder,
 )
 
 
 @pytest.fixture(scope="session")
 def append_multiple():
-    class DummyAppender(IKatsuyoTextBuilder):
-        def detect_appender(self, _):
-            raise NotImplementedError()
-
-        def detect_root(self, _):
-            raise NotImplementedError()
-
-    return DummyAppender().append_multiple
+    return SpacyKatsuyoTextBuilder().append_multiple
 
 
 @pytest.mark.parametrize(

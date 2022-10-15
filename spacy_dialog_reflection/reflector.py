@@ -1,4 +1,7 @@
 from typing import Optional, Tuple
+from spacy_dialog_reflection.lang.ja.katsuyo_text_builder import (
+    SpacyKatsuyoTextBuilder,
+)
 import warnings
 import spacy
 
@@ -19,7 +22,10 @@ class Reflector:
 
 class ReflectionTextBuilder:
     def __init__(self) -> None:
-        self.wordEnding = "んですね。"
+        # TODO wordEndingもtext_builderに組み込む
+        self.word_ending = "んですね。"
+        self.word_ending_unpersed = "、ですか。"
+        self.text_builder = SpacyKatsuyoTextBuilder()
 
     # restrict root pos tags to facilitate handling of suffixes in Japanese
     # VERB (5100; 63% instances), -NOUN (2328; 29% instances), -ADJ (529; 7% instances), -PROPN (62; 1% instances) in UD_Japanese-GSD
@@ -122,5 +128,20 @@ class ReflectionTextBuilder:
         # if root.pos_ == "VBD":
 
         if root.pos_ == "VERB":
-            return root.lemma_ + self.wordEnding
+            return root.lemma_ + self.word_ending
         return ""
+
+        # TODO 動詞の実装が終わったら、以下のコメントアウトを外す
+        try:
+            katsuyo_text, _ = self.text_builder.build(root)
+
+            if katsuyo_text is None:
+                warnings.warn(
+                    f"unsupported parse. root: {root} sent: {root.sent}", UserWarning
+                )
+                return str(root) + self.word_ending_unpersed
+
+            return str(katsuyo_text) + self.word_ending
+        except Exception as e:
+            warnings.warn(f"failed to parse root: {e}", UserWarning)
+            return str(root) + self.word_ending_unpersed

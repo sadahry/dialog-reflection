@@ -3,25 +3,26 @@ from typing import Optional, List, Tuple
 from spacy_dialog_reflection.lang.ja.katsuyo_text import KatsuyoText
 from spacy_dialog_reflection.lang.ja.katsuyo_text_appender import (
     IKatsuyoTextAppender,
+    Ukemi,
+)
+from spacy_dialog_reflection.lang.ja.katsuyo_text_detector import (
+    IKatsuyoTextDetector,
+    IKatsuyoTextAppenderDetector,
+    SpacyKatsuyoTextAppenderDetector,
+    SpacyKatsuyoTextDetector,
 )
 import abc
 import warnings
 
 
 class IKatsuyoTextBuilder(abc.ABC):
-    @abc.abstractmethod
-    def detect_appender(self, src: any) -> Tuple[List[IKatsuyoTextAppender], bool]:
-        """
-        不適切な値が代入された際は、has_error=Trueを返却する。
-        """
-        raise NotImplementedError()
-
-    @abc.abstractmethod
-    def detect_root(self, src: any) -> Optional[KatsuyoText]:
-        """
-        不適切な値が代入された際は、Noneを返却する。
-        """
-        raise NotImplementedError()
+    def __init__(
+        self,
+        root_detector: IKatsuyoTextDetector,
+        appender_detector: IKatsuyoTextAppenderDetector,
+    ) -> None:
+        self.root_detector = root_detector
+        self.appender_detector = appender_detector
 
     def append_multiple(
         self, root: KatsuyoText, appenders: List[IKatsuyoTextAppender]
@@ -55,24 +56,36 @@ class IKatsuyoTextBuilder(abc.ABC):
 
     def build(self, src: any) -> Tuple[Optional[KatsuyoText], bool]:
         """
-        サポートされていないsrcを検知した際は、Noneとhas_error=Trueを返却する。
+        サポートされていないrootを検知した際は、Noneとhas_error=Trueを返却する。
         予期されたエラーを検知した場合は、UserWarningを発生させてKatsuyoTextとhas_error=Trueを返却する。
         予期されないエラーを検知した場合は、そのままraiseされる。
         """
         has_error = False
 
-        root = self.detect_root(src)
-        if root is None:
+        katsuyo_text = self.root_detector.detect(src)
+        if katsuyo_text is None:
             has_error = True
             return None, has_error
 
-        appenders, is_error = self.detect_appender(src)
+        appenders, is_error = self.appender_detector.detect(src)
         has_error = has_error or is_error
 
-        result, is_error = self.append_multiple(root, appenders)
+        result, is_error = self.append_multiple(katsuyo_text, appenders)
         has_error = has_error or is_error
 
         return result, has_error
 
     def __str__(self):
         return self.__class__.__name__
+
+
+class SpacyKatsuyoTextBuilder(IKatsuyoTextBuilder):
+    def __init__(self):
+        super().__init__(
+            root_detector=SpacyKatsuyoTextDetector(),
+            appender_detector=SpacyKatsuyoTextAppenderDetector(
+                {
+                    Ukemi: Ukemi(),
+                }
+            ),
+        )
