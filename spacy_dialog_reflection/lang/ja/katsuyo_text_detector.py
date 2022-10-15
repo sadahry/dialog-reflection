@@ -3,6 +3,7 @@ from itertools import dropwhile
 from spacy_dialog_reflection.lang.ja.katsuyo import KEIYOUDOUSHI, KEIYOUSHI
 from spacy_dialog_reflection.lang.ja.katsuyo_text import KatsuyoText
 from spacy_dialog_reflection.lang.ja.katsuyo_text_appender import (
+    Hitei,
     IKatsuyoTextAppender,
     Shieki,
     Ukemi,
@@ -143,16 +144,19 @@ class SpacyKatsuyoTextAppenderDetector(IKatsuyoTextAppenderDetector):
                     is_succeeded = self.try_append(Shieki, appenders)
                     has_error = has_error or not is_succeeded
                     continue
+                elif norm in ["ない", "ぬ"]:
+                    is_succeeded = self.try_append(Hitei, appenders)
+                    has_error = has_error or not is_succeeded
+                    continue
 
                 warnings.warn(f"Unsupported AUX: {norm}", UserWarning)
                 has_error = True
                 continue
-            # TODO Hiteiの実装
-            # elif pos_tag == "ADJ":
-            #     # 「ない」のみ対応
-            #     if norm == "ない":
-            #        is_succeeded = self.try_append(Hitei, appenders)
-            #        has_error = has_error or not is_succeeded
-            #        continue
+            elif pos_tag == "ADJ":
+                # 「ない」のみ対応
+                if norm in ["ない", "無い"]:
+                    is_succeeded = self.try_append(Hitei, appenders)
+                    has_error = has_error or not is_succeeded
+                    continue
 
         return appenders, has_error

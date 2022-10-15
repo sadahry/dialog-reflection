@@ -6,25 +6,18 @@ from spacy_dialog_reflection.lang.ja.katsuyo import (
     KEIYOUDOUSHI,
     KEIYOUSHI,
 )
-from spacy_dialog_reflection.lang.ja.katsuyo_text_appender import Shieki, Ukemi
-from spacy_dialog_reflection.lang.ja.katsuyo_text_detector import (
-    SpacyKatsuyoTextAppenderDetector,
-    SpacyKatsuyoTextDetector,
-)
+from spacy_dialog_reflection.lang.ja.katsuyo_text_appender import Hitei, Shieki, Ukemi
+from spacy_dialog_reflection.lang.ja.katsuyo_text_builder import SpacyKatsuyoTextBuilder
 
 
 @pytest.fixture(scope="session")
 def spacy_detector():
-    return SpacyKatsuyoTextDetector()
+    return SpacyKatsuyoTextBuilder().root_detector
 
 
 @pytest.fixture(scope="session")
 def spacy_appender_detector():
-    appender_dict = {
-        Ukemi: Ukemi(),
-        Shieki: Shieki(),
-    }
-    return SpacyKatsuyoTextAppenderDetector(appender_dict)
+    return SpacyKatsuyoTextBuilder().appender_detector
 
 
 @pytest.mark.parametrize(
@@ -106,6 +99,33 @@ def test_spacy_katsuyo_text_detector(
             "AUX",
             [Shieki],
         ),
+        (
+            "子供を愛さない",
+            "ない",
+            "AUX",
+            [Hitei],
+        ),
+        (
+            "子供が寝ない",
+            "ない",
+            "AUX",
+            [Hitei],
+        ),
+        (
+            "それは仕方ない",
+            "仕方無い",
+            "ADJ",
+            [],
+        ),
+        # 現状、Hiteiとして取れてしまう。言語の返答には
+        # 直接的には関係ないので、現状はこのままとする。
+        # TODO
+        # (
+        #     "それは仕方がない",
+        #     "無い",
+        #     "ADJ",
+        #     [],
+        # ),
     ],
 )
 def test_spacy_katsuyo_text_appender_detector(
