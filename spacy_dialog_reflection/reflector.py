@@ -142,5 +142,6 @@ class ReflectionTextBuilder:
 
         #     return str(katsuyo_text) + self.word_ending
         # except Exception as e:
+        #     # 対話を進めることが優先なので、エラーはcatchしてwarningを出す
         #     warnings.warn(f"unexpected error on _build_suffix: {e}", UserWarning)
         #     return str(root) + self.word_ending_unpersed
