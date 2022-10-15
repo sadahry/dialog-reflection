@@ -95,7 +95,7 @@ def test_spacy_katsuyo_text_appender_detector(
     last_token = sent[-1]
     assert last_token.norm_ == norm, "last token is not correct"
     assert last_token.pos_ == pos, "last token is not correct"
-    result, has_error = spacy_appender_detector.detect(sent)
+    appenders, has_error = spacy_appender_detector.detect(sent)
     assert not has_error, "has error in detection"
-    appender_types = [type(appender) for appender in result]
+    appender_types = [type(appender) for appender in appenders]
     assert appender_types == expected
