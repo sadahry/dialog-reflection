@@ -76,27 +76,23 @@ def test_spacy_katsuyo_text_detector(nlp_ja, spacy_detector, text, root, pos, ex
 
 
 @pytest.mark.parametrize(
-    "text, norm, pos, infrection, expected",
+    "text, norm, pos, expected",
     [
         (
             "あなたに愛される",
             "れる",
             "AUX",
-            "",
             Ukemi,
         ),
     ],
 )
 def test_spacy_katsuyo_text_appender_detector(
-    nlp_ja, spacy_appender_detector, text, norm, pos, infrection, expected
+    nlp_ja, spacy_appender_detector, text, norm, pos, expected
 ):
     sent = next(nlp_ja(text).sents)
     last_token = sent[-1]
     assert last_token.norm_ == norm, "last token is not correct"
     assert last_token.pos_ == pos, "last token is not correct"
-    assert infrection in "".join(
-        last_token.morph.get("Inflection")
-    ), "last token is not correct"
     result, has_error = spacy_appender_detector.detect(sent)
     assert not has_error, "has error in detection"
     assert type(result[0]) is expected
