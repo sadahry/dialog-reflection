@@ -7,6 +7,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo import (
     GODAN_BA_GYO,
     KA_GYO_HENKAKU_KURU,
     KAMI_ICHIDAN,
+    KEIYOUDOUSHI,
     KEIYOUSHI,
     RARERU,
     RERU,
@@ -304,10 +305,10 @@ def test_katsuyo_text_warning_value_error(append_multiple):
         ),
     ],
 )
-def test_zohdoushi_appender_Nai(katsuyo_text, expected):
+def test_zohdoushi_appender_Nai(msg, katsuyo_text, expected):
     zohdoushi_appender = Nai()
     result = zohdoushi_appender.append(katsuyo_text)
-    assert str(result) == str(expected)
+    assert str(result) == str(expected), msg
 
 
 @pytest.mark.filterwarnings("ignore:None value TypeError Detected")
