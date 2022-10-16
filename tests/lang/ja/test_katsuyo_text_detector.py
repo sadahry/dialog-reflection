@@ -3,7 +3,15 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text import (
     KatsuyoText,
 )
 from spacy_dialog_reflection.lang.ja.katsuyo import (
+    GODAN_BA_GYO,
+    GODAN_GA_GYO,
     GODAN_KA_GYO,
+    GODAN_MA_GYO,
+    GODAN_NA_GYO,
+    GODAN_RA_GYO,
+    GODAN_SA_GYO,
+    GODAN_TA_GYO,
+    GODAN_WAA_GYO,
     KEIYOUDOUSHI,
     KEIYOUSHI,
 )
@@ -31,6 +39,78 @@ def spacy_appender_detector():
             KatsuyoText(
                 gokan="歩",
                 katsuyo=GODAN_KA_GYO,
+            ),
+        ),
+        (
+            "あなたと稼ぐ",
+            "稼ぐ",
+            "VERB",
+            KatsuyoText(
+                gokan="稼",
+                katsuyo=GODAN_GA_GYO,
+            ),
+        ),
+        (
+            "あなたと話す",
+            "話す",
+            "VERB",
+            KatsuyoText(
+                gokan="話",
+                katsuyo=GODAN_SA_GYO,
+            ),
+        ),
+        (
+            "あなたと待つ",
+            "待つ",
+            "VERB",
+            KatsuyoText(
+                gokan="待",
+                katsuyo=GODAN_TA_GYO,
+            ),
+        ),
+        (
+            "あなたと死ぬ",
+            "死ぬ",
+            "VERB",
+            KatsuyoText(
+                gokan="死",
+                katsuyo=GODAN_NA_GYO,
+            ),
+        ),
+        (
+            "あなたと遊ぶ",
+            "遊ぶ",
+            "VERB",
+            KatsuyoText(
+                gokan="遊",
+                katsuyo=GODAN_BA_GYO,
+            ),
+        ),
+        (
+            "本を読む",
+            "読む",
+            "VERB",
+            KatsuyoText(
+                gokan="読",
+                katsuyo=GODAN_MA_GYO,
+            ),
+        ),
+        (
+            "あなたと帰る",
+            "帰る",
+            "VERB",
+            KatsuyoText(
+                gokan="帰",
+                katsuyo=GODAN_RA_GYO,
+            ),
+        ),
+        (
+            "あなたと買う",
+            "買う",
+            "VERB",
+            KatsuyoText(
+                gokan="買",
+                katsuyo=GODAN_WAA_GYO,
             ),
         ),
         (

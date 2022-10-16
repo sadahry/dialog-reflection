@@ -1,7 +1,15 @@
 from typing import Dict, Optional, List, Tuple
 from itertools import dropwhile
 from spacy_dialog_reflection.lang.ja.katsuyo import (
+    GODAN_BA_GYO,
+    GODAN_GA_GYO,
     GODAN_KA_GYO,
+    GODAN_MA_GYO,
+    GODAN_NA_GYO,
+    GODAN_RA_GYO,
+    GODAN_SA_GYO,
+    GODAN_TA_GYO,
+    GODAN_WAA_GYO,
     KEIYOUDOUSHI,
     KEIYOUSHI,
 )
@@ -62,6 +70,18 @@ class IKatsuyoTextAppenderDetector(abc.ABC):
 
 
 class SpacyKatsuyoTextDetector(IKatsuyoTextDetector):
+    VERB_KATSUYOS_BY_CONJUGATION_TYPE = {
+        "五段-カ行": GODAN_KA_GYO,
+        "五段-ガ行": GODAN_GA_GYO,
+        "五段-サ行": GODAN_SA_GYO,
+        "五段-タ行": GODAN_TA_GYO,
+        "五段-ナ行": GODAN_NA_GYO,
+        "五段-バ行": GODAN_BA_GYO,
+        "五段-マ行": GODAN_MA_GYO,
+        "五段-ラ行": GODAN_RA_GYO,
+        "五段-ワア行": GODAN_WAA_GYO,
+    }
+
     def detect(self, src: spacy.tokens.Span) -> Optional[KatsuyoText]:
         sent = src
         root = sent.root
@@ -70,7 +90,11 @@ class SpacyKatsuyoTextDetector(IKatsuyoTextDetector):
         pos_tag = root.pos_
         tag = root.tag_
         lemma = root.lemma_
-        inflection = "".join(root.morph.get("Inflection"))
+        # sudachiの形態素解析結果(part_of_speech)5つ目以降が格納される
+        # > m.part_of_speech() # => ['動詞', '一般', '*', '*', '下一段-バ行', '連用形-一般']
+        # ref. https://github.com/explosion/spaCy/blob/v3.4.1/spacy/lang/ja/__init__.py#L102
+        # ref. https://github.com/WorksApplications/SudachiPy/blob/v0.5.4/README.md
+        inflection = "".join(root.morph.get("Inflection")).split(";")
 
         # There is no VBD tokens in Japanese
         # ref. https://universaldependencies.org/treebanks/ja_gsd/index.html#pos-tags
@@ -78,8 +102,19 @@ class SpacyKatsuyoTextDetector(IKatsuyoTextDetector):
 
         # TODO 動詞の実装
         if pos_tag == "VERB":
-            if "五段-カ行" in inflection:
-                return KatsuyoText(gokan=lemma[:-1], katsuyo=GODAN_KA_GYO)
+            # ==================================================
+            # 動詞の判定
+            # ==================================================
+            # ref. https://worksapplications.github.io/sudachi.rs/python/api/sudachipy.html#sudachipy.Morpheme.part_of_speech
+            conjugation_type = inflection[0]
+            katsuyo = self.VERB_KATSUYOS_BY_CONJUGATION_TYPE.get(conjugation_type)
+            if katsuyo:
+                return KatsuyoText(gokan=lemma[:-1], katsuyo=katsuyo)
+
+            warnings.warn(
+                f"Unsupported conjugation_type of VERB: {conjugation_type}", UserWarning
+            )
+            return None
         elif pos_tag == "ADJ":
             # ==================================================
             # 形容動詞の判定
