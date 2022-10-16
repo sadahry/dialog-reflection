@@ -92,6 +92,7 @@ class SpacyKatsuyoTextDetector(IKatsuyoTextDetector):
         tag = root.tag_
         lemma = root.lemma_
         # sudachiの形態素解析結果(part_of_speech)5つ目以降(活用タイプ、活用形)が格納される
+        # e.g. 動詞
         # > m.part_of_speech() # => ['動詞', '一般', '*', '*', '下一段-バ行', '連用形-一般']
         # ref. https://github.com/explosion/spaCy/blob/v3.4.1/spacy/lang/ja/__init__.py#L102
         # ref. https://github.com/WorksApplications/SudachiPy/blob/v0.5.4/README.md
