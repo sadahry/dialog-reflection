@@ -219,79 +219,7 @@ class KamiIchidanKatsuyo(DoushiKatsuyo):
     pass
 
 
-# ア行
-KAMI_ICHIDAN_A_GYO = KamiIchidanKatsuyo(
-    mizen="い",
-    renyo="い",
-    shushi="いる",
-    rentai="いる",
-    katei="いれ",
-    meirei="いろ",
-)
-
-# カ行
-KAMI_ICHIDAN_KA_GYO = KamiIchidanKatsuyo(
-    mizen="き",
-    renyo="き",
-    shushi="きる",
-    rentai="きる",
-    katei="きれ",
-    meirei="きろ",
-)
-
-# ザ行
-KAMI_ICHIDAN_ZA_GYO = KamiIchidanKatsuyo(
-    mizen="じ",
-    renyo="じ",
-    shushi="じる",
-    rentai="じる",
-    katei="じれ",
-    meirei="じろ",
-)
-
-# タ行
-KAMI_ICHIDAN_TA_GYO = KamiIchidanKatsuyo(
-    mizen="ち",
-    renyo="ち",
-    shushi="ちる",
-    rentai="ちる",
-    katei="ちれ",
-    meirei="ちろ",
-)
-
-# バ行
-KAMI_ICHIDAN_BA_GYO = KamiIchidanKatsuyo(
-    mizen="び",
-    renyo="び",
-    shushi="びる",
-    rentai="びる",
-    katei="びれ",
-    meirei="びろ",
-)
-
-# マ行
-KAMI_ICHIDAN_MA_GYO = KamiIchidanKatsuyo(
-    mizen="み",
-    renyo="み",
-    shushi="みる",
-    rentai="みる",
-    katei="みれ",
-    meirei="みろ",
-)
-
-# ラ行
-KAMI_ICHIDAN_RA_GYO = KamiIchidanKatsuyo(
-    mizen="り",
-    renyo="り",
-    shushi="りる",
-    rentai="りる",
-    katei="りれ",
-    meirei="りろ",
-)
-
-# 語幹なし
-# e.g. 居（い）る, 着（き）る, 煮（に）る, 見（み）る
-KAMI_ICHIDAN_NO_GOKAN = KamiIchidanKatsuyo(
+KAMI_ICHIDAN = KamiIchidanKatsuyo(
     mizen="",
     renyo="",
     shushi="る",
@@ -313,114 +241,13 @@ class ShimoIchidanKatsuyo(DoushiKatsuyo):
     pass
 
 
-# ア行
-SHIMO_ICHIDAN_A_GYO = ShimoIchidanKatsuyo(
-    mizen="え",
-    renyo="え",
-    shushi="える",
-    rentai="える",
-    katei="えれ",
-    meirei="えろ",
-)
-
-# カ行
-SHIMO_ICHIDAN_KA_GYO = ShimoIchidanKatsuyo(
-    mizen="け",
-    renyo="け",
-    shushi="ける",
-    rentai="ける",
-    katei="けれ",
-    meirei="けろ",
-)
-
-# サ行
-SHIMO_ICHIDAN_SA_GYO = ShimoIchidanKatsuyo(
-    mizen="せ",
-    renyo="せ",
-    shushi="せる",
-    rentai="せる",
-    katei="せれ",
-    meirei="せろ",
-)
-
-# ザ行
-SHIMO_ICHIDAN_ZA_GYO = ShimoIchidanKatsuyo(
-    mizen="ぜ",
-    renyo="ぜ",
-    shushi="ぜる",
-    rentai="ぜる",
-    katei="ぜれ",
-    meirei="ぜろ",
-)
-
-# タ行
-SHIMO_ICHIDAN_TA_GYO = ShimoIchidanKatsuyo(
-    mizen="て",
-    renyo="て",
-    shushi="てる",
-    rentai="てる",
-    katei="てれ",
-    meirei="てろ",
-)
-
-# ダ行
-SHIMO_ICHIDAN_DA_GYO = ShimoIchidanKatsuyo(
-    mizen="で",
-    renyo="で",
-    shushi="でる",
-    rentai="でる",
-    katei="でれ",
-    meirei="でろ",
-)
-
-# ナ行
-SHIMO_ICHIDAN_NA_GYO = ShimoIchidanKatsuyo(
-    mizen="ね",
-    renyo="ね",
-    shushi="ねる",
-    rentai="ねる",
-    katei="ねれ",
-    meirei="ねろ",
-)
-
-# ハ行
-SHIMO_ICHIDAN_HA_GYO = ShimoIchidanKatsuyo(
-    mizen="へ",
-    renyo="へ",
-    shushi="へる",
-    rentai="へる",
-    katei="へれ",
-    meirei="へろ",
-)
-
-# バ行
-SHIMO_ICHIDAN_BA_GYO = ShimoIchidanKatsuyo(
-    mizen="べ",
-    renyo="べ",
-    shushi="べる",
-    rentai="べる",
-    katei="べれ",
-    meirei="べろ",
-)
-
-# マ行
-SHIMO_ICHIDAN_MA_GYO = ShimoIchidanKatsuyo(
-    mizen="め",
-    renyo="め",
-    shushi="める",
-    rentai="める",
-    katei="めれ",
-    meirei="めろ",
-)
-
-# ラ行
-SHIMO_ICHIDAN_RA_GYO = ShimoIchidanKatsuyo(
-    mizen="れ",
-    renyo="れ",
-    shushi="れる",
-    rentai="れる",
-    katei="れれ",
-    meirei="れろ",
+SHIMO_ICHIDAN = ShimoIchidanKatsuyo(
+    mizen="",
+    renyo="",
+    shushi="る",
+    rentai="る",
+    katei="れ",
+    meirei="ろ",
 )
 
 # ==============================================================================

@@ -1,8 +1,8 @@
 from spacy_dialog_reflection.lang.ja.katsuyo import (
     KatsuyoHinshi,
     GODAN_IKU,
-    KAMI_ICHIDAN_A_GYO,
-    SHIMO_ICHIDAN_A_GYO,
+    KAMI_ICHIDAN,
+    SHIMO_ICHIDAN,
     KA_GYO_HENKAKU_KURU,
     SA_GYO_HENKAKU_SURU,
     KEIYOUSHI,
@@ -29,12 +29,12 @@ import pytest
             KatsuyoHinshi.DOUSHI,
         ),
         (
-            KAMI_ICHIDAN_A_GYO,
+            KAMI_ICHIDAN,
             KamiIchidanKatsuyo,
             KatsuyoHinshi.DOUSHI,
         ),
         (
-            SHIMO_ICHIDAN_A_GYO,
+            SHIMO_ICHIDAN,
             ShimoIchidanKatsuyo,
             KatsuyoHinshi.DOUSHI,
         ),

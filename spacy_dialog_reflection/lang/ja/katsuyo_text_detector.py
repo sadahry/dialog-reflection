@@ -3,6 +3,7 @@ from itertools import dropwhile
 from spacy_dialog_reflection.lang.ja.katsuyo import (
     GODAN_BA_GYO,
     GODAN_GA_GYO,
+    GODAN_IKU,
     GODAN_KA_GYO,
     GODAN_MA_GYO,
     GODAN_NA_GYO,
@@ -10,8 +11,10 @@ from spacy_dialog_reflection.lang.ja.katsuyo import (
     GODAN_SA_GYO,
     GODAN_TA_GYO,
     GODAN_WAA_GYO,
+    KAMI_ICHIDAN,
     KEIYOUDOUSHI,
     KEIYOUSHI,
+    SHIMO_ICHIDAN,
 )
 from spacy_dialog_reflection.lang.ja.katsuyo_text import KatsuyoText
 from spacy_dialog_reflection.lang.ja.katsuyo_text_appender import (
@@ -80,7 +83,27 @@ class SpacyKatsuyoTextDetector(IKatsuyoTextDetector):
         "五段-マ行": GODAN_MA_GYO,
         "五段-ラ行": GODAN_RA_GYO,
         "五段-ワア行": GODAN_WAA_GYO,
-        ""
+        "上一段-ア行": KAMI_ICHIDAN,
+        "上一段-カ行": KAMI_ICHIDAN,
+        "上一段-ガ行": KAMI_ICHIDAN,
+        "上一段-ザ行": KAMI_ICHIDAN,
+        "上一段-タ行": KAMI_ICHIDAN,
+        "上一段-ナ行": KAMI_ICHIDAN,
+        "上一段-バ行": KAMI_ICHIDAN,
+        "上一段-マ行": KAMI_ICHIDAN,
+        "上一段-ラ行": KAMI_ICHIDAN,
+        "下一段-ア行": SHIMO_ICHIDAN,
+        "下一段-カ行": SHIMO_ICHIDAN,
+        "下一段-ガ行": SHIMO_ICHIDAN,
+        "下一段-サ行": SHIMO_ICHIDAN,
+        "下一段-ザ行": SHIMO_ICHIDAN,
+        "下一段-タ行": SHIMO_ICHIDAN,
+        "下一段-ダ行": SHIMO_ICHIDAN,
+        "下一段-ナ行": SHIMO_ICHIDAN,
+        "下一段-ハ行": SHIMO_ICHIDAN,
+        "下一段-バ行": SHIMO_ICHIDAN,
+        "下一段-マ行": SHIMO_ICHIDAN,
+        "下一段-ラ行": SHIMO_ICHIDAN,
     }
 
     def detect(self, src: spacy.tokens.Span) -> Optional[KatsuyoText]:
@@ -110,6 +133,13 @@ class SpacyKatsuyoTextDetector(IKatsuyoTextDetector):
             # ==================================================
             # 動詞の判定
             # ==================================================
+            # 「いく」のみ特殊
+            if lemma in ["行く", "逝く", "往く", "征く"]:
+                return KatsuyoText(gokan=lemma[:-1], katsuyo=GODAN_IKU)
+            elif lemma in ["いく", "ゆく"]:
+                # 「ゆく」も「いく」に含める（過去・完了「た」を「ゆった」「ゆいた」とはできないため）
+                return KatsuyoText(gokan="い", katsuyo=GODAN_IKU)
+            # 活用タイプを取得
             conjugation_type = inflection[0]
             katsuyo = self.VERB_KATSUYOS_BY_CONJUGATION_TYPE.get(conjugation_type)
             if katsuyo:

@@ -5,6 +5,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text import (
 from spacy_dialog_reflection.lang.ja.katsuyo import (
     GODAN_BA_GYO,
     GODAN_GA_GYO,
+    GODAN_IKU,
     GODAN_KA_GYO,
     GODAN_MA_GYO,
     GODAN_NA_GYO,
@@ -12,8 +13,10 @@ from spacy_dialog_reflection.lang.ja.katsuyo import (
     GODAN_SA_GYO,
     GODAN_TA_GYO,
     GODAN_WAA_GYO,
+    KAMI_ICHIDAN,
     KEIYOUDOUSHI,
     KEIYOUSHI,
+    SHIMO_ICHIDAN,
 )
 from spacy_dialog_reflection.lang.ja.katsuyo_text_appender import Nai, Shieki, Ukemi
 from spacy_dialog_reflection.lang.ja.katsuyo_text_builder import SpacyKatsuyoTextBuilder
@@ -32,6 +35,7 @@ def spacy_appender_detector():
 @pytest.mark.parametrize(
     "text, root_text, pos, expected",
     [
+        # ref, https://ja.wikipedia.org/wiki/五段活用
         (
             "あなたと歩く",
             "歩く",
@@ -113,6 +117,307 @@ def spacy_appender_detector():
                 katsuyo=GODAN_WAA_GYO,
             ),
         ),
+        # 「いく」のみ特殊
+        (
+            "あなたと行く",
+            "行く",
+            "VERB",
+            KatsuyoText(
+                gokan="行",
+                katsuyo=GODAN_IKU,
+            ),
+        ),
+        (
+            "あなたと往く",
+            "往く",
+            "VERB",
+            KatsuyoText(
+                gokan="往",
+                katsuyo=GODAN_IKU,
+            ),
+        ),
+        (
+            "あなたと逝く",
+            "逝く",
+            "VERB",
+            KatsuyoText(
+                gokan="逝",
+                katsuyo=GODAN_IKU,
+            ),
+        ),
+        (
+            "あなたといく",
+            "いく",
+            "VERB",
+            KatsuyoText(
+                gokan="い",
+                katsuyo=GODAN_IKU,
+            ),
+        ),
+        (
+            "あなたとゆく",
+            "ゆく",
+            "VERB",
+            KatsuyoText(
+                # 「ゆく」は「いく」に
+                gokan="い",
+                katsuyo=GODAN_IKU,
+            ),
+        ),
+        # ref, https://ja.wikipedia.org/wiki/上一段活用
+        (
+            "あなたと老いる",
+            "老いる",
+            "VERB",
+            KatsuyoText(
+                gokan="老い",
+                katsuyo=KAMI_ICHIDAN,
+            ),
+        ),
+        (
+            "あなたと居る",
+            "居る",
+            "VERB",
+            KatsuyoText(
+                gokan="居",
+                katsuyo=KAMI_ICHIDAN,
+            ),
+        ),
+        (
+            "あなたといる",
+            "いる",
+            "VERB",
+            KatsuyoText(
+                gokan="い",
+                katsuyo=KAMI_ICHIDAN,
+            ),
+        ),
+        (
+            "あなたと起きる",
+            "起きる",
+            "VERB",
+            KatsuyoText(
+                gokan="起き",
+                katsuyo=KAMI_ICHIDAN,
+            ),
+        ),
+        (
+            "あなたと着る",
+            "着る",
+            "VERB",
+            KatsuyoText(
+                gokan="着",
+                katsuyo=KAMI_ICHIDAN,
+            ),
+        ),
+        (
+            "過ぎる",
+            "過ぎる",
+            "VERB",
+            KatsuyoText(
+                gokan="過ぎ",
+                katsuyo=KAMI_ICHIDAN,
+            ),
+        ),
+        (
+            "あなたと閉じる",
+            "閉じる",
+            "VERB",
+            KatsuyoText(
+                gokan="閉じ",
+                katsuyo=KAMI_ICHIDAN,
+            ),
+        ),
+        (
+            "あなたと落ちる",
+            "落ちる",
+            "VERB",
+            KatsuyoText(
+                gokan="落ち",
+                katsuyo=KAMI_ICHIDAN,
+            ),
+        ),
+        (
+            "野菜を煮る",
+            "煮る",
+            "VERB",
+            KatsuyoText(
+                gokan="煮",
+                katsuyo=KAMI_ICHIDAN,
+            ),
+        ),
+        (
+            "日差しを浴びる",
+            "浴びる",
+            "VERB",
+            KatsuyoText(
+                gokan="浴び",
+                katsuyo=KAMI_ICHIDAN,
+            ),
+        ),
+        (
+            "目に染みる",
+            "染みる",
+            "VERB",
+            KatsuyoText(
+                gokan="染み",
+                katsuyo=KAMI_ICHIDAN,
+            ),
+        ),
+        (
+            "目を見る",
+            "見る",
+            "VERB",
+            KatsuyoText(
+                gokan="見",
+                katsuyo=KAMI_ICHIDAN,
+            ),
+        ),
+        (
+            "下に降りる",
+            "降りる",
+            "VERB",
+            KatsuyoText(
+                gokan="降り",
+                katsuyo=KAMI_ICHIDAN,
+            ),
+        ),
+        # ref, https://ja.wikipedia.org/wiki/下一段活用
+        (
+            "下に見える",
+            "見える",
+            "VERB",
+            KatsuyoText(
+                gokan="見え",
+                katsuyo=SHIMO_ICHIDAN,
+            ),
+        ),
+        (
+            "報酬を得る",
+            "得る",
+            "VERB",
+            KatsuyoText(
+                gokan="得",
+                katsuyo=SHIMO_ICHIDAN,
+            ),
+        ),
+        (
+            "罰を受ける",
+            "受ける",
+            "VERB",
+            KatsuyoText(
+                gokan="受け",
+                katsuyo=SHIMO_ICHIDAN,
+            ),
+        ),
+        (
+            "宣告を告げる",
+            "告げる",
+            "VERB",
+            KatsuyoText(
+                gokan="告げ",
+                katsuyo=SHIMO_ICHIDAN,
+            ),
+        ),
+        (
+            "映像を見せる",
+            "見せる",
+            "VERB",
+            KatsuyoText(
+                gokan="見せ",
+                katsuyo=SHIMO_ICHIDAN,
+            ),
+        ),
+        (
+            "小麦粉を混ぜる",
+            "混ぜる",
+            "VERB",
+            KatsuyoText(
+                gokan="混ぜ",
+                katsuyo=SHIMO_ICHIDAN,
+            ),
+        ),
+        (
+            "小麦粉を捨てる",
+            "捨てる",
+            "VERB",
+            KatsuyoText(
+                gokan="捨て",
+                katsuyo=SHIMO_ICHIDAN,
+            ),
+        ),
+        (
+            "うどんを茹でる",
+            "茹でる",
+            "VERB",
+            KatsuyoText(
+                gokan="茹で",
+                katsuyo=SHIMO_ICHIDAN,
+            ),
+        ),
+        (
+            "出汁が出る",
+            "出る",
+            "VERB",
+            KatsuyoText(
+                gokan="出",
+                katsuyo=SHIMO_ICHIDAN,
+            ),
+        ),
+        (
+            "親戚を尋ねる",
+            "尋ねる",
+            "VERB",
+            KatsuyoText(
+                gokan="尋ね",
+                katsuyo=SHIMO_ICHIDAN,
+            ),
+        ),
+        (
+            "すぐに寝る",
+            "寝る",
+            "VERB",
+            KatsuyoText(
+                gokan="寝",
+                katsuyo=SHIMO_ICHIDAN,
+            ),
+        ),
+        (
+            "時を経る",
+            "経る",
+            "VERB",
+            KatsuyoText(
+                gokan="経",
+                katsuyo=SHIMO_ICHIDAN,
+            ),
+        ),
+        (
+            "ご飯を食べる",
+            "食べる",
+            "VERB",
+            KatsuyoText(
+                gokan="食べ",
+                katsuyo=SHIMO_ICHIDAN,
+            ),
+        ),
+        (
+            "ご飯を求める",
+            "求める",
+            "VERB",
+            KatsuyoText(
+                gokan="求め",
+                katsuyo=SHIMO_ICHIDAN,
+            ),
+        ),
+        (
+            "麺を入れる",
+            "入れる",
+            "VERB",
+            KatsuyoText(
+                gokan="入れ",
+                katsuyo=SHIMO_ICHIDAN,
+            ),
+        ),
         (
             "あなたは美しい",
             "美しい",
@@ -159,7 +464,7 @@ def test_spacy_katsuyo_text_detector(
     assert root_token.text == root_text, "root token is not correct"
     assert root_token.pos_ == pos, "root token is not correct"
     result = spacy_detector.detect(sent)
-    assert str(result) == str(expected)
+    assert result == expected
 
 
 @pytest.mark.parametrize(
