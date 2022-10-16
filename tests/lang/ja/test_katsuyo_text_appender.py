@@ -1,10 +1,12 @@
 import pytest
 from spacy_dialog_reflection.lang.ja.katsuyo_text import (
+    KURU,
     KatsuyoText,
 )
 from spacy_dialog_reflection.lang.ja.katsuyo import (
     GODAN_BA_GYO,
     KA_GYO_HENKAKU_KURU,
+    KAMI_ICHIDAN,
     KEIYOUSHI,
     RARERU,
     RERU,
@@ -12,6 +14,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo import (
     SA_GYO_HENKAKU_ZURU,
     SASERU,
     SERU,
+    SHIMO_ICHIDAN,
 )
 from spacy_dialog_reflection.lang.ja.katsuyo_text_appender import (
     Nai,
@@ -32,17 +35,6 @@ def append_multiple():
 @pytest.mark.parametrize(
     "katsuyo_text, expected",
     [
-        # TODO もっとテストケースを増やす
-        (
-            KatsuyoText(
-                gokan="",
-                katsuyo=KA_GYO_HENKAKU_KURU,
-            ),
-            KatsuyoText(
-                gokan="こ",
-                katsuyo=RARERU,
-            ),
-        ),
         (
             KatsuyoText(
                 gokan="遊",
@@ -50,6 +42,43 @@ def append_multiple():
             ),
             KatsuyoText(
                 gokan="遊ば",
+                katsuyo=RERU,
+            ),
+        ),
+        (
+            KatsuyoText(
+                gokan="見",
+                katsuyo=KAMI_ICHIDAN,
+            ),
+            KatsuyoText(
+                gokan="見",
+                katsuyo=RARERU,
+            ),
+        ),
+        (
+            KatsuyoText(
+                gokan="蹴",
+                katsuyo=SHIMO_ICHIDAN,
+            ),
+            KatsuyoText(
+                gokan="蹴",
+                katsuyo=RARERU,
+            ),
+        ),
+        (
+            KURU,
+            KatsuyoText(
+                gokan="こ",
+                katsuyo=RARERU,
+            ),
+        ),
+        (
+            KatsuyoText(
+                gokan="ウォーキング",
+                katsuyo=SA_GYO_HENKAKU_SURU,
+            ),
+            KatsuyoText(
+                gokan="ウォーキングさ",
                 katsuyo=RERU,
             ),
         ),
@@ -84,17 +113,6 @@ def test_zohdoushi_appender_ukemi(katsuyo_text, expected):
 @pytest.mark.parametrize(
     "katsuyo_text, expected",
     [
-        # TODO もっとテストケースを増やす
-        (
-            KatsuyoText(
-                gokan="",
-                katsuyo=KA_GYO_HENKAKU_KURU,
-            ),
-            KatsuyoText(
-                gokan="こ",
-                katsuyo=SASERU,
-            ),
-        ),
         (
             KatsuyoText(
                 gokan="遊",
@@ -102,6 +120,43 @@ def test_zohdoushi_appender_ukemi(katsuyo_text, expected):
             ),
             KatsuyoText(
                 gokan="遊ば",
+                katsuyo=SERU,
+            ),
+        ),
+        (
+            KatsuyoText(
+                gokan="見",
+                katsuyo=KAMI_ICHIDAN,
+            ),
+            KatsuyoText(
+                gokan="見",
+                katsuyo=SASERU,
+            ),
+        ),
+        (
+            KatsuyoText(
+                gokan="求め",
+                katsuyo=SHIMO_ICHIDAN,
+            ),
+            KatsuyoText(
+                gokan="求め",
+                katsuyo=SASERU,
+            ),
+        ),
+        (
+            KURU,
+            KatsuyoText(
+                gokan="こ",
+                katsuyo=SASERU,
+            ),
+        ),
+        (
+            KatsuyoText(
+                gokan="ウォーキング",
+                katsuyo=SA_GYO_HENKAKU_SURU,
+            ),
+            KatsuyoText(
+                gokan="ウォーキングさ",
                 katsuyo=SERU,
             ),
         ),

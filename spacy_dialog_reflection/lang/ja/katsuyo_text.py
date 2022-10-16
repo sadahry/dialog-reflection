@@ -42,3 +42,13 @@ NAI = KatsuyoText(
     gokan="な",
     katsuyo=k.KEIYOUSHI,
 )
+
+TAI = KatsuyoText(
+    gokan="た",
+    katsuyo=k.KEIYOUSHI,
+)
+
+TAGARU = KatsuyoText(
+    gokan="たが",
+    katsuyo=k.GODAN_RA_GYO,
+)

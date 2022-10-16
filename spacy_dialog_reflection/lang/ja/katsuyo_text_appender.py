@@ -1,4 +1,4 @@
-from spacy_dialog_reflection.lang.ja.katsuyo_text import NAI, KatsuyoText
+from spacy_dialog_reflection.lang.ja.katsuyo_text import NAI, TAGARU, TAI, KatsuyoText
 import abc
 import spacy_dialog_reflection.lang.ja.katsuyo as k
 
@@ -77,4 +77,33 @@ class Nai(IKatsuyoTextAppender):
         return KatsuyoText(
             gokan=mizen_text + NAI.gokan,
             katsuyo=NAI.katsuyo,
+        )
+
+
+# 自分の希望
+class KibouSelf(IKatsuyoTextAppender):
+    def append(self, katsuyo_text: KatsuyoText) -> KatsuyoText:
+        if katsuyo_text.katsuyo.hinshi == k.KatsuyoHinshi.DOUSHI:
+            renyo_text = katsuyo_text.gokan + katsuyo_text.katsuyo.renyo
+            return KatsuyoText(
+                gokan=renyo_text + TAI.gokan,
+                katsuyo=TAI.katsuyo,
+            )
+        # TODO 他のハンドリング
+        return KatsuyoText(
+            gokan="",
+            katsuyo=TAI.katsuyo,
+        )
+
+
+# 他人の希望
+class KibouOthers(IKatsuyoTextAppender):
+    # 現状、出力文字列としては「ない」のみサポート
+    # TODO オプションで「ぬ」を選択できるように
+
+    def append(self, katsuyo_text: KatsuyoText) -> KatsuyoText:
+        renyo_text = katsuyo_text.gokan + katsuyo_text.katsuyo.renyo
+        return KatsuyoText(
+            gokan=renyo_text + TAGARU.gokan,
+            katsuyo=TAGARU.katsuyo,
         )
