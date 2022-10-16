@@ -80,6 +80,7 @@ class SpacyKatsuyoTextDetector(IKatsuyoTextDetector):
         "五段-マ行": GODAN_MA_GYO,
         "五段-ラ行": GODAN_RA_GYO,
         "五段-ワア行": GODAN_WAA_GYO,
+        ""
     }
 
     def detect(self, src: spacy.tokens.Span) -> Optional[KatsuyoText]:
@@ -90,7 +91,7 @@ class SpacyKatsuyoTextDetector(IKatsuyoTextDetector):
         pos_tag = root.pos_
         tag = root.tag_
         lemma = root.lemma_
-        # sudachiの形態素解析結果(part_of_speech)5つ目以降が格納される
+        # sudachiの形態素解析結果(part_of_speech)5つ目以降(活用タイプ、活用形)が格納される
         # > m.part_of_speech() # => ['動詞', '一般', '*', '*', '下一段-バ行', '連用形-一般']
         # ref. https://github.com/explosion/spaCy/blob/v3.4.1/spacy/lang/ja/__init__.py#L102
         # ref. https://github.com/WorksApplications/SudachiPy/blob/v0.5.4/README.md
@@ -105,7 +106,6 @@ class SpacyKatsuyoTextDetector(IKatsuyoTextDetector):
             # ==================================================
             # 動詞の判定
             # ==================================================
-            # ref. https://worksapplications.github.io/sudachi.rs/python/api/sudachipy.html#sudachipy.Morpheme.part_of_speech
             conjugation_type = inflection[0]
             katsuyo = self.VERB_KATSUYOS_BY_CONJUGATION_TYPE.get(conjugation_type)
             if katsuyo:
