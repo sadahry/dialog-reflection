@@ -469,6 +469,35 @@ def spacy_appender_detector():
                 katsuyo=SA_GYO_HENKAKU_ZURU,
             ),
         ),
+        # サ行変格活用と間違える可能性がある動詞
+        (
+            "ひざをずる",
+            "ずる",
+            "VERB",
+            KatsuyoText(
+                gokan="ず",
+                katsuyo=GODAN_RA_GYO,
+            ),
+        ),
+        (
+            "ひざを擦る",
+            "擦る",
+            "VERB",
+            KatsuyoText(
+                gokan="擦",
+                katsuyo=GODAN_RA_GYO,
+            ),
+        ),
+        # この活用判別は困難なため、現状は未対応
+        # (
+        #     "ひざをする",
+        #     "する",
+        #     "VERB",
+        #     KatsuyoText(
+        #         gokan="す",
+        #         katsuyo=GODAN_RA_GYO,
+        #     ),
+        # ),
         # 形容詞
         (
             "あなたは美しい",
