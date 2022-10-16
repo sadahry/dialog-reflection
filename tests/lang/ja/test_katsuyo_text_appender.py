@@ -213,18 +213,7 @@ def test_katsuyo_text_warning_value_error(append_multiple):
 @pytest.mark.parametrize(
     "katsuyo_text, expected",
     [
-        # TODO もっとテストケースを増やす
         # TODO 「らしい」など未然形が存在しないケースを追加
-        (
-            KatsuyoText(
-                gokan="",
-                katsuyo=KA_GYO_HENKAKU_KURU,
-            ),
-            KatsuyoText(
-                gokan="こな",
-                katsuyo=KEIYOUSHI,
-            ),
-        ),
         (
             KatsuyoText(
                 gokan="遊",
@@ -232,6 +221,63 @@ def test_katsuyo_text_warning_value_error(append_multiple):
             ),
             KatsuyoText(
                 gokan="遊ばな",
+                katsuyo=KEIYOUSHI,
+            ),
+        ),
+        (
+            KatsuyoText(
+                gokan="見",
+                katsuyo=KAMI_ICHIDAN,
+            ),
+            KatsuyoText(
+                gokan="見な",
+                katsuyo=KEIYOUSHI,
+            ),
+        ),
+        (
+            KatsuyoText(
+                gokan="求め",
+                katsuyo=SHIMO_ICHIDAN,
+            ),
+            KatsuyoText(
+                gokan="求めな",
+                katsuyo=KEIYOUSHI,
+            ),
+        ),
+        (
+            KURU,
+            KatsuyoText(
+                gokan="こな",
+                katsuyo=KEIYOUSHI,
+            ),
+        ),
+        (
+            KatsuyoText(
+                gokan="ウォーキング",
+                katsuyo=SA_GYO_HENKAKU_SURU,
+            ),
+            KatsuyoText(
+                gokan="ウォーキングしな",
+                katsuyo=KEIYOUSHI,
+            ),
+        ),
+        (
+            KatsuyoText(
+                gokan="尊重",
+                katsuyo=SA_GYO_HENKAKU_SURU,
+            ),
+            KatsuyoText(
+                gokan="尊重しな",
+                katsuyo=KEIYOUSHI,
+            ),
+        ),
+        (
+            KatsuyoText(
+                gokan="重ん",
+                katsuyo=SA_GYO_HENKAKU_ZURU,
+            ),
+            KatsuyoText(
+                gokan="重んじな",
                 katsuyo=KEIYOUSHI,
             ),
         ),
