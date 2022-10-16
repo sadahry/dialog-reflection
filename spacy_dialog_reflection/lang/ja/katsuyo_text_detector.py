@@ -11,9 +11,13 @@ from spacy_dialog_reflection.lang.ja.katsuyo import (
     GODAN_SA_GYO,
     GODAN_TA_GYO,
     GODAN_WAA_GYO,
+    KA_GYO_HENKAKU_KURU,
+    KA_GYO_HENKAKU_KURU_KANJI,
     KAMI_ICHIDAN,
     KEIYOUDOUSHI,
     KEIYOUSHI,
+    SA_GYO_HENKAKU_SURU,
+    SA_GYO_HENKAKU_ZURU,
     SHIMO_ICHIDAN,
 )
 from spacy_dialog_reflection.lang.ja.katsuyo_text import KatsuyoText
@@ -122,7 +126,9 @@ class SpacyKatsuyoTextDetector(IKatsuyoTextDetector):
         # ref. https://github.com/WorksApplications/SudachiPy/blob/v0.5.4/README.md
         # > Returns the part of speech as a six-element tuple. Tuple elements are four POS levels, conjugation type and conjugation form.
         # ref. https://worksapplications.github.io/sudachi.rs/python/api/sudachipy.html#sudachipy.Morpheme.part_of_speech
-        inflection = "".join(root.morph.get("Inflection")).split(";")
+        inflection = root.morph.get("Inflection")
+        if len(inflection) > 0:
+            inflection = inflection[0].split(";")
 
         # There is no VBD tokens in Japanese
         # ref. https://universaldependencies.org/treebanks/ja_gsd/index.html#pos-tags
@@ -133,17 +139,48 @@ class SpacyKatsuyoTextDetector(IKatsuyoTextDetector):
             # ==================================================
             # 動詞の判定
             # ==================================================
-            # 「いく」のみ特殊
+            # 「いく」は特殊な変形
             if lemma in ["行く", "逝く", "往く", "征く"]:
                 return KatsuyoText(gokan=lemma[:-1], katsuyo=GODAN_IKU)
             elif lemma in ["いく", "ゆく"]:
                 # 「ゆく」も「いく」に含める（過去・完了「た」を「ゆった」「ゆいた」とはできないため）
                 return KatsuyoText(gokan="い", katsuyo=GODAN_IKU)
-            # 活用タイプを取得
-            conjugation_type = inflection[0]
+
+            # 活用タイプを取得して判定に利用
+            conjugation_type = inflection[0] if len(inflection) > 0 else None
+            # 活用形の判定
             katsuyo = self.VERB_KATSUYOS_BY_CONJUGATION_TYPE.get(conjugation_type)
             if katsuyo:
                 return KatsuyoText(gokan=lemma[:-1], katsuyo=katsuyo)
+
+            # 例外的な活用形の判定
+
+            if conjugation_type == "カ行変格":
+                # カ変「くる」「来る」を別途ハンドリング
+                if lemma == "来る":
+                    return KatsuyoText(gokan="来", katsuyo=KA_GYO_HENKAKU_KURU_KANJI)
+                elif lemma == "くる":
+                    return KatsuyoText(gokan="", katsuyo=KA_GYO_HENKAKU_KURU)
+
+            if conjugation_type == "サ行変格":
+                # サ変「する」「ずる」を別途ハンドリング
+                if lemma[-2:] == "する":
+                    return KatsuyoText(gokan=lemma[:-2], katsuyo=SA_GYO_HENKAKU_SURU)
+                elif lemma[-2:] == "ずる":
+                    return KatsuyoText(gokan=lemma[:-2], katsuyo=SA_GYO_HENKAKU_ZURU)
+
+            if not conjugation_type:
+                # 体言を含むサ変動詞の判定
+                # 名詞がVERBとして現れるため、conjugation_typeが取得できない
+                # # text = ウォーキングする
+                # 1       ウォーキング    ウォーキング    VERB    名詞-普通名詞-一般      _       0       root    _       SpaceAfter=No|BunsetuBILabel=B|BunsetuPositionType=ROOT|Reading=ウォーキング
+                # 2       する    する    AUX     動詞-非自立可能 _       1       aux     _       SpaceAfter=No|BunsetuBILabel=I|BunsetuPositionType=SYN_HEAD|Inf=サ行変格,終止形-一般|Reading=スル
+                right = next(root.rights)
+                if right.lemma_ == "する":
+                    return KatsuyoText(gokan=lemma, katsuyo=SA_GYO_HENKAKU_SURU)
+                # このパターンは存在しない
+                # elif right.lemma_ == "ずる":
+                #     return KatsuyoText(gokan=lemma, katsuyo=SA_GYO_HENKAKU_ZURU)
 
             warnings.warn(
                 f"Unsupported conjugation_type of VERB: {conjugation_type}", UserWarning

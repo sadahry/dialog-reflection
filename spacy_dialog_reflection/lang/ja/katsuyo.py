@@ -271,6 +271,17 @@ KA_GYO_HENKAKU_KURU = KaGyoHenkakuKatsuyo(
     meirei="こい",
 )
 
+# 「来る」と「くる」を区別
+# TODO ReadingをKatsuyoに含める際には語幹から「来」を除く
+KA_GYO_HENKAKU_KURU_KANJI = KaGyoHenkakuKatsuyo(
+    mizen="",
+    renyo="",
+    shushi="る",
+    rentai="る",
+    katei="れ",
+    meirei="い",
+)
+
 # ==============================================================================
 # 動詞::サ行変格活用
 # see: https://ja.wikipedia.org/wiki/サ行変格活用

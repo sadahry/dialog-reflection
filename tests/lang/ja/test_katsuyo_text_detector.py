@@ -13,9 +13,13 @@ from spacy_dialog_reflection.lang.ja.katsuyo import (
     GODAN_SA_GYO,
     GODAN_TA_GYO,
     GODAN_WAA_GYO,
+    KA_GYO_HENKAKU_KURU,
+    KA_GYO_HENKAKU_KURU_KANJI,
     KAMI_ICHIDAN,
     KEIYOUDOUSHI,
     KEIYOUSHI,
+    SA_GYO_HENKAKU_SURU,
+    SA_GYO_HENKAKU_ZURU,
     SHIMO_ICHIDAN,
 )
 from spacy_dialog_reflection.lang.ja.katsuyo_text_appender import Nai, Shieki, Ukemi
@@ -418,6 +422,54 @@ def spacy_appender_detector():
                 katsuyo=SHIMO_ICHIDAN,
             ),
         ),
+        # ref. https://ja.wikipedia.org/wiki/カ行変格活用
+        (
+            "家にくる",
+            "くる",
+            "VERB",
+            KatsuyoText(
+                gokan="",
+                katsuyo=KA_GYO_HENKAKU_KURU,
+            ),
+        ),
+        (
+            "家に来る",
+            "来る",
+            "VERB",
+            KatsuyoText(
+                gokan="来",
+                katsuyo=KA_GYO_HENKAKU_KURU_KANJI,
+            ),
+        ),
+        # ref. https://ja.wikipedia.org/wiki/サ行変格活用
+        (
+            "軽くウォーキングする",
+            "ウォーキング",
+            "VERB",
+            KatsuyoText(
+                gokan="ウォーキング",
+                katsuyo=SA_GYO_HENKAKU_SURU,
+            ),
+        ),
+        (
+            "フライパンを熱する",
+            "熱する",
+            "VERB",
+            KatsuyoText(
+                gokan="熱",
+                katsuyo=SA_GYO_HENKAKU_SURU,
+            ),
+        ),
+        (
+            "影響が生ずる",
+            "生ずる",
+            "VERB",
+            KatsuyoText(
+                gokan="生",
+                katsuyo=SA_GYO_HENKAKU_ZURU,
+            ),
+        ),
+        # 形容詞
         (
             "あなたは美しい",
             "美しい",
@@ -427,6 +479,7 @@ def spacy_appender_detector():
                 katsuyo=KEIYOUSHI,
             ),
         ),
+        # 形容動詞
         (
             "あなたは傲慢だ",
             "傲慢",
@@ -436,6 +489,7 @@ def spacy_appender_detector():
                 katsuyo=KEIYOUDOUSHI,
             ),
         ),
+        # 名詞
         (
             "それは明日かな",
             "明日",
@@ -445,6 +499,7 @@ def spacy_appender_detector():
                 katsuyo=KEIYOUDOUSHI,
             ),
         ),
+        # 固有名詞
         (
             "それはステファンだ",
             "ステファン",
