@@ -569,13 +569,13 @@ def test_spacy_katsuyo_text_detector(
         ),
         # 現状、Naiとして取れてしまう。言語の返答には
         # 直接的には関係ないので、現状はこのままとする。
-        # TODO 「仕方が無い」のような、Naiとして取れるものを取れなくする
-        # (
-        #     "それは仕方がない",
-        #     "無い",
-        #     "ADJ",
-        #     [],
-        # ),
+        # TODO 「仕方が無い」のような、Naiとして取れるものと否定の意を区別する
+        (
+            "それは仕方がない",
+            "無い",
+            "ADJ",
+            [Nai],
+        ),
     ],
 )
 def test_spacy_katsuyo_text_appender_detector(
