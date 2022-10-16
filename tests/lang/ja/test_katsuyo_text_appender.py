@@ -8,6 +8,8 @@ from spacy_dialog_reflection.lang.ja.katsuyo import (
     KEIYOUSHI,
     RARERU,
     RERU,
+    SA_GYO_HENKAKU_SURU,
+    SA_GYO_HENKAKU_ZURU,
     SASERU,
     SERU,
 )
@@ -51,6 +53,26 @@ def append_multiple():
                 katsuyo=RERU,
             ),
         ),
+        (
+            KatsuyoText(
+                gokan="尊重",
+                katsuyo=SA_GYO_HENKAKU_SURU,
+            ),
+            KatsuyoText(
+                gokan="尊重さ",
+                katsuyo=RERU,
+            ),
+        ),
+        (
+            KatsuyoText(
+                gokan="重ん",
+                katsuyo=SA_GYO_HENKAKU_ZURU,
+            ),
+            KatsuyoText(
+                gokan="重んぜ",
+                katsuyo=RARERU,
+            ),
+        ),
     ],
 )
 def test_zohdoushi_appender_ukemi(katsuyo_text, expected):
@@ -81,6 +103,26 @@ def test_zohdoushi_appender_ukemi(katsuyo_text, expected):
             KatsuyoText(
                 gokan="遊ば",
                 katsuyo=SERU,
+            ),
+        ),
+        (
+            KatsuyoText(
+                gokan="尊重",
+                katsuyo=SA_GYO_HENKAKU_SURU,
+            ),
+            KatsuyoText(
+                gokan="尊重さ",
+                katsuyo=SERU,
+            ),
+        ),
+        (
+            KatsuyoText(
+                gokan="重ん",
+                katsuyo=SA_GYO_HENKAKU_ZURU,
+            ),
+            KatsuyoText(
+                gokan="重んじ",
+                katsuyo=SASERU,
             ),
         ),
     ],

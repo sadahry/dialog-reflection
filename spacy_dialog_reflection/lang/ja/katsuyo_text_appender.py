@@ -18,7 +18,21 @@ class IKatsuyoTextAppender(abc.ABC):
 # 受身,尊敬,自発,可能
 class Ukemi(IKatsuyoTextAppender):
     def append(self, katsuyo_text: KatsuyoText) -> KatsuyoText:
-        # TODO サ行変格活用の扱い
+        # サ行変格活用のみ特殊
+        if type(katsuyo_text.katsuyo) is k.SaGyoHenkakuKatsuyo:
+            # 用法的に「〜する」は「れる/られる」どちらでもよいため固定
+            # 用法的に「〜ずる」は文語が多いため未然形「〜ぜ られる」を採用
+            if katsuyo_text.katsuyo.shushi == "する":
+                return KatsuyoText(
+                    gokan=katsuyo_text.gokan + katsuyo_text.katsuyo.mizen_reru,
+                    katsuyo=k.RERU,
+                )
+            elif katsuyo_text.katsuyo.shushi == "ずる":
+                return KatsuyoText(
+                    gokan=katsuyo_text.gokan + katsuyo_text.katsuyo.mizen_rareru,
+                    katsuyo=k.RARERU,
+                )
+
         mizen_text = katsuyo_text.gokan + katsuyo_text.katsuyo.mizen
         if mizen_text[-1] in k.DAN["あ"]:
             return KatsuyoText(gokan=mizen_text, katsuyo=k.RERU)
@@ -29,7 +43,21 @@ class Ukemi(IKatsuyoTextAppender):
 # 使役
 class Shieki(IKatsuyoTextAppender):
     def append(self, katsuyo_text: KatsuyoText) -> KatsuyoText:
-        # TODO サ行変格活用の扱い
+        # サ行変格活用のみ特殊
+        if type(katsuyo_text.katsuyo) is k.SaGyoHenkakuKatsuyo:
+            # 用法的に「〜する」は「さ せる」となるため固定
+            # 用法的に「〜ずる」は連用形「~じ させる」を採用
+            if katsuyo_text.katsuyo.shushi == "する":
+                return KatsuyoText(
+                    gokan=katsuyo_text.gokan + katsuyo_text.katsuyo.mizen_reru,
+                    katsuyo=k.SERU,
+                )
+            elif katsuyo_text.katsuyo.shushi == "ずる":
+                return KatsuyoText(
+                    gokan=katsuyo_text.gokan + katsuyo_text.katsuyo.renyo,
+                    katsuyo=k.SASERU,
+                )
+
         mizen_text = katsuyo_text.gokan + katsuyo_text.katsuyo.mizen
         if mizen_text[-1] in k.DAN["あ"]:
             return KatsuyoText(gokan=mizen_text, katsuyo=k.SERU)
