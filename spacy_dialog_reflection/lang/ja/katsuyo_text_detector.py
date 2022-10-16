@@ -47,6 +47,8 @@ class IKatsuyoTextDetector(abc.ABC):
 class IKatsuyoTextAppenderDetector(abc.ABC):
     APPENDERS = [
         Ukemi,
+        Shieki,
+        Nai,
     ]
 
     def __init__(self, appender_dict: Dict[type, IKatsuyoTextAppender]) -> None:
