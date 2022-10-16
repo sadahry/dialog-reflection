@@ -1,5 +1,5 @@
 from dataclasses import replace
-from typing import Optional, List, Tuple
+from typing import Any, Optional, List, Tuple
 from spacy_dialog_reflection.lang.ja.katsuyo_text import KatsuyoText
 from spacy_dialog_reflection.lang.ja.katsuyo_text_appender import (
     IKatsuyoTextAppender,
@@ -56,7 +56,7 @@ class IKatsuyoTextBuilder(abc.ABC):
 
         return result, has_error
 
-    def build(self, src: any) -> Tuple[Optional[KatsuyoText], bool]:
+    def build(self, src: Any) -> Tuple[Optional[KatsuyoText], bool]:
         """
         サポートされていないrootを検知した際は、Noneとhas_error=Trueを返却する。
         予期されたエラーを検知した場合は、UserWarningを発生させてKatsuyoTextとhas_error=Trueを返却する。

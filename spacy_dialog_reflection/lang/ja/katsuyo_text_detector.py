@@ -1,4 +1,4 @@
-from typing import Dict, Optional, List, Tuple
+from typing import Any, Dict, Optional, List, Tuple
 from itertools import dropwhile
 from spacy_dialog_reflection.lang.ja.katsuyo import (
     GODAN_BA_GYO,
@@ -32,7 +32,7 @@ import spacy
 
 class IKatsuyoTextDetector(abc.ABC):
     @abc.abstractmethod
-    def detect(self, src: any) -> Optional[KatsuyoText]:
+    def detect(self, src: Any) -> Optional[KatsuyoText]:
         """
         不適切な値が代入された際は、Noneを返却する。
         """
@@ -66,7 +66,7 @@ class IKatsuyoTextAppenderDetector(abc.ABC):
         return True
 
     @abc.abstractmethod
-    def detect(self, src: any) -> Tuple[List[IKatsuyoTextAppender], bool]:
+    def detect(self, src: Any) -> Tuple[List[IKatsuyoTextAppender], bool]:
         """
         不適切な値が代入された際は、Noneを返却する。
         """
@@ -148,28 +148,8 @@ class SpacyKatsuyoTextDetector(IKatsuyoTextDetector):
 
             # 活用タイプを取得して判定に利用
             conjugation_type = inflection[0] if len(inflection) > 0 else None
-            # 活用形の判定
-            katsuyo = self.VERB_KATSUYOS_BY_CONJUGATION_TYPE.get(conjugation_type)
-            if katsuyo:
-                return KatsuyoText(gokan=lemma[:-1], katsuyo=katsuyo)
 
-            # 例外的な活用形の判定
-
-            if conjugation_type == "カ行変格":
-                # カ変「くる」「来る」を別途ハンドリング
-                if lemma == "来る":
-                    return KURU_KANJI
-                elif lemma == "くる":
-                    return KURU
-
-            if conjugation_type == "サ行変格":
-                # サ変「する」「ずる」を別途ハンドリング
-                if lemma[-2:] == "する":
-                    return KatsuyoText(gokan=lemma[:-2], katsuyo=SA_GYO_HENKAKU_SURU)
-                elif lemma[-2:] == "ずる":
-                    return KatsuyoText(gokan=lemma[:-2], katsuyo=SA_GYO_HENKAKU_ZURU)
-
-            if not conjugation_type:
+            if conjugation_type is None:
                 # 体言を含むサ変動詞の判定
                 # 名詞がVERBとして現れるため、conjugation_typeが取得できない
                 # # text = ウォーキングする
@@ -181,6 +161,29 @@ class SpacyKatsuyoTextDetector(IKatsuyoTextDetector):
                 # このパターンは存在しない
                 # elif right.lemma_ == "ずる":
                 #     return KatsuyoText(gokan=lemma, katsuyo=SA_GYO_HENKAKU_ZURU)
+            else:
+                # 活用形の判定
+                katsuyo = self.VERB_KATSUYOS_BY_CONJUGATION_TYPE.get(conjugation_type)
+                if katsuyo:
+                    return KatsuyoText(gokan=lemma[:-1], katsuyo=katsuyo)
+
+                # 例外的な活用形の判定
+                if conjugation_type == "カ行変格":
+                    # カ変「くる」「来る」を別途ハンドリング
+                    if lemma == "来る":
+                        return KURU_KANJI
+                    elif lemma == "くる":
+                        return KURU
+                elif conjugation_type == "サ行変格":
+                    # サ変「する」「ずる」を別途ハンドリング
+                    if lemma[-2:] == "する":
+                        return KatsuyoText(
+                            gokan=lemma[:-2], katsuyo=SA_GYO_HENKAKU_SURU
+                        )
+                    elif lemma[-2:] == "ずる":
+                        return KatsuyoText(
+                            gokan=lemma[:-2], katsuyo=SA_GYO_HENKAKU_ZURU
+                        )
 
             warnings.warn(
                 f"Unsupported conjugation_type of VERB: {conjugation_type}", UserWarning
@@ -230,7 +233,7 @@ class SpacyKatsuyoTextAppenderDetector(IKatsuyoTextAppenderDetector):
         # 現状はroot固定で処理
         root = sent.root
 
-        appenders = []
+        appenders: List[IKatsuyoTextAppender] = []
         has_error = False
 
         # NOTE: rootに紐づくトークンを取得するのに、依存関係を見ずにrootトークンのindex以降のトークンを見る
