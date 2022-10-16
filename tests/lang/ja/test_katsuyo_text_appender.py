@@ -225,10 +225,11 @@ def test_katsuyo_text_warning_value_error(append_multiple):
 
 
 @pytest.mark.parametrize(
-    "katsuyo_text, expected",
+    "msg, katsuyo_text, expected",
     [
         # TODO 「らしい」など未然形が存在しないケースを追加
         (
+            "五段活用",
             KatsuyoText(
                 gokan="遊",
                 katsuyo=GODAN_BA_GYO,
@@ -239,6 +240,7 @@ def test_katsuyo_text_warning_value_error(append_multiple):
             ),
         ),
         (
+            "上一段活用",
             KatsuyoText(
                 gokan="見",
                 katsuyo=KAMI_ICHIDAN,
@@ -249,6 +251,7 @@ def test_katsuyo_text_warning_value_error(append_multiple):
             ),
         ),
         (
+            "下一段活用",
             KatsuyoText(
                 gokan="求め",
                 katsuyo=SHIMO_ICHIDAN,
@@ -259,6 +262,7 @@ def test_katsuyo_text_warning_value_error(append_multiple):
             ),
         ),
         (
+            "カ変活用",
             KURU,
             KatsuyoText(
                 gokan="こな",
@@ -266,6 +270,7 @@ def test_katsuyo_text_warning_value_error(append_multiple):
             ),
         ),
         (
+            "サ変活用",
             KatsuyoText(
                 gokan="ウォーキング",
                 katsuyo=SA_GYO_HENKAKU_SURU,
@@ -276,6 +281,7 @@ def test_katsuyo_text_warning_value_error(append_multiple):
             ),
         ),
         (
+            "サ変活用(する)",
             KatsuyoText(
                 gokan="尊重",
                 katsuyo=SA_GYO_HENKAKU_SURU,
@@ -286,6 +292,7 @@ def test_katsuyo_text_warning_value_error(append_multiple):
             ),
         ),
         (
+            "サ変活用(ずる)",
             KatsuyoText(
                 gokan="重ん",
                 katsuyo=SA_GYO_HENKAKU_ZURU,
