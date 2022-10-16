@@ -96,6 +96,8 @@ class SpacyKatsuyoTextDetector(IKatsuyoTextDetector):
         # > m.part_of_speech() # => ['動詞', '一般', '*', '*', '下一段-バ行', '連用形-一般']
         # ref. https://github.com/explosion/spaCy/blob/v3.4.1/spacy/lang/ja/__init__.py#L102
         # ref. https://github.com/WorksApplications/SudachiPy/blob/v0.5.4/README.md
+        # > Returns the part of speech as a six-element tuple. Tuple elements are four POS levels, conjugation type and conjugation form.
+        # ref. https://worksapplications.github.io/sudachi.rs/python/api/sudachipy.html#sudachipy.Morpheme.part_of_speech
         inflection = "".join(root.morph.get("Inflection")).split(";")
 
         # There is no VBD tokens in Japanese
