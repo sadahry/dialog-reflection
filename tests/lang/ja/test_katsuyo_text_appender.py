@@ -33,9 +33,10 @@ def append_multiple():
 
 
 @pytest.mark.parametrize(
-    "katsuyo_text, expected",
+    "msg, katsuyo_text, expected",
     [
         (
+            "五段活用",
             KatsuyoText(
                 gokan="遊",
                 katsuyo=GODAN_BA_GYO,
@@ -46,6 +47,7 @@ def append_multiple():
             ),
         ),
         (
+            "上一段活用",
             KatsuyoText(
                 gokan="見",
                 katsuyo=KAMI_ICHIDAN,
@@ -56,6 +58,7 @@ def append_multiple():
             ),
         ),
         (
+            "下一段活用",
             KatsuyoText(
                 gokan="蹴",
                 katsuyo=SHIMO_ICHIDAN,
@@ -66,6 +69,7 @@ def append_multiple():
             ),
         ),
         (
+            "カ変活用",
             KURU,
             KatsuyoText(
                 gokan="こ",
@@ -73,6 +77,7 @@ def append_multiple():
             ),
         ),
         (
+            "サ変活用",
             KatsuyoText(
                 gokan="ウォーキング",
                 katsuyo=SA_GYO_HENKAKU_SURU,
@@ -83,6 +88,7 @@ def append_multiple():
             ),
         ),
         (
+            "サ変活用(する)",
             KatsuyoText(
                 gokan="尊重",
                 katsuyo=SA_GYO_HENKAKU_SURU,
@@ -93,6 +99,7 @@ def append_multiple():
             ),
         ),
         (
+            "サ変活用(ずる)",
             KatsuyoText(
                 gokan="重ん",
                 katsuyo=SA_GYO_HENKAKU_ZURU,
@@ -104,16 +111,17 @@ def append_multiple():
         ),
     ],
 )
-def test_zohdoushi_appender_ukemi(katsuyo_text, expected):
+def test_zohdoushi_appender_ukemi(msg, katsuyo_text, expected):
     zohdoushi_appender = Ukemi()
     result = zohdoushi_appender.append(katsuyo_text)
-    assert str(result) == str(expected)
+    assert str(result) == str(expected), msg
 
 
 @pytest.mark.parametrize(
-    "katsuyo_text, expected",
+    "msg, katsuyo_text, expected",
     [
         (
+            "五段活用",
             KatsuyoText(
                 gokan="遊",
                 katsuyo=GODAN_BA_GYO,
@@ -124,6 +132,7 @@ def test_zohdoushi_appender_ukemi(katsuyo_text, expected):
             ),
         ),
         (
+            "上一段活用",
             KatsuyoText(
                 gokan="見",
                 katsuyo=KAMI_ICHIDAN,
@@ -134,6 +143,7 @@ def test_zohdoushi_appender_ukemi(katsuyo_text, expected):
             ),
         ),
         (
+            "下一段活用",
             KatsuyoText(
                 gokan="求め",
                 katsuyo=SHIMO_ICHIDAN,
@@ -144,6 +154,7 @@ def test_zohdoushi_appender_ukemi(katsuyo_text, expected):
             ),
         ),
         (
+            "カ変活用",
             KURU,
             KatsuyoText(
                 gokan="こ",
@@ -151,6 +162,7 @@ def test_zohdoushi_appender_ukemi(katsuyo_text, expected):
             ),
         ),
         (
+            "サ変活用",
             KatsuyoText(
                 gokan="ウォーキング",
                 katsuyo=SA_GYO_HENKAKU_SURU,
@@ -161,6 +173,7 @@ def test_zohdoushi_appender_ukemi(katsuyo_text, expected):
             ),
         ),
         (
+            "サ変活用(する)",
             KatsuyoText(
                 gokan="尊重",
                 katsuyo=SA_GYO_HENKAKU_SURU,
@@ -171,6 +184,7 @@ def test_zohdoushi_appender_ukemi(katsuyo_text, expected):
             ),
         ),
         (
+            "サ変活用(ずる)",
             KatsuyoText(
                 gokan="重ん",
                 katsuyo=SA_GYO_HENKAKU_ZURU,
@@ -182,10 +196,10 @@ def test_zohdoushi_appender_ukemi(katsuyo_text, expected):
         ),
     ],
 )
-def test_zohdoushi_appender_shieki(katsuyo_text, expected):
+def test_zohdoushi_appender_shieki(msg, katsuyo_text, expected):
     zohdoushi_appender = Shieki()
     result = zohdoushi_appender.append(katsuyo_text)
-    assert str(result) == str(expected)
+    assert str(result) == str(expected), msg
 
 
 @pytest.mark.filterwarnings("ignore:ValueError")
