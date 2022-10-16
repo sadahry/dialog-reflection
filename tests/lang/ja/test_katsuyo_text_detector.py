@@ -37,10 +37,11 @@ def spacy_appender_detector():
 
 
 @pytest.mark.parametrize(
-    "text, root_text, pos, expected",
+    "msg, text, root_text, pos, expected",
     [
         # ref, https://ja.wikipedia.org/wiki/五段活用
         (
+            "五段活用",
             "あなたと歩く",
             "歩く",
             "VERB",
@@ -50,6 +51,7 @@ def spacy_appender_detector():
             ),
         ),
         (
+            "五段活用",
             "あなたと稼ぐ",
             "稼ぐ",
             "VERB",
@@ -59,6 +61,7 @@ def spacy_appender_detector():
             ),
         ),
         (
+            "五段活用",
             "あなたと話す",
             "話す",
             "VERB",
@@ -68,6 +71,7 @@ def spacy_appender_detector():
             ),
         ),
         (
+            "五段活用",
             "あなたと待つ",
             "待つ",
             "VERB",
@@ -77,6 +81,7 @@ def spacy_appender_detector():
             ),
         ),
         (
+            "五段活用",
             "あなたと死ぬ",
             "死ぬ",
             "VERB",
@@ -86,6 +91,7 @@ def spacy_appender_detector():
             ),
         ),
         (
+            "五段活用",
             "あなたと遊ぶ",
             "遊ぶ",
             "VERB",
@@ -95,6 +101,7 @@ def spacy_appender_detector():
             ),
         ),
         (
+            "五段活用",
             "本を読む",
             "読む",
             "VERB",
@@ -104,6 +111,7 @@ def spacy_appender_detector():
             ),
         ),
         (
+            "五段活用",
             "あなたと帰る",
             "帰る",
             "VERB",
@@ -113,6 +121,7 @@ def spacy_appender_detector():
             ),
         ),
         (
+            "五段活用",
             "あなたと買う",
             "買う",
             "VERB",
@@ -123,6 +132,7 @@ def spacy_appender_detector():
         ),
         # 「いく」のみ特殊
         (
+            "五段活用",
             "あなたと行く",
             "行く",
             "VERB",
@@ -132,6 +142,7 @@ def spacy_appender_detector():
             ),
         ),
         (
+            "五段活用",
             "あなたと往く",
             "往く",
             "VERB",
@@ -141,6 +152,7 @@ def spacy_appender_detector():
             ),
         ),
         (
+            "五段活用",
             "あなたと逝く",
             "逝く",
             "VERB",
@@ -150,6 +162,7 @@ def spacy_appender_detector():
             ),
         ),
         (
+            "五段活用",
             "あなたといく",
             "いく",
             "VERB",
@@ -159,6 +172,7 @@ def spacy_appender_detector():
             ),
         ),
         (
+            "五段活用",
             "あなたとゆく",
             "ゆく",
             "VERB",
@@ -170,6 +184,7 @@ def spacy_appender_detector():
         ),
         # ref, https://ja.wikipedia.org/wiki/上一段活用
         (
+            "上一段活用",
             "あなたと老いる",
             "老いる",
             "VERB",
@@ -179,6 +194,7 @@ def spacy_appender_detector():
             ),
         ),
         (
+            "上一段活用",
             "あなたと居る",
             "居る",
             "VERB",
@@ -188,6 +204,7 @@ def spacy_appender_detector():
             ),
         ),
         (
+            "上一段活用",
             "あなたといる",
             "いる",
             "VERB",
@@ -197,6 +214,7 @@ def spacy_appender_detector():
             ),
         ),
         (
+            "上一段活用",
             "あなたと起きる",
             "起きる",
             "VERB",
@@ -206,6 +224,7 @@ def spacy_appender_detector():
             ),
         ),
         (
+            "上一段活用",
             "あなたと着る",
             "着る",
             "VERB",
@@ -215,6 +234,7 @@ def spacy_appender_detector():
             ),
         ),
         (
+            "上一段活用",
             "過ぎる",
             "過ぎる",
             "VERB",
@@ -224,6 +244,7 @@ def spacy_appender_detector():
             ),
         ),
         (
+            "上一段活用",
             "あなたと閉じる",
             "閉じる",
             "VERB",
@@ -233,6 +254,7 @@ def spacy_appender_detector():
             ),
         ),
         (
+            "上一段活用",
             "あなたと落ちる",
             "落ちる",
             "VERB",
@@ -242,6 +264,7 @@ def spacy_appender_detector():
             ),
         ),
         (
+            "上一段活用",
             "野菜を煮る",
             "煮る",
             "VERB",
@@ -251,6 +274,7 @@ def spacy_appender_detector():
             ),
         ),
         (
+            "上一段活用",
             "日差しを浴びる",
             "浴びる",
             "VERB",
@@ -260,6 +284,7 @@ def spacy_appender_detector():
             ),
         ),
         (
+            "上一段活用",
             "目に染みる",
             "染みる",
             "VERB",
@@ -269,6 +294,7 @@ def spacy_appender_detector():
             ),
         ),
         (
+            "上一段活用",
             "目を見る",
             "見る",
             "VERB",
@@ -278,6 +304,7 @@ def spacy_appender_detector():
             ),
         ),
         (
+            "上一段活用",
             "下に降りる",
             "降りる",
             "VERB",
@@ -288,6 +315,7 @@ def spacy_appender_detector():
         ),
         # ref, https://ja.wikipedia.org/wiki/下一段活用
         (
+            "下一段活用",
             "下に見える",
             "見える",
             "VERB",
@@ -297,6 +325,7 @@ def spacy_appender_detector():
             ),
         ),
         (
+            "下一段活用",
             "報酬を得る",
             "得る",
             "VERB",
@@ -306,6 +335,7 @@ def spacy_appender_detector():
             ),
         ),
         (
+            "下一段活用",
             "罰を受ける",
             "受ける",
             "VERB",
@@ -315,6 +345,7 @@ def spacy_appender_detector():
             ),
         ),
         (
+            "下一段活用",
             "宣告を告げる",
             "告げる",
             "VERB",
@@ -324,6 +355,7 @@ def spacy_appender_detector():
             ),
         ),
         (
+            "下一段活用",
             "映像を見せる",
             "見せる",
             "VERB",
@@ -333,6 +365,7 @@ def spacy_appender_detector():
             ),
         ),
         (
+            "下一段活用",
             "小麦粉を混ぜる",
             "混ぜる",
             "VERB",
@@ -342,6 +375,7 @@ def spacy_appender_detector():
             ),
         ),
         (
+            "下一段活用",
             "小麦粉を捨てる",
             "捨てる",
             "VERB",
@@ -351,6 +385,7 @@ def spacy_appender_detector():
             ),
         ),
         (
+            "下一段活用",
             "うどんを茹でる",
             "茹でる",
             "VERB",
@@ -360,6 +395,7 @@ def spacy_appender_detector():
             ),
         ),
         (
+            "下一段活用",
             "出汁が出る",
             "出る",
             "VERB",
@@ -369,6 +405,7 @@ def spacy_appender_detector():
             ),
         ),
         (
+            "下一段活用",
             "親戚を尋ねる",
             "尋ねる",
             "VERB",
@@ -378,6 +415,7 @@ def spacy_appender_detector():
             ),
         ),
         (
+            "下一段活用",
             "すぐに寝る",
             "寝る",
             "VERB",
@@ -387,6 +425,7 @@ def spacy_appender_detector():
             ),
         ),
         (
+            "下一段活用",
             "時を経る",
             "経る",
             "VERB",
@@ -396,6 +435,7 @@ def spacy_appender_detector():
             ),
         ),
         (
+            "下一段活用",
             "ご飯を食べる",
             "食べる",
             "VERB",
@@ -405,6 +445,7 @@ def spacy_appender_detector():
             ),
         ),
         (
+            "下一段活用",
             "ご飯を求める",
             "求める",
             "VERB",
@@ -414,6 +455,7 @@ def spacy_appender_detector():
             ),
         ),
         (
+            "下一段活用",
             "麺を入れる",
             "入れる",
             "VERB",
@@ -424,6 +466,7 @@ def spacy_appender_detector():
         ),
         # ref. https://ja.wikipedia.org/wiki/カ行変格活用
         (
+            "カ行変格活用",
             "家にくる",
             "くる",
             "VERB",
@@ -433,6 +476,7 @@ def spacy_appender_detector():
             ),
         ),
         (
+            "カ行変格活用",
             "家に来る",
             "来る",
             "VERB",
@@ -443,6 +487,7 @@ def spacy_appender_detector():
         ),
         # ref. https://ja.wikipedia.org/wiki/サ行変格活用
         (
+            "サ行変格活用",
             "軽くウォーキングする",
             "ウォーキング",
             "VERB",
@@ -452,6 +497,7 @@ def spacy_appender_detector():
             ),
         ),
         (
+            "サ行変格活用",
             "フライパンを熱する",
             "熱する",
             "VERB",
@@ -461,6 +507,7 @@ def spacy_appender_detector():
             ),
         ),
         (
+            "サ行変格活用",
             "影響が生ずる",
             "生ずる",
             "VERB",
@@ -471,6 +518,7 @@ def spacy_appender_detector():
         ),
         # サ行変格活用と間違える可能性がある動詞
         (
+            "サ行変格活用と間違われる可能性がある動詞",
             "ひざをずる",
             "ずる",
             "VERB",
@@ -480,6 +528,7 @@ def spacy_appender_detector():
             ),
         ),
         (
+            "サ行変格活用と間違われる可能性がある動詞",
             "ひざを擦る",
             "擦る",
             "VERB",
@@ -490,6 +539,7 @@ def spacy_appender_detector():
         ),
         # この活用判別は困難なため、現状は未対応
         # (
+        #    "サ行変格活用と間違われる可能性がある動詞",
         #     "ひざをする",
         #     "する",
         #     "VERB",
@@ -500,6 +550,7 @@ def spacy_appender_detector():
         # ),
         # 形容詞
         (
+            "形容詞",
             "あなたは美しい",
             "美しい",
             "ADJ",
@@ -510,6 +561,7 @@ def spacy_appender_detector():
         ),
         # 形容動詞
         (
+            "形容動詞",
             "あなたは傲慢だ",
             "傲慢",
             "ADJ",
@@ -520,6 +572,7 @@ def spacy_appender_detector():
         ),
         # 名詞
         (
+            "名詞",
             "それは明日かな",
             "明日",
             "NOUN",
@@ -530,6 +583,7 @@ def spacy_appender_detector():
         ),
         # 固有名詞
         (
+            "固有名詞",
             "それはステファンだ",
             "ステファン",
             "PROPN",
@@ -541,14 +595,14 @@ def spacy_appender_detector():
     ],
 )
 def test_spacy_katsuyo_text_detector(
-    nlp_ja, spacy_detector, text, root_text, pos, expected
+    nlp_ja, spacy_detector, msg, text, root_text, pos, expected
 ):
     sent = next(nlp_ja(text).sents)
     root_token = sent.root
     assert root_token.text == root_text, "root token is not correct"
     assert root_token.pos_ == pos, "root token is not correct"
     result = spacy_detector.detect(sent)
-    assert result == expected
+    assert result == expected, msg
 
 
 @pytest.mark.parametrize(
