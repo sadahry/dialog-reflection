@@ -1,7 +1,5 @@
 from dataclasses import dataclass
-from enum import Enum, auto, unique
 from typing import Optional
-import abc
 
 DAN = {
     "あ": ["あ", "か", "さ", "た", "な", "は", "ま", "や", "ら", "わ", "が", "ざ", "だ", "ば", "ぱ"],
@@ -30,18 +28,6 @@ GYO = {
 }
 
 
-@unique
-class KatsuyoHinshi(Enum):
-    # ref. https://docs.python.org/ja/3/library/enum.html#using-automatic-values
-    def _generate_next_value_(name, start, count, last_values):
-        return name
-
-    DOUSHI = auto()
-    ZYODOUSHI = auto()
-    KEIYOUSHI = auto()
-    KEIYOUDOUSHI = auto()
-
-
 @dataclass(frozen=True)
 class Katsuyo:
     mizen: str
@@ -51,11 +37,6 @@ class Katsuyo:
     # 已然形もkateiに含める
     katei: str
     meirei: Optional[str]
-
-    @property
-    @abc.abstractmethod
-    def hinshi(self) -> KatsuyoHinshi:
-        raise NotImplementedError()
 
     def __str__(self) -> str:
         return self.shushi
@@ -67,9 +48,7 @@ class Katsuyo:
 
 
 class DoushiKatsuyo(Katsuyo):
-    @property
-    def hinshi(self) -> KatsuyoHinshi:
-        return KatsuyoHinshi.DOUSHI
+    pass
 
 
 # ==============================================================================
@@ -336,10 +315,6 @@ class KeiyoushiKatsuyo(Katsuyo):
     # 連用形に「た」が続くとき、活用語尾が変化する。
     renyo_ta: str
 
-    @property
-    def hinshi(self) -> KatsuyoHinshi:
-        return KatsuyoHinshi.KEIYOUSHI
-
 
 KEIYOUSHI = KeiyoushiKatsuyo(
     mizen="かろ",
@@ -364,10 +339,6 @@ class KeiyoudoushiKatsuyo(Katsuyo):
     # 連用形に「なる」「する」などが続くとき、活用語尾が変化する。
     renyo_naru: str
 
-    @property
-    def hinshi(self) -> KatsuyoHinshi:
-        return KatsuyoHinshi.KEIYOUDOUSHI
-
 
 KEIYOUDOUSHI = KeiyoudoushiKatsuyo(
     mizen="だろ",
@@ -386,11 +357,10 @@ KEIYOUDOUSHI = KeiyoudoushiKatsuyo(
 # ==============================================================================
 
 
+# TODO それぞれの動詞型に変えていく
 @dataclass(frozen=True)
 class ZyodoushiKatsuyo(Katsuyo):
-    @property
-    def hinshi(self) -> KatsuyoHinshi:
-        return KatsuyoHinshi.ZYODOUSHI
+    pass
 
 
 # ==============================================================================

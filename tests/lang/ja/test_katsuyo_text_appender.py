@@ -110,6 +110,28 @@ def append_multiple():
                 katsuyo=RARERU,
             ),
         ),
+        (
+            "形容詞",
+            KatsuyoText(
+                gokan="美し",
+                katsuyo=KEIYOUSHI,
+            ),
+            KatsuyoText(
+                gokan="美しくなら",
+                katsuyo=RERU,
+            ),
+        ),
+        (
+            "形容動詞",
+            KatsuyoText(
+                gokan="綺麗",
+                katsuyo=KEIYOUDOUSHI,
+            ),
+            KatsuyoText(
+                gokan="綺麗になら",
+                katsuyo=RERU,
+            ),
+        ),
     ],
 )
 def test_zohdoushi_appender_ukemi(msg, katsuyo_text, expected):

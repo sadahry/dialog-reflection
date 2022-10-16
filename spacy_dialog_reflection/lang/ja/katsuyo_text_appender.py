@@ -1,3 +1,5 @@
+from collections.abc import Callable
+from typing import Optional
 from spacy_dialog_reflection.lang.ja.katsuyo_text import NAI, TAGARU, TAI, KatsuyoText
 import abc
 import spacy_dialog_reflection.lang.ja.katsuyo as k
@@ -17,27 +19,58 @@ class IKatsuyoTextAppender(abc.ABC):
 
 # 受身,尊敬,自発,可能
 class Ukemi(IKatsuyoTextAppender):
-    def append(self, katsuyo_text: KatsuyoText) -> KatsuyoText:
-        # サ行変格活用のみ特殊
-        if type(katsuyo_text.katsuyo) is k.SaGyoHenkakuKatsuyo:
-            # 用法的に「〜する」は「れる/られる」どちらでもよいため固定
-            # 用法的に「〜ずる」は文語が多いため未然形「〜ぜ られる」を採用
-            if katsuyo_text.katsuyo.shushi == "する":
-                return KatsuyoText(
-                    gokan=katsuyo_text.gokan + katsuyo_text.katsuyo.mizen_reru,
-                    katsuyo=k.RERU,
-                )
-            elif katsuyo_text.katsuyo.shushi == "ずる":
-                return KatsuyoText(
-                    gokan=katsuyo_text.gokan + katsuyo_text.katsuyo.mizen_rareru,
-                    katsuyo=k.RARERU,
-                )
+    def __init__(
+        self,
+        bridge_text_func: Optional[Callable[[KatsuyoText], str]] = None,
+    ) -> None:
+        if bridge_text_func is None:
+            # デフォルトでは動詞「なる」でブリッジ
+            def __nara(_):
+                return "なら"
 
-        mizen_text = katsuyo_text.gokan + katsuyo_text.katsuyo.mizen
-        if mizen_text[-1] in k.DAN["あ"]:
-            return KatsuyoText(gokan=mizen_text, katsuyo=k.RERU)
-        else:
-            return KatsuyoText(gokan=mizen_text, katsuyo=k.RARERU)
+            bridge_text_func = __nara
+
+        self.bridge_text_func: Callable[[KatsuyoText], str] = bridge_text_func
+
+    def append(self, katsuyo_text: KatsuyoText) -> KatsuyoText:
+        katsuyo_class = type(katsuyo_text.katsuyo)
+        if issubclass(katsuyo_class, k.DoushiKatsuyo):
+            # サ行変格活用のみ特殊
+            if issubclass(katsuyo_class, k.SaGyoHenkakuKatsuyo):
+                # 用法的に「〜する」は「れる/られる」どちらでもよいため固定
+                # 用法的に「〜ずる」は文語が多いため未然形「〜ぜ られる」を採用
+                if katsuyo_text.katsuyo.shushi == "する":
+                    return KatsuyoText(
+                        gokan=katsuyo_text.gokan + katsuyo_text.katsuyo.mizen_reru,
+                        katsuyo=k.RERU,
+                    )
+                elif katsuyo_text.katsuyo.shushi == "ずる":
+                    return KatsuyoText(
+                        gokan=katsuyo_text.gokan + katsuyo_text.katsuyo.mizen_rareru,
+                        katsuyo=k.RARERU,
+                    )
+
+            mizen_text = katsuyo_text.gokan + katsuyo_text.katsuyo.mizen
+            if mizen_text[-1] in k.DAN["あ"]:
+                return KatsuyoText(gokan=mizen_text, katsuyo=k.RERU)
+            else:
+                return KatsuyoText(gokan=mizen_text, katsuyo=k.RARERU)
+        elif issubclass(katsuyo_class, k.KeiyoushiKatsuyo):
+            renyo_text = katsuyo_text.gokan + katsuyo_text.katsuyo.renyo
+            bridge_text = self.bridge_text_func(katsuyo_text)
+            return KatsuyoText(
+                gokan=renyo_text + bridge_text,
+                katsuyo=k.RERU,
+            )
+        elif issubclass(katsuyo_class, k.KeiyoudoushiKatsuyo):
+            renyo_text = katsuyo_text.gokan + katsuyo_text.katsuyo.renyo_naru
+            bridge_text = self.bridge_text_func(katsuyo_text)
+            return KatsuyoText(
+                gokan=renyo_text + bridge_text,
+                katsuyo=k.RERU,
+            )
+
+        raise ValueError(f"Unsupported katsuyo_text in Ukemi: {katsuyo_text}")
 
 
 # 使役
