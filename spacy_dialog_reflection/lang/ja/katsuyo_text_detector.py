@@ -11,8 +11,6 @@ from spacy_dialog_reflection.lang.ja.katsuyo import (
     GODAN_SA_GYO,
     GODAN_TA_GYO,
     GODAN_WAA_GYO,
-    KA_GYO_HENKAKU_KURU,
-    KA_GYO_HENKAKU_KURU_KANJI,
     KAMI_ICHIDAN,
     KEIYOUDOUSHI,
     KEIYOUSHI,
@@ -20,7 +18,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo import (
     SA_GYO_HENKAKU_ZURU,
     SHIMO_ICHIDAN,
 )
-from spacy_dialog_reflection.lang.ja.katsuyo_text import KatsuyoText
+from spacy_dialog_reflection.lang.ja.katsuyo_text import KURU, KURU_KANJI, KatsuyoText
 from spacy_dialog_reflection.lang.ja.katsuyo_text_appender import (
     Nai,
     IKatsuyoTextAppender,
@@ -160,9 +158,9 @@ class SpacyKatsuyoTextDetector(IKatsuyoTextDetector):
             if conjugation_type == "カ行変格":
                 # カ変「くる」「来る」を別途ハンドリング
                 if lemma == "来る":
-                    return KatsuyoText(gokan="来", katsuyo=KA_GYO_HENKAKU_KURU_KANJI)
+                    return KURU_KANJI
                 elif lemma == "くる":
-                    return KatsuyoText(gokan="", katsuyo=KA_GYO_HENKAKU_KURU)
+                    return KURU
 
             if conjugation_type == "サ行変格":
                 # サ変「する」「ずる」を別途ハンドリング

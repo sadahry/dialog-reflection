@@ -1,4 +1,4 @@
-from spacy_dialog_reflection.lang.ja.katsuyo_text import KatsuyoText
+from spacy_dialog_reflection.lang.ja.katsuyo_text import NAI, KatsuyoText
 import abc
 import spacy_dialog_reflection.lang.ja.katsuyo as k
 
@@ -43,14 +43,10 @@ class Shieki(IKatsuyoTextAppender):
 class Nai(IKatsuyoTextAppender):
     # 現状、出力文字列としては「ない」のみサポート
     # TODO オプションで「ぬ」を選択できるように
-    NAI = KatsuyoText(
-        gokan="な",
-        katsuyo=k.KEIYOUSHI,
-    )
 
     def append(self, katsuyo_text: KatsuyoText) -> KatsuyoText:
         mizen_text = katsuyo_text.gokan + katsuyo_text.katsuyo.mizen
         return KatsuyoText(
-            gokan=mizen_text + self.NAI.gokan,
-            katsuyo=self.NAI.katsuyo,
+            gokan=mizen_text + NAI.gokan,
+            katsuyo=NAI.katsuyo,
         )

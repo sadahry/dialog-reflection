@@ -18,3 +18,27 @@ class KatsuyoText:
 
     def __str__(self):
         return f"{self.gokan}{self.katsuyo}"
+
+
+# ==============================================================================
+# 動詞
+# ==============================================================================
+
+KURU = KatsuyoText(
+    gokan="",
+    katsuyo=k.KA_GYO_HENKAKU_KURU,
+)
+
+KURU_KANJI = KatsuyoText(
+    gokan="来",
+    katsuyo=k.KA_GYO_HENKAKU_KURU_KANJI,
+)
+
+# ==============================================================================
+# 助動詞
+# ==============================================================================
+
+NAI = KatsuyoText(
+    gokan="な",
+    katsuyo=k.KEIYOUSHI,
+)
