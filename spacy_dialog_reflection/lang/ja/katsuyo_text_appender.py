@@ -24,11 +24,30 @@ class Ukemi(IKatsuyoTextAppender):
         bridge_text_func: Optional[Callable[[KatsuyoText], str]] = None,
     ) -> None:
         if bridge_text_func is None:
-            # デフォルトでは動詞「なる」でブリッジ
-            def __nara(_):
-                return "なら"
 
-            bridge_text_func = __nara
+            # デフォルトでは動詞「なる」でブリッジ
+            def __default(katsuyo_text: KatsuyoText) -> str:
+                bridge_text = "なら"
+
+                katsuyo_class = type(katsuyo_text.katsuyo)
+                if issubclass(katsuyo_class, k.KeiyoushiKatsuyo):
+                    # 形容詞
+                    renyo_text = katsuyo_text.gokan + katsuyo_text.katsuyo.renyo
+                    return KatsuyoText(
+                        gokan=renyo_text + bridge_text,
+                        katsuyo=k.RERU,
+                    )
+                elif issubclass(katsuyo_class, k.KeiyoudoushiKatsuyo):
+                    # 形容動詞
+                    renyo_text = katsuyo_text.gokan + katsuyo_text.katsuyo.renyo_naru
+                    return KatsuyoText(
+                        gokan=renyo_text + bridge_text,
+                        katsuyo=k.RERU,
+                    )
+
+                raise ValueError(f"Unsupported katsuyo_text in Ukemi: {katsuyo_text}")
+
+            bridge_text_func = __default
 
         self.bridge_text_func: Callable[[KatsuyoText], str] = bridge_text_func
 
@@ -55,22 +74,9 @@ class Ukemi(IKatsuyoTextAppender):
                 return KatsuyoText(gokan=mizen_text, katsuyo=k.RERU)
             else:
                 return KatsuyoText(gokan=mizen_text, katsuyo=k.RARERU)
-        elif issubclass(katsuyo_class, k.KeiyoushiKatsuyo):
-            renyo_text = katsuyo_text.gokan + katsuyo_text.katsuyo.renyo
-            bridge_text = self.bridge_text_func(katsuyo_text)
-            return KatsuyoText(
-                gokan=renyo_text + bridge_text,
-                katsuyo=k.RERU,
-            )
-        elif issubclass(katsuyo_class, k.KeiyoudoushiKatsuyo):
-            renyo_text = katsuyo_text.gokan + katsuyo_text.katsuyo.renyo_naru
-            bridge_text = self.bridge_text_func(katsuyo_text)
-            return KatsuyoText(
-                gokan=renyo_text + bridge_text,
-                katsuyo=k.RERU,
-            )
 
-        raise ValueError(f"Unsupported katsuyo_text in Ukemi: {katsuyo_text}")
+        # 文法的な置き換えができない単語はbridge_text_funcで処理
+        return self.bridge_text_func(katsuyo_text)
 
 
 # 使役
