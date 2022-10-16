@@ -294,9 +294,37 @@ def test_zohdoushi_appender_Nai(katsuyo_text, expected):
 def test_katsuyo_text_warning_none_type_error(append_multiple):
     class AppenderRaiseTypeError(IKatsuyoTextAppender):
         def append(self, _):
+            # raise TypeError
+            gokan = "あ" + None
+            return KatsuyoText(
+                gokan=gokan,
+                katsuyo=KA_GYO_HENKAKU_KURU,
+            )
+
+    katsuyo_text = KatsuyoText(
+        gokan="",
+        katsuyo=KA_GYO_HENKAKU_KURU,
+    )
+    katsuyo_text_appenders = [
+        AppenderRaiseTypeError(),
+    ]
+    result, has_error = append_multiple(
+        katsuyo_text,
+        katsuyo_text_appenders,
+    )
+    assert result == katsuyo_text, "No changes"
+    assert has_error, "has_error is True"
+
+
+@pytest.mark.filterwarnings("ignore:None value TypeError Detected")
+@pytest.mark.filterwarnings("ignore:Invalid appender")
+def test_katsuyo_text_warning_none_type_error2(append_multiple):
+    class AppenderRaiseTypeError(IKatsuyoTextAppender):
+        def append(self, _):
+            gokan = None
             return KatsuyoText(
                 # raise TypeError
-                gokan="あ" + None,
+                gokan=gokan[:-1],
                 katsuyo=KA_GYO_HENKAKU_KURU,
             )
 
