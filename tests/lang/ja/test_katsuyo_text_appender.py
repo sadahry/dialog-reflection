@@ -38,10 +38,7 @@ def append_multiple():
                 gokan="遊",
                 katsuyo=GODAN_BA_GYO,
             ),
-            KatsuyoText(
-                gokan="遊ばれ",
-                katsuyo=SHIMO_ICHIDAN,
-            ),
+            "遊ばれる",
         ),
         (
             "上一段活用",
@@ -49,10 +46,7 @@ def append_multiple():
                 gokan="見",
                 katsuyo=KAMI_ICHIDAN,
             ),
-            KatsuyoText(
-                gokan="見られ",
-                katsuyo=SHIMO_ICHIDAN,
-            ),
+            "見られる",
         ),
         (
             "下一段活用",
@@ -60,18 +54,12 @@ def append_multiple():
                 gokan="蹴",
                 katsuyo=SHIMO_ICHIDAN,
             ),
-            KatsuyoText(
-                gokan="蹴られ",
-                katsuyo=SHIMO_ICHIDAN,
-            ),
+            "蹴られる",
         ),
         (
             "カ変活用",
             KURU,
-            KatsuyoText(
-                gokan="こられ",
-                katsuyo=SHIMO_ICHIDAN,
-            ),
+            "こられる",
         ),
         (
             "サ変活用",
@@ -79,10 +67,7 @@ def append_multiple():
                 gokan="ウォーキング",
                 katsuyo=SA_GYO_HENKAKU_SURU,
             ),
-            KatsuyoText(
-                gokan="ウォーキングされ",
-                katsuyo=SHIMO_ICHIDAN,
-            ),
+            "ウォーキングされる",
         ),
         (
             "サ変活用(する)",
@@ -90,10 +75,7 @@ def append_multiple():
                 gokan="尊重",
                 katsuyo=SA_GYO_HENKAKU_SURU,
             ),
-            KatsuyoText(
-                gokan="尊重され",
-                katsuyo=SHIMO_ICHIDAN,
-            ),
+            "尊重される",
         ),
         (
             "サ変活用(ずる)",
@@ -101,10 +83,7 @@ def append_multiple():
                 gokan="重ん",
                 katsuyo=SA_GYO_HENKAKU_ZURU,
             ),
-            KatsuyoText(
-                gokan="重んぜられ",
-                katsuyo=SHIMO_ICHIDAN,
-            ),
+            "重んぜられる",
         ),
         (
             "形容詞",
@@ -112,10 +91,7 @@ def append_multiple():
                 gokan="美し",
                 katsuyo=KEIYOUSHI,
             ),
-            KatsuyoText(
-                gokan="美しくなられ",
-                katsuyo=SHIMO_ICHIDAN,
-            ),
+            "美しくなられる",
         ),
         (
             "形容動詞",
@@ -123,17 +99,14 @@ def append_multiple():
                 gokan="綺麗",
                 katsuyo=KEIYOUDOUSHI,
             ),
-            KatsuyoText(
-                gokan="綺麗になられ",
-                katsuyo=SHIMO_ICHIDAN,
-            ),
+            "綺麗になられる",
         ),
     ],
 )
 def test_zohdoushi_appender_ukemi(msg, katsuyo_text, expected):
     zohdoushi_appender = Ukemi()
     result = zohdoushi_appender.append(katsuyo_text)
-    assert str(result) == str(expected), msg
+    assert str(result) == expected, msg
 
 
 @pytest.mark.parametrize(
@@ -145,10 +118,7 @@ def test_zohdoushi_appender_ukemi(msg, katsuyo_text, expected):
                 gokan="遊",
                 katsuyo=GODAN_BA_GYO,
             ),
-            KatsuyoText(
-                gokan="遊ばせ",
-                katsuyo=SHIMO_ICHIDAN,
-            ),
+            "遊ばせる",
         ),
         (
             "上一段活用",
@@ -156,10 +126,7 @@ def test_zohdoushi_appender_ukemi(msg, katsuyo_text, expected):
                 gokan="見",
                 katsuyo=KAMI_ICHIDAN,
             ),
-            KatsuyoText(
-                gokan="見させ",
-                katsuyo=SHIMO_ICHIDAN,
-            ),
+            "見させる",
         ),
         (
             "下一段活用",
@@ -167,18 +134,12 @@ def test_zohdoushi_appender_ukemi(msg, katsuyo_text, expected):
                 gokan="求め",
                 katsuyo=SHIMO_ICHIDAN,
             ),
-            KatsuyoText(
-                gokan="求めさせ",
-                katsuyo=SHIMO_ICHIDAN,
-            ),
+            "求めさせる",
         ),
         (
             "カ変活用",
             KURU,
-            KatsuyoText(
-                gokan="こさせ",
-                katsuyo=SHIMO_ICHIDAN,
-            ),
+            "こさせる",
         ),
         (
             "サ変活用",
@@ -186,10 +147,7 @@ def test_zohdoushi_appender_ukemi(msg, katsuyo_text, expected):
                 gokan="ウォーキング",
                 katsuyo=SA_GYO_HENKAKU_SURU,
             ),
-            KatsuyoText(
-                gokan="ウォーキングさせ",
-                katsuyo=SHIMO_ICHIDAN,
-            ),
+            "ウォーキングさせる",
         ),
         (
             "サ変活用(する)",
@@ -197,10 +155,7 @@ def test_zohdoushi_appender_ukemi(msg, katsuyo_text, expected):
                 gokan="尊重",
                 katsuyo=SA_GYO_HENKAKU_SURU,
             ),
-            KatsuyoText(
-                gokan="尊重させ",
-                katsuyo=SHIMO_ICHIDAN,
-            ),
+            "尊重させる",
         ),
         (
             "サ変活用(ずる)",
@@ -208,17 +163,14 @@ def test_zohdoushi_appender_ukemi(msg, katsuyo_text, expected):
                 gokan="重ん",
                 katsuyo=SA_GYO_HENKAKU_ZURU,
             ),
-            KatsuyoText(
-                gokan="重んじさせ",
-                katsuyo=SHIMO_ICHIDAN,
-            ),
+            "重んじさせる",
         ),
     ],
 )
 def test_zohdoushi_appender_shieki(msg, katsuyo_text, expected):
     zohdoushi_appender = Shieki()
     result = zohdoushi_appender.append(katsuyo_text)
-    assert str(result) == str(expected), msg
+    assert str(result) == expected, msg
 
 
 @pytest.mark.filterwarnings("ignore:ValueError")
@@ -253,10 +205,7 @@ def test_katsuyo_text_warning_value_error(append_multiple):
                 gokan="遊",
                 katsuyo=GODAN_BA_GYO,
             ),
-            KatsuyoText(
-                gokan="遊ばな",
-                katsuyo=KEIYOUSHI,
-            ),
+            "遊ばない",
         ),
         (
             "上一段活用",
@@ -264,10 +213,7 @@ def test_katsuyo_text_warning_value_error(append_multiple):
                 gokan="見",
                 katsuyo=KAMI_ICHIDAN,
             ),
-            KatsuyoText(
-                gokan="見な",
-                katsuyo=KEIYOUSHI,
-            ),
+            "見ない",
         ),
         (
             "下一段活用",
@@ -275,18 +221,12 @@ def test_katsuyo_text_warning_value_error(append_multiple):
                 gokan="求め",
                 katsuyo=SHIMO_ICHIDAN,
             ),
-            KatsuyoText(
-                gokan="求めな",
-                katsuyo=KEIYOUSHI,
-            ),
+            "求めない",
         ),
         (
             "カ変活用",
             KURU,
-            KatsuyoText(
-                gokan="こな",
-                katsuyo=KEIYOUSHI,
-            ),
+            "こない",
         ),
         (
             "サ変活用",
@@ -294,10 +234,7 @@ def test_katsuyo_text_warning_value_error(append_multiple):
                 gokan="ウォーキング",
                 katsuyo=SA_GYO_HENKAKU_SURU,
             ),
-            KatsuyoText(
-                gokan="ウォーキングしな",
-                katsuyo=KEIYOUSHI,
-            ),
+            "ウォーキングしない",
         ),
         (
             "サ変活用(する)",
@@ -305,10 +242,7 @@ def test_katsuyo_text_warning_value_error(append_multiple):
                 gokan="尊重",
                 katsuyo=SA_GYO_HENKAKU_SURU,
             ),
-            KatsuyoText(
-                gokan="尊重しな",
-                katsuyo=KEIYOUSHI,
-            ),
+            "尊重しない",
         ),
         (
             "サ変活用(ずる)",
@@ -316,17 +250,14 @@ def test_katsuyo_text_warning_value_error(append_multiple):
                 gokan="重ん",
                 katsuyo=SA_GYO_HENKAKU_ZURU,
             ),
-            KatsuyoText(
-                gokan="重んじな",
-                katsuyo=KEIYOUSHI,
-            ),
+            "重んじない",
         ),
     ],
 )
 def test_zohdoushi_appender_Nai(msg, katsuyo_text, expected):
     zohdoushi_appender = Nai()
     result = zohdoushi_appender.append(katsuyo_text)
-    assert str(result) == str(expected), msg
+    assert str(result) == expected, msg
 
 
 @pytest.mark.filterwarnings("ignore:None value TypeError Detected")
