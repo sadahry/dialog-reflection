@@ -1,16 +1,20 @@
 from dataclasses import replace
 from typing import Any, Optional, List, Tuple
 from spacy_dialog_reflection.lang.ja.katsuyo_text import KatsuyoText
-from spacy_dialog_reflection.lang.ja.katsuyo_text_appender import (
-    IKatsuyoTextAppender,
-    Shieki,
+
+# TODO 直す
+# from spacy_dialog_reflection.lang.ja.zyodoushi_katsuyo_text import (
+#     Shieki,
+#     Ukemi,
+#     Nai,
+# )
+from spacy_dialog_reflection.lang.ja.zyodoushi_katsuyo_text import (
     Ukemi,
-    Nai,
 )
 from spacy_dialog_reflection.lang.ja.katsuyo_text_detector import (
     IKatsuyoTextDetector,
-    IKatsuyoTextAppenderDetector,
-    SpacyKatsuyoTextAppenderDetector,
+    IKatsuyoTextAppendantsDetector,
+    SpacyKatsuyoTextAppendantsDetector,
     SpacyKatsuyoTextDetector,
 )
 import abc
@@ -21,25 +25,25 @@ class IKatsuyoTextBuilder(abc.ABC):
     def __init__(
         self,
         root_detector: IKatsuyoTextDetector,
-        appender_detector: IKatsuyoTextAppenderDetector,
+        appendants_detector: IKatsuyoTextAppendantsDetector,
     ) -> None:
         self.root_detector = root_detector
-        self.appender_detector = appender_detector
+        self.appendants_detector = appendants_detector
 
     def append_multiple(
-        self, root: KatsuyoText, appenders: List[IKatsuyoTextAppender]
+        self, root: KatsuyoText, appendants: List[KatsuyoText]
     ) -> Tuple[KatsuyoText, bool]:
         # clone KatsuyoText
         result = replace(root)
 
         has_error = False
-        for appender in appenders:
+        for appendant in appendants:
             try:
-                result = appender.append(result)
+                result += appendant
             except ValueError as e:
                 warnings.warn(f"ValueError: {e}", UserWarning)
                 warnings.warn(
-                    f"Invalid appender:{appender}. katsuyo_text: {result}",
+                    f"Invalid appendant:{appendant}. katsuyo_text: {result}",
                     UserWarning,
                 )
                 has_error = True
@@ -49,7 +53,7 @@ class IKatsuyoTextBuilder(abc.ABC):
                     raise e
                 warnings.warn(f"None value TypeError Detected: {e}", UserWarning)
                 warnings.warn(
-                    f"Invalid appender:{appender}. katsuyo_text: {result}",
+                    f"Invalid appendant:{appendant}. katsuyo_text: {result}",
                     UserWarning,
                 )
                 has_error = True
@@ -69,10 +73,10 @@ class IKatsuyoTextBuilder(abc.ABC):
             has_error = True
             return None, has_error
 
-        appenders, is_error = self.appender_detector.detect(src)
+        appendants, is_error = self.appendants_detector.detect(src)
         has_error = has_error or is_error
 
-        result, is_error = self.append_multiple(katsuyo_text, appenders)
+        result, is_error = self.append_multiple(katsuyo_text, appendants)
         has_error = has_error or is_error
 
         return result, has_error
@@ -85,11 +89,12 @@ class SpacyKatsuyoTextBuilder(IKatsuyoTextBuilder):
     def __init__(self):
         super().__init__(
             root_detector=SpacyKatsuyoTextDetector(),
-            appender_detector=SpacyKatsuyoTextAppenderDetector(
+            appendants_detector=SpacyKatsuyoTextAppendantsDetector(
                 {
                     Ukemi: Ukemi(),
-                    Shieki: Shieki(),
-                    Nai: Nai(),
+                    # TODO 直す
+                    # Shieki: Shieki(),
+                    # Nai: Nai(),
                 }
             ),
         )

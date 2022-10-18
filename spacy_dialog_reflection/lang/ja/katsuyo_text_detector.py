@@ -19,10 +19,14 @@ from spacy_dialog_reflection.lang.ja.katsuyo import (
     SHIMO_ICHIDAN,
 )
 from spacy_dialog_reflection.lang.ja.katsuyo_text import KURU, KURU_KANJI, KatsuyoText
-from spacy_dialog_reflection.lang.ja.katsuyo_text_appender import (
-    Nai,
-    IKatsuyoTextAppender,
-    Shieki,
+
+# TODO 直す
+# from spacy_dialog_reflection.lang.ja.zyodoushi_katsuyo_text import (
+#     Nai,
+#     Shieki,
+#     Ukemi,
+# )
+from spacy_dialog_reflection.lang.ja.zyodoushi_katsuyo_text import (
     Ukemi,
 )
 import abc
@@ -42,31 +46,31 @@ class IKatsuyoTextDetector(abc.ABC):
         return self.__class__.__name__
 
 
-class IKatsuyoTextAppenderDetector(abc.ABC):
-    APPENDERS = [
+class IKatsuyoTextAppendantsDetector(abc.ABC):
+    APPENDANTS = [
         Ukemi,
-        Shieki,
-        Nai,
+        # Shieki,
+        # Nai,
     ]
 
-    def __init__(self, appender_dict: Dict[type, IKatsuyoTextAppender]) -> None:
-        self.appender_dict = appender_dict
-        # check appender_dict
-        for appender in self.APPENDERS:
-            if appender not in self.appender_dict:
-                warnings.warn(f"appender_dict doesn't have appender: {appender}")
+    def __init__(self, appendants_dict: Dict[type, KatsuyoText]) -> None:
+        self.appendants_dict = appendants_dict
+        # check appendants_dict
+        for appendant in self.APPENDANTS:
+            if appendant not in self.appendants_dict:
+                warnings.warn(f"appendants_dict doesn't have appendant: {appendant}")
 
-    def try_append(self, type: type, appenders: List[IKatsuyoTextAppender]) -> bool:
-        if type not in self.appender_dict:
+    def try_append(self, type: type, appendants: List[KatsuyoText]) -> bool:
+        if type not in self.appendants_dict:
             warnings.warn(
-                f"couldn't append: {type} since appender_dict doesn't have it"
+                f"couldn't append: {type} since appendants_dict doesn't have it"
             )
             return False
-        appenders.append(self.appender_dict[type])
+        appendants.append(self.appendants_dict[type])
         return True
 
     @abc.abstractmethod
-    def detect(self, src: Any) -> Tuple[List[IKatsuyoTextAppender], bool]:
+    def detect(self, src: Any) -> Tuple[List[KatsuyoText], bool]:
         """
         不適切な値が代入された際は、Noneを返却する。
         """
@@ -227,13 +231,13 @@ class SpacyKatsuyoTextDetector(IKatsuyoTextDetector):
             return None
 
 
-class SpacyKatsuyoTextAppenderDetector(IKatsuyoTextAppenderDetector):
-    def detect(self, src: spacy.tokens.Span) -> Tuple[List[IKatsuyoTextAppender], bool]:
+class SpacyKatsuyoTextAppendantsDetector(IKatsuyoTextAppendantsDetector):
+    def detect(self, src: spacy.tokens.Span) -> Tuple[List[KatsuyoText], bool]:
         sent = src
         # 現状はroot固定で処理
         root = sent.root
 
-        appenders: List[IKatsuyoTextAppender] = []
+        appendants: List[KatsuyoText] = []
         has_error = False
 
         # NOTE: rootに紐づくトークンを取得するのに、依存関係を見ずにrootトークンのindex以降のトークンを見る
@@ -248,27 +252,27 @@ class SpacyKatsuyoTextAppenderDetector(IKatsuyoTextAppenderDetector):
                 # 助動詞の判定
                 # ==================================================
                 if lemma in ["れる", "られる"]:
-                    is_succeeded = self.try_append(Ukemi, appenders)
+                    is_succeeded = self.try_append(Ukemi, appendants)
                     has_error = has_error or not is_succeeded
                     continue
-                elif lemma in ["せる", "させる"]:
-                    is_succeeded = self.try_append(Shieki, appenders)
-                    has_error = has_error or not is_succeeded
-                    continue
-                elif lemma in ["ない", "ぬ"]:
-                    # 「ぬ」も「ない」として扱う
-                    is_succeeded = self.try_append(Nai, appenders)
-                    has_error = has_error or not is_succeeded
-                    continue
+                # elif lemma in ["せる", "させる"]:
+                #     is_succeeded = self.try_append(Shieki, appendants)
+                #     has_error = has_error or not is_succeeded
+                #     continue
+                # elif lemma in ["ない", "ぬ"]:
+                #     # 「ぬ」も「ない」として扱う
+                #     is_succeeded = self.try_append(Nai, appendants)
+                #     has_error = has_error or not is_succeeded
+                #     continue
 
                 warnings.warn(f"Unsupported AUX: {lemma}", UserWarning)
                 has_error = True
                 continue
-            elif pos_tag == "ADJ":
-                # 「ない」のみ対応
-                if lemma in ["ない", "無い"]:
-                    is_succeeded = self.try_append(Nai, appenders)
-                    has_error = has_error or not is_succeeded
-                    continue
+            # elif pos_tag == "ADJ":
+            #     # 「ない」のみ対応
+            #     if lemma in ["ない", "無い"]:
+            #         is_succeeded = self.try_append(Nai, appendants)
+            #         has_error = has_error or not is_succeeded
+            #         continue
 
-        return appenders, has_error
+        return appendants, has_error

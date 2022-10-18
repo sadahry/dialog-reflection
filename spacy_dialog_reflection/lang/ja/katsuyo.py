@@ -336,15 +336,15 @@ KEIYOUSHI = KeiyoushiKatsuyo(
 class KeiyoudoushiKatsuyo(Katsuyo):
     # 連用形に「た」が続くとき、活用語尾が変化する。
     renyo_ta: str
-    # 連用形に「なる」「する」などが続くとき、活用語尾が変化する。
-    renyo_naru: str
+    # 連用形に「ない」など形容詞が続くとき、活用語尾が変化する。
+    renyo_nai: str
 
 
 KEIYOUDOUSHI = KeiyoudoushiKatsuyo(
     mizen="だろ",
-    renyo="で",
+    renyo="に",
     renyo_ta="だっ",
-    renyo_naru="に",
+    renyo_nai="で",
     shushi="だ",
     rentai="な",
     katei="なら",
