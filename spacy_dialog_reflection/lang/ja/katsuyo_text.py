@@ -16,6 +16,17 @@ class KatsuyoText:
     """
     katsuyo: k.Katsuyo
 
+    def __add__(self, post: "KatsuyoText") -> "KatsuyoText":
+        # 言語の特性上、活用形の前に接続される品詞の影響を受ける。
+        return post.merge(self)
+
+    def merge(self, pre: "KatsuyoText") -> "KatsuyoText":
+        renyo_text = pre.gokan + pre.katsuyo.renyo
+        return KatsuyoText(
+            gokan=renyo_text + self.gokan,
+            katsuyo=self.katsuyo,
+        )
+
     def __str__(self):
         return f"{self.gokan}{self.katsuyo}"
 
@@ -34,6 +45,16 @@ KURU_KANJI = KatsuyoText(
     katsuyo=k.KA_GYO_HENKAKU_KURU_KANJI,
 )
 
+SURU = KatsuyoText(
+    gokan="",
+    katsuyo=k.SA_GYO_HENKAKU_SURU,
+)
+
+ZURU = KatsuyoText(
+    gokan="",
+    katsuyo=k.SA_GYO_HENKAKU_ZURU,
+)
+
 # ==============================================================================
 # 助動詞
 # see: https://ja.wikipedia.org/wiki/助動詞_(国文法)
@@ -48,7 +69,6 @@ RERU = KatsuyoText(
     katsuyo=k.SHIMO_ICHIDAN,
 )
 
-
 RARERU = KatsuyoText(
     gokan="られ",
     katsuyo=k.SHIMO_ICHIDAN,
@@ -62,7 +82,6 @@ SERU = KatsuyoText(
     gokan="せ",
     katsuyo=k.SHIMO_ICHIDAN,
 )
-
 
 SASERU = KatsuyoText(
     gokan="させ",
