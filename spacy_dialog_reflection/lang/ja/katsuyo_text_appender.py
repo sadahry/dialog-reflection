@@ -1,13 +1,13 @@
 from collections.abc import Callable
 from typing import Optional
-from spacy_dialog_reflection.lang.ja.katsuyo_text import NAI, TAGARU, TAI, KatsuyoText
 import abc
 import spacy_dialog_reflection.lang.ja.katsuyo as k
+import spacy_dialog_reflection.lang.ja.katsuyo_text as kt
 
 
 class IKatsuyoTextAppender(abc.ABC):
     @abc.abstractmethod
-    def append(self, katsuyo_text: KatsuyoText) -> KatsuyoText:
+    def append(self, katsuyo_text: kt.KatsuyoText) -> kt.KatsuyoText:
         """
         不適切な値が代入された際は、ValueErrorを発生させる。
         """
@@ -21,37 +21,37 @@ class IKatsuyoTextAppender(abc.ABC):
 class Ukemi(IKatsuyoTextAppender):
     def __init__(
         self,
-        bridge_text_func: Optional[Callable[[KatsuyoText], str]] = None,
+        bridge_text_func: Optional[Callable[[kt.KatsuyoText], str]] = None,
     ) -> None:
         if bridge_text_func is None:
 
             # デフォルトでは動詞「なる」でブリッジ
-            def __default(katsuyo_text: KatsuyoText) -> str:
+            def __default(katsuyo_text: kt.KatsuyoText) -> str:
                 bridge_text = "なら"
 
                 katsuyo_class = type(katsuyo_text.katsuyo)
                 if issubclass(katsuyo_class, k.KeiyoushiKatsuyo):
                     # 形容詞
                     renyo_text = katsuyo_text.gokan + katsuyo_text.katsuyo.renyo
-                    return KatsuyoText(
-                        gokan=renyo_text + bridge_text,
-                        katsuyo=k.RERU,
+                    return kt.KatsuyoText(
+                        gokan=renyo_text + bridge_text + kt.RERU.gokan,
+                        katsuyo=kt.RERU.katsuyo,
                     )
                 elif issubclass(katsuyo_class, k.KeiyoudoushiKatsuyo):
                     # 形容動詞
                     renyo_text = katsuyo_text.gokan + katsuyo_text.katsuyo.renyo_naru
-                    return KatsuyoText(
-                        gokan=renyo_text + bridge_text,
-                        katsuyo=k.RERU,
+                    return kt.KatsuyoText(
+                        gokan=renyo_text + bridge_text + kt.RERU.gokan,
+                        katsuyo=kt.RERU.katsuyo,
                     )
 
                 raise ValueError(f"Unsupported katsuyo_text in Ukemi: {katsuyo_text}")
 
             bridge_text_func = __default
 
-        self.bridge_text_func: Callable[[KatsuyoText], str] = bridge_text_func
+        self.bridge_text_func: Callable[[kt.KatsuyoText], str] = bridge_text_func
 
-    def append(self, katsuyo_text: KatsuyoText) -> KatsuyoText:
+    def append(self, katsuyo_text: kt.KatsuyoText) -> kt.KatsuyoText:
         katsuyo_class = type(katsuyo_text.katsuyo)
         if issubclass(katsuyo_class, k.DoushiKatsuyo):
             # サ行変格活用のみ特殊
@@ -59,21 +59,29 @@ class Ukemi(IKatsuyoTextAppender):
                 # 用法的に「〜する」は「れる/られる」どちらでもよいため固定
                 # 用法的に「〜ずる」は文語が多いため未然形「〜ぜ られる」を採用
                 if katsuyo_text.katsuyo.shushi == "する":
-                    return KatsuyoText(
-                        gokan=katsuyo_text.gokan + katsuyo_text.katsuyo.mizen_reru,
-                        katsuyo=k.RERU,
+                    mizen_text = katsuyo_text.gokan + katsuyo_text.katsuyo.mizen_reru
+                    return kt.KatsuyoText(
+                        gokan=mizen_text + kt.RERU.gokan,
+                        katsuyo=kt.RERU.katsuyo,
                     )
                 elif katsuyo_text.katsuyo.shushi == "ずる":
-                    return KatsuyoText(
-                        gokan=katsuyo_text.gokan + katsuyo_text.katsuyo.mizen_rareru,
-                        katsuyo=k.RARERU,
+                    mizen_text = katsuyo_text.gokan + katsuyo_text.katsuyo.mizen_rareru
+                    return kt.KatsuyoText(
+                        gokan=mizen_text + kt.RARERU.gokan,
+                        katsuyo=kt.RARERU.katsuyo,
                     )
 
             mizen_text = katsuyo_text.gokan + katsuyo_text.katsuyo.mizen
             if mizen_text[-1] in k.DAN["あ"]:
-                return KatsuyoText(gokan=mizen_text, katsuyo=k.RERU)
+                return kt.KatsuyoText(
+                    gokan=mizen_text + kt.RERU.gokan,
+                    katsuyo=kt.RERU.katsuyo,
+                )
             else:
-                return KatsuyoText(gokan=mizen_text, katsuyo=k.RARERU)
+                return kt.KatsuyoText(
+                    gokan=mizen_text + kt.RARERU.gokan,
+                    katsuyo=kt.RARERU.katsuyo,
+                )
 
         # 文法的な置き換えができない単語はbridge_text_funcで処理
         return self.bridge_text_func(katsuyo_text)
@@ -81,27 +89,36 @@ class Ukemi(IKatsuyoTextAppender):
 
 # 使役
 class Shieki(IKatsuyoTextAppender):
-    def append(self, katsuyo_text: KatsuyoText) -> KatsuyoText:
+    def append(self, katsuyo_text: kt.KatsuyoText) -> kt.KatsuyoText:
+        katsuyo_class = type(katsuyo_text.katsuyo)
         # サ行変格活用のみ特殊
-        if type(katsuyo_text.katsuyo) is k.SaGyoHenkakuKatsuyo:
-            # 用法的に「〜する」は「さ せる」となるため固定
-            # 用法的に「〜ずる」は連用形「~じ させる」を採用
+        if issubclass(katsuyo_class, k.SaGyoHenkakuKatsuyo):
+            # 用法的に「〜する」は「れる/られる」どちらでもよいため固定
+            # 用法的に「〜ずる」は文語が多いため未然形「〜ぜ られる」を採用
             if katsuyo_text.katsuyo.shushi == "する":
-                return KatsuyoText(
-                    gokan=katsuyo_text.gokan + katsuyo_text.katsuyo.mizen_reru,
-                    katsuyo=k.SERU,
+                mizen_text = katsuyo_text.gokan + katsuyo_text.katsuyo.mizen_reru
+                return kt.KatsuyoText(
+                    gokan=mizen_text + kt.SERU.gokan,
+                    katsuyo=kt.SERU.katsuyo,
                 )
             elif katsuyo_text.katsuyo.shushi == "ずる":
-                return KatsuyoText(
-                    gokan=katsuyo_text.gokan + katsuyo_text.katsuyo.renyo,
-                    katsuyo=k.SASERU,
+                mizen_text = katsuyo_text.gokan + katsuyo_text.katsuyo.renyo
+                return kt.KatsuyoText(
+                    gokan=mizen_text + kt.SASERU.gokan,
+                    katsuyo=kt.SASERU.katsuyo,
                 )
 
         mizen_text = katsuyo_text.gokan + katsuyo_text.katsuyo.mizen
         if mizen_text[-1] in k.DAN["あ"]:
-            return KatsuyoText(gokan=mizen_text, katsuyo=k.SERU)
+            return kt.KatsuyoText(
+                gokan=mizen_text + kt.SERU.gokan,
+                katsuyo=kt.SERU.katsuyo,
+            )
         else:
-            return KatsuyoText(gokan=mizen_text, katsuyo=k.SASERU)
+            return kt.KatsuyoText(
+                gokan=mizen_text + kt.SASERU.gokan,
+                katsuyo=kt.SASERU.katsuyo,
+            )
 
 
 # 否定
@@ -111,27 +128,27 @@ class Nai(IKatsuyoTextAppender):
     # 現状、出力文字列としては「ない」のみサポート
     # TODO オプションで「ぬ」を選択できるように
 
-    def append(self, katsuyo_text: KatsuyoText) -> KatsuyoText:
+    def append(self, katsuyo_text: kt.KatsuyoText) -> kt.KatsuyoText:
         mizen_text = katsuyo_text.gokan + katsuyo_text.katsuyo.mizen
-        return KatsuyoText(
-            gokan=mizen_text + NAI.gokan,
-            katsuyo=NAI.katsuyo,
+        return kt.KatsuyoText(
+            gokan=mizen_text + kt.NAI.gokan,
+            katsuyo=kt.NAI.katsuyo,
         )
 
 
 # 自分の希望
 class KibouSelf(IKatsuyoTextAppender):
-    def append(self, katsuyo_text: KatsuyoText) -> KatsuyoText:
+    def append(self, katsuyo_text: kt.KatsuyoText) -> kt.KatsuyoText:
         if katsuyo_text.katsuyo.hinshi == k.KatsuyoHinshi.DOUSHI:
             renyo_text = katsuyo_text.gokan + katsuyo_text.katsuyo.renyo
-            return KatsuyoText(
-                gokan=renyo_text + TAI.gokan,
-                katsuyo=TAI.katsuyo,
+            return kt.KatsuyoText(
+                gokan=renyo_text + kt.TAI.gokan,
+                katsuyo=kt.TAI.katsuyo,
             )
         # TODO 他のハンドリング
-        return KatsuyoText(
+        return kt.KatsuyoText(
             gokan="",
-            katsuyo=TAI.katsuyo,
+            katsuyo=kt.TAI.katsuyo,
         )
 
 
@@ -140,9 +157,9 @@ class KibouOthers(IKatsuyoTextAppender):
     # 現状、出力文字列としては「ない」のみサポート
     # TODO オプションで「ぬ」を選択できるように
 
-    def append(self, katsuyo_text: KatsuyoText) -> KatsuyoText:
+    def append(self, katsuyo_text: kt.KatsuyoText) -> kt.KatsuyoText:
         renyo_text = katsuyo_text.gokan + katsuyo_text.katsuyo.renyo
-        return KatsuyoText(
-            gokan=renyo_text + TAGARU.gokan,
-            katsuyo=TAGARU.katsuyo,
+        return kt.KatsuyoText(
+            gokan=renyo_text + kt.TAGARU.gokan,
+            katsuyo=kt.TAGARU.katsuyo,
         )

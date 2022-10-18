@@ -9,12 +9,8 @@ from spacy_dialog_reflection.lang.ja.katsuyo import (
     KAMI_ICHIDAN,
     KEIYOUDOUSHI,
     KEIYOUSHI,
-    RARERU,
-    RERU,
     SA_GYO_HENKAKU_SURU,
     SA_GYO_HENKAKU_ZURU,
-    SASERU,
-    SERU,
     SHIMO_ICHIDAN,
 )
 from spacy_dialog_reflection.lang.ja.katsuyo_text_appender import (
@@ -43,8 +39,8 @@ def append_multiple():
                 katsuyo=GODAN_BA_GYO,
             ),
             KatsuyoText(
-                gokan="遊ば",
-                katsuyo=RERU,
+                gokan="遊ばれ",
+                katsuyo=SHIMO_ICHIDAN,
             ),
         ),
         (
@@ -54,8 +50,8 @@ def append_multiple():
                 katsuyo=KAMI_ICHIDAN,
             ),
             KatsuyoText(
-                gokan="見",
-                katsuyo=RARERU,
+                gokan="見られ",
+                katsuyo=SHIMO_ICHIDAN,
             ),
         ),
         (
@@ -65,16 +61,16 @@ def append_multiple():
                 katsuyo=SHIMO_ICHIDAN,
             ),
             KatsuyoText(
-                gokan="蹴",
-                katsuyo=RARERU,
+                gokan="蹴られ",
+                katsuyo=SHIMO_ICHIDAN,
             ),
         ),
         (
             "カ変活用",
             KURU,
             KatsuyoText(
-                gokan="こ",
-                katsuyo=RARERU,
+                gokan="こられ",
+                katsuyo=SHIMO_ICHIDAN,
             ),
         ),
         (
@@ -84,8 +80,8 @@ def append_multiple():
                 katsuyo=SA_GYO_HENKAKU_SURU,
             ),
             KatsuyoText(
-                gokan="ウォーキングさ",
-                katsuyo=RERU,
+                gokan="ウォーキングされ",
+                katsuyo=SHIMO_ICHIDAN,
             ),
         ),
         (
@@ -95,8 +91,8 @@ def append_multiple():
                 katsuyo=SA_GYO_HENKAKU_SURU,
             ),
             KatsuyoText(
-                gokan="尊重さ",
-                katsuyo=RERU,
+                gokan="尊重され",
+                katsuyo=SHIMO_ICHIDAN,
             ),
         ),
         (
@@ -106,8 +102,8 @@ def append_multiple():
                 katsuyo=SA_GYO_HENKAKU_ZURU,
             ),
             KatsuyoText(
-                gokan="重んぜ",
-                katsuyo=RARERU,
+                gokan="重んぜられ",
+                katsuyo=SHIMO_ICHIDAN,
             ),
         ),
         (
@@ -117,8 +113,8 @@ def append_multiple():
                 katsuyo=KEIYOUSHI,
             ),
             KatsuyoText(
-                gokan="美しくなら",
-                katsuyo=RERU,
+                gokan="美しくなられ",
+                katsuyo=SHIMO_ICHIDAN,
             ),
         ),
         (
@@ -128,8 +124,8 @@ def append_multiple():
                 katsuyo=KEIYOUDOUSHI,
             ),
             KatsuyoText(
-                gokan="綺麗になら",
-                katsuyo=RERU,
+                gokan="綺麗になられ",
+                katsuyo=SHIMO_ICHIDAN,
             ),
         ),
     ],
@@ -150,8 +146,8 @@ def test_zohdoushi_appender_ukemi(msg, katsuyo_text, expected):
                 katsuyo=GODAN_BA_GYO,
             ),
             KatsuyoText(
-                gokan="遊ば",
-                katsuyo=SERU,
+                gokan="遊ばせ",
+                katsuyo=SHIMO_ICHIDAN,
             ),
         ),
         (
@@ -161,8 +157,8 @@ def test_zohdoushi_appender_ukemi(msg, katsuyo_text, expected):
                 katsuyo=KAMI_ICHIDAN,
             ),
             KatsuyoText(
-                gokan="見",
-                katsuyo=SASERU,
+                gokan="見させ",
+                katsuyo=SHIMO_ICHIDAN,
             ),
         ),
         (
@@ -172,16 +168,16 @@ def test_zohdoushi_appender_ukemi(msg, katsuyo_text, expected):
                 katsuyo=SHIMO_ICHIDAN,
             ),
             KatsuyoText(
-                gokan="求め",
-                katsuyo=SASERU,
+                gokan="求めさせ",
+                katsuyo=SHIMO_ICHIDAN,
             ),
         ),
         (
             "カ変活用",
             KURU,
             KatsuyoText(
-                gokan="こ",
-                katsuyo=SASERU,
+                gokan="こさせ",
+                katsuyo=SHIMO_ICHIDAN,
             ),
         ),
         (
@@ -191,8 +187,8 @@ def test_zohdoushi_appender_ukemi(msg, katsuyo_text, expected):
                 katsuyo=SA_GYO_HENKAKU_SURU,
             ),
             KatsuyoText(
-                gokan="ウォーキングさ",
-                katsuyo=SERU,
+                gokan="ウォーキングさせ",
+                katsuyo=SHIMO_ICHIDAN,
             ),
         ),
         (
@@ -202,8 +198,8 @@ def test_zohdoushi_appender_ukemi(msg, katsuyo_text, expected):
                 katsuyo=SA_GYO_HENKAKU_SURU,
             ),
             KatsuyoText(
-                gokan="尊重さ",
-                katsuyo=SERU,
+                gokan="尊重させ",
+                katsuyo=SHIMO_ICHIDAN,
             ),
         ),
         (
@@ -213,8 +209,8 @@ def test_zohdoushi_appender_ukemi(msg, katsuyo_text, expected):
                 katsuyo=SA_GYO_HENKAKU_ZURU,
             ),
             KatsuyoText(
-                gokan="重んじ",
-                katsuyo=SASERU,
+                gokan="重んじさせ",
+                katsuyo=SHIMO_ICHIDAN,
             ),
         ),
     ],
