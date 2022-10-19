@@ -123,8 +123,6 @@ class Shieki(IKatsuyoTextHelper):
 
 
 # 否定
-# NOTE: 現状は「仕方が無い」といった否定以外の文字列も取れてしまう。
-#       意味を扱うユースケースが発生したら、別途方針を決める。
 class Hitei(IKatsuyoTextHelper):
     # 現状、出力文字列としては「ない」のみサポート
     # TODO オプションで「ぬ」を選択できるように

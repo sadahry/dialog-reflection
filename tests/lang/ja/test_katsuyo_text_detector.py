@@ -24,8 +24,11 @@ from spacy_dialog_reflection.lang.ja.katsuyo import (
 )
 
 # TODO 直す
-# from spacy_dialog_reflection.lang.ja.katsuyo_text_helper import Nai, Shieki, Ukemi
-from spacy_dialog_reflection.lang.ja.katsuyo_text_helper import Ukemi
+from spacy_dialog_reflection.lang.ja.katsuyo_text_helper import (
+    Ukemi,
+    Shieki,
+    Hitei,
+)
 from spacy_dialog_reflection.lang.ja.katsuyo_text_builder import SpacyKatsuyoTextBuilder
 
 
@@ -623,45 +626,46 @@ def test_spacy_katsuyo_text_detector(
             "AUX",
             [Ukemi],
         ),
-        # (
-        #     "あなたを愛させる",
-        #     "せる",
-        #     "AUX",
-        #     [Shieki],
-        # ),
-        # (
-        #     "子供を寝させる",
-        #     "させる",
-        #     "AUX",
-        #     [Shieki],
-        # ),
-        # (
-        #     "子供を愛さない",
-        #     "ない",
-        #     "AUX",
-        #     [Nai],
-        # ),
-        # (
-        #     "子供が寝ない",
-        #     "ない",
-        #     "AUX",
-        #     [Nai],
-        # ),
-        # (
-        #     "それは仕方ない",
-        #     "仕方無い",
-        #     "ADJ",
-        #     [],
-        # ),
-        # # 現状、Naiとして取れてしまう。言語の返答には
-        # # 直接的には関係ないので、現状はこのままとする。
-        # # TODO 「仕方が無い」のような、Naiとして取れるものと否定の意を区別する
-        # (
-        #     "それは仕方がない",
-        #     "無い",
-        #     "ADJ",
-        #     [Nai],
-        # ),
+        (
+            "あなたを愛させる",
+            "せる",
+            "AUX",
+            [Shieki],
+        ),
+        (
+            "子供を寝させる",
+            "させる",
+            "AUX",
+            [Shieki],
+        ),
+        (
+            "子供を愛さない",
+            "ない",
+            "AUX",
+            [Hitei],
+        ),
+        (
+            "子供が寝ない",
+            "ない",
+            "AUX",
+            [Hitei],
+        ),
+        (
+            "それは仕方ない",
+            "仕方無い",
+            "ADJ",
+            [],
+        ),
+        # NOTE: ここでは「仕方が無い」といった言葉は否定として抽出され、
+        #       「仕方ない」は一つの動詞とされる。
+        #       文章全体の意味を成立させるうえで問題は発生しないためBugとはしないが、
+        #       否定の意味を扱ううえでは問題となるため、今後の改善の余地がある。
+        (
+            "それは仕方がない",
+            "無い",
+            "ADJ",
+            [Hitei],
+        ),
     ],
 )
 def test_spacy_katsuyo_text_appendants_detector(
