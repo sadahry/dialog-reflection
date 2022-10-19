@@ -24,6 +24,8 @@ from spacy_dialog_reflection.lang.ja.katsuyo import (
 )
 
 from spacy_dialog_reflection.lang.ja.katsuyo_text_helper import (
+    KibouOthers,
+    KibouSelf,
     Ukemi,
     Shieki,
     Hitei,
@@ -666,6 +668,18 @@ def test_spacy_katsuyo_text_detector(
             "ADJ",
             # TODO 格助詞「が」も取得できるように
             [Hitei],
+        ),
+        (
+            "あなたを愛したい",
+            "たい",
+            "AUX",
+            [KibouSelf],
+        ),
+        (
+            "子供が遊びたがる",
+            "たがる",
+            "AUX",
+            [KibouOthers],
         ),
     ],
 )

@@ -264,6 +264,14 @@ class SpacyKatsuyoTextAppendantsDetector(IKatsuyoTextAppendantsDetector):
                     is_succeeded = self.try_append(Hitei, appendants)
                     has_error = has_error or not is_succeeded
                     continue
+                elif lemma in ["たい"]:
+                    is_succeeded = self.try_append(KibouSelf, appendants)
+                    has_error = has_error or not is_succeeded
+                    continue
+                elif lemma in ["たがる"]:
+                    is_succeeded = self.try_append(KibouOthers, appendants)
+                    has_error = has_error or not is_succeeded
+                    continue
 
                 warnings.warn(f"Unsupported AUX: {lemma}", UserWarning)
                 has_error = True
