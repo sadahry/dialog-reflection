@@ -612,7 +612,7 @@ def test_spacy_katsuyo_text_detector(
 
 
 @pytest.mark.parametrize(
-    "text, norm, pos, expected",
+    "text, lemma, pos, expected",
     [
         (
             "あなたに愛される",
@@ -650,30 +650,31 @@ def test_spacy_katsuyo_text_detector(
             "AUX",
             [Hitei],
         ),
-        (
-            "それは仕方ない",
-            "仕方無い",
-            "ADJ",
-            [],
-        ),
-        # NOTE: ここでは「仕方が無い」といった言葉は否定として抽出され、
-        #       「仕方ない」は一つの動詞とされる。
+        # NOTE: ここでは、
+        #       「仕方ない」は一つの形容詞として抽出されるが、
+        #       「仕方がない」は分析を区切られ、否定として抽出される。
         #       文章全体の意味を成立させるうえで問題は発生しないためBugとはしないが、
         #       否定の意味を扱ううえでは問題となるため、今後の改善の余地がある。
         (
+            "それは仕方ない",
+            "仕方ない",
+            "ADJ",
+            [],
+        ),
+        (
             "それは仕方がない",
-            "無い",
+            "ない",
             "ADJ",
             [Hitei],
         ),
     ],
 )
 def test_spacy_katsuyo_text_appendants_detector(
-    nlp_ja, spacy_appendants_detector, text, norm, pos, expected
+    nlp_ja, spacy_appendants_detector, text, lemma, pos, expected
 ):
     sent = next(nlp_ja(text).sents)
     last_token = sent[-1]
-    assert last_token.norm_ == norm, "last token is not correct"
+    assert last_token.lemma_ == lemma, "last token is not correct"
     assert last_token.pos_ == pos, "last token is not correct"
     appendants, has_error = spacy_appendants_detector.detect(sent)
     assert not has_error, "has error in detection"
