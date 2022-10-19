@@ -172,6 +172,27 @@ def test_zyodoushi_ukemi(msg, katsuyo_text, expected):
             ),
             "重んじさせる",
         ),
+        (
+            "形容詞",
+            KatsuyoText(
+                gokan="美し",
+                katsuyo=KEIYOUSHI,
+            ),
+            "美しくさせる",
+        ),
+        (
+            "形容動詞",
+            KatsuyoText(
+                gokan="綺麗",
+                katsuyo=KEIYOUDOUSHI,
+            ),
+            "綺麗にさせる",
+        ),
+        (
+            "NonKatsuyoText",
+            NonKatsuyoText("状態"),
+            "状態にさせる",
+        ),
     ],
 )
 def test_zyodoushi_shieki(msg, katsuyo_text, expected):

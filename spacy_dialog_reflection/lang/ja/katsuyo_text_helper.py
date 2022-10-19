@@ -1,6 +1,9 @@
 from collections.abc import Callable
 from typing import Optional, Union
-from spacy_dialog_reflection.lang.ja.katsuyo_text import IKatsuyoTextHelper
+from spacy_dialog_reflection.lang.ja.katsuyo_text import (
+    IKatsuyoTextHelper,
+    NonKatsuyoText,
+)
 import spacy_dialog_reflection.lang.ja.katsuyo as k
 import spacy_dialog_reflection.lang.ja.katsuyo_text as kt
 
@@ -66,12 +69,37 @@ class Ukemi(kt.IKatsuyoTextHelper):
 
 
 class Shieki(IKatsuyoTextHelper):
-    def __init__(self) -> None:
-        # TODO 実装
-        def __default(pre: Union[kt.KatsuyoText, kt.NonKatsuyoText]) -> kt.KatsuyoText:
-            raise NotImplementedError()
+    def __init__(
+        self,
+        bridge_func: Optional[
+            Callable[[Union[kt.KatsuyoText, kt.NonKatsuyoText]], kt.KatsuyoText]
+        ] = None,
+    ) -> None:
+        if bridge_func is None:
 
-        super().__init__(__default)
+            def __default(
+                pre: Union[kt.KatsuyoText, kt.NonKatsuyoText]
+            ) -> kt.KatsuyoText:
+                if issubclass(
+                    type(pre),
+                    (kt.NonKatsuyoText),
+                ):
+                    ni = kt.NonKatsuyoText("に")
+                    return pre + ni + kt.Saseru()
+
+                if issubclass(
+                    type(pre.katsuyo),
+                    (k.KeiyoushiKatsuyo, k.KeiyoudoushiKatsuyo),
+                ):
+                    # 「させる」を動詞として扱い連用形でブリッジ
+                    renyo_text = pre.gokan + pre.katsuyo.renyo
+                    return NonKatsuyoText(renyo_text) + kt.Saseru()
+
+                raise ValueError(f"Unsupported katsuyo_text in Shieki: {pre}")
+
+            bridge_func = __default
+
+        super().__init__(bridge_func)
 
     def try_merge(self, pre: kt.KatsuyoText) -> Optional[kt.KatsuyoText]:
         katsuyo_class = type(pre.katsuyo)
