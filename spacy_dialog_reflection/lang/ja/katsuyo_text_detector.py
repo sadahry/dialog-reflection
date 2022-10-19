@@ -1,4 +1,4 @@
-from typing import Any, Optional, List, Tuple
+from typing import Any, Optional, List, Set, Tuple
 from itertools import dropwhile
 from spacy_dialog_reflection.lang.ja.katsuyo import (
     GODAN_BA_GYO,
@@ -58,7 +58,7 @@ class IKatsuyoTextAppendantsDetector(abc.ABC):
         KibouOthers,
     )
 
-    def __init__(self, helpers: List[IKatsuyoTextHelper]) -> None:
+    def __init__(self, helpers: Set[IKatsuyoTextHelper]) -> None:
         # validate helpers
         for helper in helpers:
             if not isinstance(helper, self.SUPPORTED_HELPERS):

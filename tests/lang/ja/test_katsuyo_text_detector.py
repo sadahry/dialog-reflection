@@ -55,21 +55,13 @@ def katsuyo_texts_appendants_detector_init_validation_error():
             return None
 
     with pytest.raises(ValueError):
-        SpacyKatsuyoTextAppendantsDetector(
-            [
-                UnsupportedHelper(),
-            ]
-        )
+        SpacyKatsuyoTextAppendantsDetector((UnsupportedHelper()))
         assert False, "UnsupportedHelper should not be accepted."
 
 
 @pytest.mark.filterwarnings("ignore:this object doesn't have helper")
 def katsuyo_texts_appendants_detector_init_warning():
-    SpacyKatsuyoTextAppendantsDetector(
-        [
-            Ukemi(),
-        ]
-    )
+    SpacyKatsuyoTextAppendantsDetector((Ukemi()))
 
 
 @pytest.mark.parametrize(

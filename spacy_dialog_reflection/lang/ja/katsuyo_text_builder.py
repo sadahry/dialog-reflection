@@ -88,12 +88,12 @@ class SpacyKatsuyoTextBuilder(IKatsuyoTextBuilder):
             root_detector=SpacyKatsuyoTextDetector(),
             appendants_detector=SpacyKatsuyoTextAppendantsDetector(
                 # TODO もっと柔軟な設定ができるように
-                [
+                (
                     Ukemi(),
                     Shieki(),
                     Hitei(),
                     KibouSelf(),
                     KibouOthers(),
-                ],
+                ),
             ),
         )
