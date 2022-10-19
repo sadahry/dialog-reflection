@@ -8,7 +8,7 @@ import spacy_dialog_reflection.lang.ja.katsuyo as k
 @dataclass(frozen=True)
 class KatsuyoText:
     """
-    活用形を含む動詞,形容詞,形容動詞,副詞の表現を表すクラス
+    活用形を含む動詞,形容詞,形容動詞,副詞の表現を表すクラス。用言を表す。
     """
 
     gokan: str
@@ -56,9 +56,10 @@ class KatsuyoText:
 @dataclass(frozen=True)
 class NonKatsuyoText:
     """
-    活用形を含まない文字列を表すクラス
+    活用形を含まない文字列を表すクラス。
     名詞,助詞,接続詞,感動詞,記号,連体詞,接頭辞,接尾辞,補助記号,フィラー,
-    その他,そのままKatsuyoTextにaddする文字列を想定
+    その他,そのままKatsuyoTextにaddする文字列を想定。
+    基本的には体言だが、活用された用言を含むこともある。
     """
 
     text: str
