@@ -2,6 +2,7 @@ import pytest
 from spacy_dialog_reflection.lang.ja.katsuyo_text import (
     KURU,
     KatsuyoText,
+    NonKatsuyoText,
 )
 from spacy_dialog_reflection.lang.ja.katsuyo import (
     GODAN_BA_GYO,
@@ -104,6 +105,11 @@ def append_multiple():
                 katsuyo=KEIYOUDOUSHI,
             ),
             "綺麗になられる",
+        ),
+        (
+            "NonKatsuyoText",
+            NonKatsuyoText("状態"),
+            "状態になられる",
         ),
     ],
 )

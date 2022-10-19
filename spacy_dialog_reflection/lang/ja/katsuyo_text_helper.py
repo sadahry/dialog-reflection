@@ -28,7 +28,8 @@ class Ukemi(kt.IKatsuyoTextHelper):
                     type(pre),
                     (kt.NonKatsuyoText),
                 ):
-                    return pre + "に" + naru + kt.Reru()
+                    ni = kt.NonKatsuyoText("に")
+                    return pre + ni + naru + kt.Reru()
 
                 if issubclass(
                     type(pre.katsuyo),
