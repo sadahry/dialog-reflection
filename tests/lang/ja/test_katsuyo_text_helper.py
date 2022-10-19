@@ -6,6 +6,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text import (
     NonKatsuyoText,
 )
 from spacy_dialog_reflection.lang.ja.katsuyo import (
+    Katsuyo,
     GODAN_BA_GYO,
     KA_GYO_HENKAKU_KURU,
     KAMI_ICHIDAN,
@@ -29,6 +30,24 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text_builder import (
 @pytest.fixture(scope="session")
 def append_multiple():
     return SpacyKatsuyoTextBuilder().append_multiple
+
+
+@pytest.fixture(scope="session")
+def unsupported_katsuyo_text():
+    class UnsupportedKatsuyo(Katsuyo):
+        pass
+
+    return KatsuyoText(
+        gokan="",
+        katsuyo=UnsupportedKatsuyo(
+            mizen="",
+            renyo="",
+            shushi="",
+            rentai="",
+            katei="",
+            meirei="",
+        ),
+    )
 
 
 @pytest.mark.parametrize(
@@ -116,6 +135,12 @@ def test_zyodoushi_ukemi(msg, katsuyo_text, expected):
     assert str(result) == expected, msg
 
 
+def test_zyodoushi_ukemi_value_error(unsupported_katsuyo_text):
+    zyodoushi = Ukemi()
+    with pytest.raises(ValueError):
+        unsupported_katsuyo_text + zyodoushi
+
+
 @pytest.mark.parametrize(
     "msg, katsuyo_text, expected",
     [
@@ -199,6 +224,12 @@ def test_zyodoushi_shieki(msg, katsuyo_text, expected):
     zyodoushi = Shieki()
     result = katsuyo_text + zyodoushi
     assert str(result) == expected, msg
+
+
+def test_zyodoushi_shieki_value_error(unsupported_katsuyo_text):
+    zyodoushi = Shieki()
+    with pytest.raises(ValueError):
+        unsupported_katsuyo_text + zyodoushi
 
 
 @pytest.mark.parametrize(
@@ -286,6 +317,12 @@ def test_zyodoushi_hiteii(msg, katsuyo_text, expected):
     zyodoushi = Hitei()
     result = katsuyo_text + zyodoushi
     assert str(result) == expected, msg
+
+
+def test_zyodoushi_hitei_value_error(unsupported_katsuyo_text):
+    zyodoushi = Hitei()
+    with pytest.raises(ValueError):
+        unsupported_katsuyo_text + zyodoushi
 
 
 @pytest.mark.filterwarnings("ignore:ValueError")

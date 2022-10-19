@@ -41,7 +41,9 @@ class Ukemi(kt.IKatsuyoTextHelper):
                 ):
                     return pre + naru + kt.Reru()
 
-                raise ValueError(f"Unsupported katsuyo_text in Ukemi: {pre}")
+                raise ValueError(
+                    f"Unsupported katsuyo_text in Ukemi: {pre} type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
+                )
 
             bridge = __default
 
@@ -95,7 +97,9 @@ class Shieki(IKatsuyoTextHelper):
                     renyo_text = pre.gokan + pre.katsuyo.renyo
                     return NonKatsuyoText(renyo_text) + kt.Saseru()
 
-                raise ValueError(f"Unsupported katsuyo_text in Shieki: {pre}")
+                raise ValueError(
+                    f"Unsupported katsuyo_text in Shieki: {pre} type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
+                )
 
             bridge = __default
 
@@ -162,7 +166,9 @@ class Hitei(IKatsuyoTextHelper):
                     renyo_text = pre.gokan + pre.katsuyo.renyo_nai
                     return NonKatsuyoText(renyo_text) + kt.Nai()
 
-                raise ValueError(f"Unsupported katsuyo_text in Hitei: {pre}")
+                raise ValueError(
+                    f"Unsupported katsuyo_text in Hitei: {pre} type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
+                )
 
             bridge = __default
 
