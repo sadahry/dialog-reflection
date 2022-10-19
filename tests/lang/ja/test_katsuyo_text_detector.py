@@ -23,7 +23,6 @@ from spacy_dialog_reflection.lang.ja.katsuyo import (
     SHIMO_ICHIDAN,
 )
 
-# TODO 直す
 from spacy_dialog_reflection.lang.ja.katsuyo_text_helper import (
     Ukemi,
     Shieki,
