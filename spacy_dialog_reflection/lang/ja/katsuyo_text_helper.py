@@ -13,11 +13,11 @@ import spacy_dialog_reflection.lang.ja.katsuyo_text as kt
 class Ukemi(kt.IKatsuyoTextHelper):
     def __init__(
         self,
-        bridge_func: Optional[
+        bridge: Optional[
             Callable[[Union[kt.KatsuyoText, kt.NonKatsuyoText]], kt.KatsuyoText]
         ] = None,
     ) -> None:
-        if bridge_func is None:
+        if bridge is None:
 
             def __default(
                 pre: Union[kt.KatsuyoText, kt.NonKatsuyoText]
@@ -43,9 +43,9 @@ class Ukemi(kt.IKatsuyoTextHelper):
 
                 raise ValueError(f"Unsupported katsuyo_text in Ukemi: {pre}")
 
-            bridge_func = __default
+            bridge = __default
 
-        super().__init__(bridge_func)
+        super().__init__(bridge)
 
     def try_merge(self, pre: kt.KatsuyoText) -> Optional[kt.KatsuyoText]:
         katsuyo_class = type(pre.katsuyo)
@@ -71,11 +71,11 @@ class Ukemi(kt.IKatsuyoTextHelper):
 class Shieki(IKatsuyoTextHelper):
     def __init__(
         self,
-        bridge_func: Optional[
+        bridge: Optional[
             Callable[[Union[kt.KatsuyoText, kt.NonKatsuyoText]], kt.KatsuyoText]
         ] = None,
     ) -> None:
-        if bridge_func is None:
+        if bridge is None:
 
             def __default(
                 pre: Union[kt.KatsuyoText, kt.NonKatsuyoText]
@@ -97,9 +97,9 @@ class Shieki(IKatsuyoTextHelper):
 
                 raise ValueError(f"Unsupported katsuyo_text in Shieki: {pre}")
 
-            bridge_func = __default
+            bridge = __default
 
-        super().__init__(bridge_func)
+        super().__init__(bridge)
 
     def try_merge(self, pre: kt.KatsuyoText) -> Optional[kt.KatsuyoText]:
         katsuyo_class = type(pre.katsuyo)

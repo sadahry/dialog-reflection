@@ -258,6 +258,28 @@ def test_zyodoushi_shieki(msg, katsuyo_text, expected):
             ),
             "重んじない",
         ),
+        (
+            "形容詞",
+            KatsuyoText(
+                gokan="美し",
+                katsuyo=KEIYOUSHI,
+            ),
+            "美しくない",
+        ),
+        (
+            "形容動詞",
+            KatsuyoText(
+                gokan="綺麗",
+                katsuyo=KEIYOUDOUSHI,
+            ),
+            "綺麗でない",
+        ),
+        # TODO 助詞のハンドリング
+        (
+            "NonKatsuyoText",
+            NonKatsuyoText("状態"),
+            "状態ではない",
+        ),
     ],
 )
 def test_zyodoushi_hiteii(msg, katsuyo_text, expected):
