@@ -73,9 +73,6 @@ class IKatsuyoTextAppendantsDetector(abc.ABC):
 
     def try_append(self, type: type, appendants: List[KatsuyoText]) -> bool:
         if type not in self.appendants_dict:
-            warnings.warn(
-                f"couldn't append: {type} since appendants_dict doesn't have it"
-            )
             return False
         appendants.append(self.appendants_dict[type])
         return True
