@@ -20,9 +20,9 @@ class KatsuyoText:
     katsuyo: k.Katsuyo
 
     def __add__(
-        self, post: Union["NoKatsuyoText", "NoKatsuyoText", "IKatsuyoTextHelper"]
-    ) -> Union["KatsuyoText", "NoKatsuyoText"]:
-        if issubclass(type(post), NoKatsuyoText):
+        self, post: Union["NonKatsuyoText", "NonKatsuyoText", "IKatsuyoTextHelper"]
+    ) -> Union["KatsuyoText", "NonKatsuyoText"]:
+        if issubclass(type(post), NonKatsuyoText):
             return self.append(post)
         elif issubclass(type(post), (KatsuyoText, IKatsuyoTextHelper)):
             # 言語の特性上、活用形の前に接続される品詞の影響を受ける。
@@ -30,13 +30,13 @@ class KatsuyoText:
 
         raise ValueError(f"Invalid type in addition: {type(post)}")
 
-    def append(self, post: "NoKatsuyoText") -> "NoKatsuyoText":
+    def append(self, post: "NonKatsuyoText") -> "NonKatsuyoText":
         """
         基本的には連体形で受けるが、下位クラスで上書きすることで
         任意の活用形に変換して返すことがある。
         """
         prefix = self.gokan + self.katsuyo.rentai
-        return NoKatsuyoText(text=prefix + post.text)
+        return NonKatsuyoText(text=prefix + post.text)
 
     def merge(self, pre: "KatsuyoText") -> "KatsuyoText":
         """
@@ -54,7 +54,7 @@ class KatsuyoText:
 
 
 @dataclass(frozen=True)
-class NoKatsuyoText:
+class NonKatsuyoText:
     """
     活用形を含まない文字列を表すクラス
     名詞,助詞,接続詞,感動詞,記号,連体詞,接頭辞,接尾辞,補助記号,フィラー,
@@ -64,10 +64,10 @@ class NoKatsuyoText:
     text: str
 
     def __add__(
-        self, post: Union["KatsuyoText", "NoKatsuyoText", "IKatsuyoTextHelper"]
-    ) -> Union["KatsuyoText", "NoKatsuyoText"]:
-        if issubclass(type(post), NoKatsuyoText):
-            return NoKatsuyoText(text=self.text + post.text)
+        self, post: Union["KatsuyoText", "NonKatsuyoText", "IKatsuyoTextHelper"]
+    ) -> Union["KatsuyoText", "NonKatsuyoText"]:
+        if issubclass(type(post), NonKatsuyoText):
+            return NonKatsuyoText(text=self.text + post.text)
         elif issubclass(type(post), KatsuyoText):
             return KatsuyoText(
                 gokan=self.text + post.gokan,
@@ -91,7 +91,7 @@ class IKatsuyoTextHelper(abc.ABC):
 
     def __init__(
         self,
-        bridge: Callable[[Union[KatsuyoText, NoKatsuyoText]], KatsuyoText],
+        bridge: Callable[[Union[KatsuyoText, NonKatsuyoText]], KatsuyoText],
     ) -> None:
         # 文法的には不正な活用形の組み合わせを
         # 任意の活用形に変換して返せるようにするための関数
@@ -164,10 +164,10 @@ class Reru(ZyodoushiKatsuyoText):
     def merge(self, pre: KatsuyoText) -> KatsuyoText:
         if issubclass(type(pre.katsuyo), k.SaGyoHenkakuKatsuyo):
             prefix = pre.gokan + pre.katsuyo.mizen_reru
-            return NoKatsuyoText(prefix) + self.zyodoushi
+            return NonKatsuyoText(prefix) + self.zyodoushi
 
         prefix = pre.gokan + pre.katsuyo.mizen
-        return NoKatsuyoText(prefix) + self.zyodoushi
+        return NonKatsuyoText(prefix) + self.zyodoushi
 
 
 class Rareru(ZyodoushiKatsuyoText):
@@ -182,10 +182,10 @@ class Rareru(ZyodoushiKatsuyoText):
     def merge(self, pre: KatsuyoText) -> KatsuyoText:
         if issubclass(type(pre.katsuyo), k.SaGyoHenkakuKatsuyo):
             prefix = pre.gokan + pre.katsuyo.mizen_rareru
-            return NoKatsuyoText(prefix) + self.zyodoushi
+            return NonKatsuyoText(prefix) + self.zyodoushi
 
         prefix = pre.gokan + pre.katsuyo.mizen
-        return NoKatsuyoText(prefix) + self.zyodoushi
+        return NonKatsuyoText(prefix) + self.zyodoushi
 
 
 # ==============================================================================

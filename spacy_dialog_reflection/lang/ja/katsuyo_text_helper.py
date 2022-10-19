@@ -10,13 +10,13 @@ class Ukemi(kt.IKatsuyoTextHelper):
     def __init__(
         self,
         bridge_func: Optional[
-            Callable[[Union[kt.KatsuyoText, kt.NoKatsuyoText]], kt.KatsuyoText]
+            Callable[[Union[kt.KatsuyoText, kt.NonKatsuyoText]], kt.KatsuyoText]
         ] = None,
     ) -> None:
         if bridge_func is None:
 
             def __default(
-                pre: Union[kt.KatsuyoText, kt.NoKatsuyoText]
+                pre: Union[kt.KatsuyoText, kt.NonKatsuyoText]
             ) -> kt.KatsuyoText:
                 # デフォルトでは動詞「なる」でブリッジ
                 naru = kt.KatsuyoText(
@@ -26,7 +26,7 @@ class Ukemi(kt.IKatsuyoTextHelper):
 
                 if issubclass(
                     type(pre),
-                    (kt.NoKatsuyoText),
+                    (kt.NonKatsuyoText),
                 ):
                     return pre + "に" + naru + kt.Reru()
 
