@@ -6,6 +6,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text_helper import (
     Hitei,
     Shieki,
     Ukemi,
+    KibouSelf,
 )
 from spacy_dialog_reflection.lang.ja.katsuyo_text_detector import (
     IKatsuyoTextDetector,
@@ -91,6 +92,7 @@ class SpacyKatsuyoTextBuilder(IKatsuyoTextBuilder):
                     Ukemi: Ukemi(),
                     Shieki: Shieki(),
                     Hitei: Hitei(),
+                    KibouSelf: KibouSelf(),
                 }
             ),
         )

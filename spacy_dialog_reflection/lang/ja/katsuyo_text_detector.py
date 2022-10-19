@@ -22,6 +22,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text import KURU, KURU_KANJI, Katsu
 
 from spacy_dialog_reflection.lang.ja.katsuyo_text_helper import (
     Hitei,
+    KibouSelf,
     Shieki,
     Ukemi,
 )
@@ -47,6 +48,7 @@ class IKatsuyoTextAppendantsDetector(abc.ABC):
         Ukemi,
         Shieki,
         Hitei,
+        KibouSelf,
     ]
 
     def __init__(self, appendants_dict: Dict[type, KatsuyoText]) -> None:

@@ -182,20 +182,34 @@ class Hitei(IKatsuyoTextHelper):
         return None
 
 
-# # 自分の希望
-# class KibouSelf(IKatsuyoTextAppendants):
-#     def append(self, katsuyo_text: kt.KatsuyoText) -> kt.KatsuyoText:
-#         if katsuyo_text.katsuyo.hinshi == k.KatsuyoHinshi.DOUSHI:
-#             renyo_text = katsuyo_text.gokan + katsuyo_text.katsuyo.renyo
-#             return kt.KatsuyoText(
-#                 gokan=renyo_text + kt.TAI.gokan,
-#                 katsuyo=kt.TAI.katsuyo,
-#             )
-#         # TODO 他のハンドリング
-#         return kt.KatsuyoText(
-#             gokan="",
-#             katsuyo=kt.TAI.katsuyo,
-#         )
+# 自分の希望
+class KibouSelf(IKatsuyoTextHelper):
+    def __init__(
+        self,
+        bridge: Optional[
+            Callable[[Union[kt.KatsuyoText, kt.NonKatsuyoText]], kt.KatsuyoText]
+        ] = None,
+    ) -> None:
+        if bridge is None:
+
+            def __default(
+                pre: Union[kt.KatsuyoText, kt.NonKatsuyoText]
+            ) -> kt.KatsuyoText:
+                # デフォルトでは特に何もしない
+                raise ValueError(
+                    f"Unsupported katsuyo_text in KibouSelf: {pre} type: {type(pre)}"
+                )
+
+            bridge = __default
+
+        super().__init__(bridge)
+
+    def try_merge(self, pre: kt.KatsuyoText) -> Optional[kt.KatsuyoText]:
+        katsuyo_class = type(pre.katsuyo)
+        if issubclass(katsuyo_class, k.DoushiKatsuyo):
+            return pre + kt.Tai()
+
+        return None
 
 
 # # 他人の希望

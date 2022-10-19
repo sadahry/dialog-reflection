@@ -295,10 +295,29 @@ class Nai(ZyodoushiKatsuyoText):
 # 助動詞::希望
 # ==============================================================================
 
-TAI = KatsuyoText(
-    gokan="た",
-    katsuyo=k.KEIYOUSHI,
-)
+
+class Tai(ZyodoushiKatsuyoText):
+    def __init__(self):
+        super().__init__(
+            KatsuyoText(
+                gokan="た",
+                katsuyo=k.KEIYOUSHI,
+            )
+        )
+
+    def merge(self, pre: KatsuyoText) -> KatsuyoText:
+        if issubclass(type(pre), NonKatsuyoText):
+            raise ValueError(
+                f"Unsupported katsuyo_text in Nai: {pre} type: {type(pre)}"
+            )
+        if not issubclass(type(pre.katsuyo), k.DoushiKatsuyo):
+            raise ValueError(
+                f"Unsupported katsuyo_text in Nai: {pre} type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
+            )
+
+        prefix = pre.gokan + pre.katsuyo.renyo
+        return NonKatsuyoText(prefix) + self.zyodoushi
+
 
 TAGARU = KatsuyoText(
     gokan="たが",

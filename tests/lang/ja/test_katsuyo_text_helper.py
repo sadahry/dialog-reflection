@@ -1,3 +1,4 @@
+import re
 import pytest
 from spacy_dialog_reflection.lang.ja.katsuyo_text import (
     KURU,
@@ -21,6 +22,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text_helper import (
     Hitei,
     Shieki,
     Ukemi,
+    KibouSelf,
 )
 from spacy_dialog_reflection.lang.ja.katsuyo_text_builder import (
     SpacyKatsuyoTextBuilder,
@@ -235,7 +237,6 @@ def test_zyodoushi_shieki_value_error(unsupported_katsuyo_text):
 @pytest.mark.parametrize(
     "msg, katsuyo_text, expected",
     [
-        # TODO 「らしい」など未然形が存在しないケースを追加
         (
             "五段活用",
             KatsuyoText(
@@ -323,6 +324,100 @@ def test_zyodoushi_hitei_value_error(unsupported_katsuyo_text):
     zyodoushi = Hitei()
     with pytest.raises(ValueError):
         unsupported_katsuyo_text + zyodoushi
+
+
+@pytest.mark.parametrize(
+    "msg, katsuyo_text, expected",
+    [
+        (
+            "五段活用",
+            KatsuyoText(
+                gokan="遊",
+                katsuyo=GODAN_BA_GYO,
+            ),
+            "遊びたい",
+        ),
+        (
+            "上一段活用",
+            KatsuyoText(
+                gokan="見",
+                katsuyo=KAMI_ICHIDAN,
+            ),
+            "見たい",
+        ),
+        (
+            "下一段活用",
+            KatsuyoText(
+                gokan="求め",
+                katsuyo=SHIMO_ICHIDAN,
+            ),
+            "求めたい",
+        ),
+        (
+            "カ変活用",
+            KURU,
+            "きたい",
+        ),
+        (
+            "サ変活用",
+            KatsuyoText(
+                gokan="ウォーキング",
+                katsuyo=SA_GYO_HENKAKU_SURU,
+            ),
+            "ウォーキングしたい",
+        ),
+        (
+            "サ変活用(する)",
+            KatsuyoText(
+                gokan="尊重",
+                katsuyo=SA_GYO_HENKAKU_SURU,
+            ),
+            "尊重したい",
+        ),
+        (
+            "サ変活用(ずる)",
+            KatsuyoText(
+                gokan="重ん",
+                katsuyo=SA_GYO_HENKAKU_ZURU,
+            ),
+            "重んじたい",
+        ),
+    ],
+)
+def test_zyodoushi_kibou_self(msg, katsuyo_text, expected):
+    zyodoushi = KibouSelf()
+    result = katsuyo_text + zyodoushi
+    assert str(result) == expected, msg
+
+
+@pytest.mark.parametrize(
+    "msg, katsuyo_text",
+    [
+        (
+            "形容詞",
+            KatsuyoText(
+                gokan="美し",
+                katsuyo=KEIYOUSHI,
+            ),
+        ),
+        (
+            "形容動詞",
+            KatsuyoText(
+                gokan="綺麗",
+                katsuyo=KEIYOUDOUSHI,
+            ),
+        ),
+        (
+            "NonKatsuyoText",
+            NonKatsuyoText("状態"),
+        ),
+    ],
+)
+def test_zyodoushi_kibou_self_value_error(msg, katsuyo_text):
+    zyodoushi = KibouSelf()
+    with pytest.raises(ValueError, match=re.compile(r"Unsupported.*")):
+        katsuyo_text + zyodoushi
+        assert False, msg
 
 
 @pytest.mark.filterwarnings("ignore:ValueError")
