@@ -319,7 +319,24 @@ class Tai(ZyodoushiKatsuyoText):
         return NonKatsuyoText(prefix) + self.zyodoushi
 
 
-TAGARU = KatsuyoText(
-    gokan="たが",
-    katsuyo=k.GODAN_RA_GYO,
-)
+class Tagaru(ZyodoushiKatsuyoText):
+    def __init__(self):
+        super().__init__(
+            KatsuyoText(
+                gokan="たが",
+                katsuyo=k.GODAN_RA_GYO,
+            )
+        )
+
+    def merge(self, pre: KatsuyoText) -> KatsuyoText:
+        if issubclass(type(pre), NonKatsuyoText):
+            raise ValueError(
+                f"Unsupported katsuyo_text in Nai: {pre} type: {type(pre)}"
+            )
+        if not issubclass(type(pre.katsuyo), k.DoushiKatsuyo):
+            raise ValueError(
+                f"Unsupported katsuyo_text in Nai: {pre} type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
+            )
+
+        prefix = pre.gokan + pre.katsuyo.renyo
+        return NonKatsuyoText(prefix) + self.zyodoushi

@@ -196,6 +196,7 @@ class KibouSelf(IKatsuyoTextHelper):
                 pre: Union[kt.KatsuyoText, kt.NonKatsuyoText]
             ) -> kt.KatsuyoText:
                 # デフォルトでは特に何もしない
+                # 「なりたい」「ありたい」「したい」など多様な選択肢が考えられるため
                 raise ValueError(
                     f"Unsupported katsuyo_text in KibouSelf: {pre} type: {type(pre)}"
                 )
@@ -212,14 +213,31 @@ class KibouSelf(IKatsuyoTextHelper):
         return None
 
 
-# # 他人の希望
-# class KibouOthers(IKatsuyoTextAppendants):
-#     # 現状、出力文字列としては「ない」のみサポート
-#     # TODO オプションで「ぬ」を選択できるように
+class KibouOthers(IKatsuyoTextHelper):
+    def __init__(
+        self,
+        bridge: Optional[
+            Callable[[Union[kt.KatsuyoText, kt.NonKatsuyoText]], kt.KatsuyoText]
+        ] = None,
+    ) -> None:
+        if bridge is None:
 
-#     def append(self, katsuyo_text: kt.KatsuyoText) -> kt.KatsuyoText:
-#         renyo_text = katsuyo_text.gokan + katsuyo_text.katsuyo.renyo
-#         return kt.KatsuyoText(
-#             gokan=renyo_text + kt.TAGARU.gokan,
-#             katsuyo=kt.TAGARU.katsuyo,
-#         )
+            def __default(
+                pre: Union[kt.KatsuyoText, kt.NonKatsuyoText]
+            ) -> kt.KatsuyoText:
+                # デフォルトでは特に何もしない
+                # 「なりたがる」「ありたがる」「したがる」など多様な選択肢が考えられるため
+                raise ValueError(
+                    f"Unsupported katsuyo_text in KibouOthers: {pre} type: {type(pre)}"
+                )
+
+            bridge = __default
+
+        super().__init__(bridge)
+
+    def try_merge(self, pre: kt.KatsuyoText) -> Optional[kt.KatsuyoText]:
+        katsuyo_class = type(pre.katsuyo)
+        if issubclass(katsuyo_class, k.DoushiKatsuyo):
+            return pre + kt.Tagaru()
+
+        return None

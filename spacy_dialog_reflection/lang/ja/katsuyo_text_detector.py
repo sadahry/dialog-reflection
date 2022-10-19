@@ -25,6 +25,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text_helper import (
     KibouSelf,
     Shieki,
     Ukemi,
+    KibouOthers,
 )
 import abc
 import warnings
@@ -49,6 +50,7 @@ class IKatsuyoTextAppendantsDetector(abc.ABC):
         Shieki,
         Hitei,
         KibouSelf,
+        KibouOthers,
     ]
 
     def __init__(self, appendants_dict: Dict[type, KatsuyoText]) -> None:
