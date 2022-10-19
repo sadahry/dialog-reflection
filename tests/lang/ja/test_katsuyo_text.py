@@ -21,6 +21,8 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text import (
         #
         #       たとえば「来る」＋「みる」=「来てみる」が自然だといえそうだが
         #       この加算式では「来みる」になる。
+        #
+        #       自然な結果の出力はIKatsuyoTextHeplerの実装方式に依存する。
         (
             "五段活用",
             KatsuyoText(
