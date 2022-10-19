@@ -4,7 +4,6 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text import (
     IKatsuyoTextHelper,
     KatsuyoText,
     NonKatsuyoText,
-    Nai,
 )
 from spacy_dialog_reflection.lang.ja.katsuyo import (
     GODAN_BA_GYO,
