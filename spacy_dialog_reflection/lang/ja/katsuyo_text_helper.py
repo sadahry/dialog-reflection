@@ -1,49 +1,39 @@
 from collections.abc import Callable
-from typing import Optional
-import abc
+from typing import Optional, Union
 import spacy_dialog_reflection.lang.ja.katsuyo as k
 import spacy_dialog_reflection.lang.ja.katsuyo_text as kt
 
 
-class IKatsuyoTextHelper(abc.ABC):
-    def __init__(
-        self,
-        bridge: Callable[[kt.KatsuyoText], kt.KatsuyoText],
-    ) -> None:
-        # 文法的には不正な活用形の組み合わせを
-        # 任意の活用形に変換して返せるようにするための関数
-        self.bridge = bridge
-
-    def merge(self, pre: kt.KatsuyoText) -> kt.KatsuyoText:
-        result = self.try_merge(pre)
-        if result is None:
-            return self.bridge(pre)
-        return result
-
-    @abc.abstractmethod
-    def try_merge(self, pre: kt.KatsuyoText) -> Optional[kt.KatsuyoText]:
-        raise NotImplementedError()
-
-
 # TODO このクラスは、KatsuyoTextBuilder的な名前のクラスに変更する
 #      gokan等が必要なく、KatsuyoTextを返すだけのクラスにする
-class Ukemi(IKatsuyoTextHelper):
+class Ukemi(kt.IKatsuyoTextHelper):
     def __init__(
         self,
-        bridge_func: Optional[Callable[[kt.KatsuyoText], kt.KatsuyoText]] = None,
+        bridge_func: Optional[
+            Callable[[Union[kt.KatsuyoText, kt.NoKatsuyoText]], kt.KatsuyoText]
+        ] = None,
     ) -> None:
         if bridge_func is None:
 
-            def __default(pre: kt.KatsuyoText) -> kt.KatsuyoText:
+            def __default(
+                pre: Union[kt.KatsuyoText, kt.NoKatsuyoText]
+            ) -> kt.KatsuyoText:
+                # デフォルトでは動詞「なる」でブリッジ
+                naru = kt.KatsuyoText(
+                    gokan="な",
+                    katsuyo=k.GODAN_RA_GYO,
+                )
+
+                if issubclass(
+                    type(pre),
+                    (kt.NoKatsuyoText),
+                ):
+                    return pre + "に" + naru + kt.Reru()
+
                 if issubclass(
                     type(pre.katsuyo),
                     (k.KeiyoushiKatsuyo, k.KeiyoudoushiKatsuyo),
                 ):
-                    # デフォルトでは動詞「なる」でブリッジ
-                    naru = kt.KatsuyoText(
-                        gokan="な",
-                        katsuyo=k.GODAN_RA_GYO,
-                    )
                     return pre + naru + kt.Reru()
 
                 raise ValueError(f"Unsupported katsuyo_text in Ukemi: {pre}")

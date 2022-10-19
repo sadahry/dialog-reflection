@@ -1,5 +1,7 @@
-from typing import Union
+from collections.abc import Callable
+from typing import Union, Optional
 from dataclasses import dataclass
+import abc
 import spacy_dialog_reflection.lang.ja.katsuyo as k
 
 
@@ -18,14 +20,15 @@ class KatsuyoText:
     katsuyo: k.Katsuyo
 
     def __add__(
-        self, post: Union["NoKatsuyoText", "NoKatsuyoText"]
-    ) -> Union["NoKatsuyoText", "NoKatsuyoText"]:
+        self, post: Union["NoKatsuyoText", "NoKatsuyoText", "IKatsuyoTextHelper"]
+    ) -> Union["KatsuyoText", "NoKatsuyoText"]:
         if issubclass(type(post), NoKatsuyoText):
             return self.append(post)
+        elif issubclass(type(post), (KatsuyoText, IKatsuyoTextHelper)):
+            # 言語の特性上、活用形の前に接続される品詞の影響を受ける。
+            return post.merge(self)
 
-        # if "KatsuyoText"
-        # 言語の特性上、活用形の前に接続される品詞の影響を受ける。
-        return post.merge(self)
+        raise ValueError(f"Invalid type in addition: {type(post)}")
 
     def append(self, post: "NoKatsuyoText") -> "NoKatsuyoText":
         """
@@ -61,19 +64,48 @@ class NoKatsuyoText:
     text: str
 
     def __add__(
-        self, post: Union["KatsuyoText", "NoKatsuyoText"]
+        self, post: Union["KatsuyoText", "NoKatsuyoText", "IKatsuyoTextHelper"]
     ) -> Union["KatsuyoText", "NoKatsuyoText"]:
         if issubclass(type(post), NoKatsuyoText):
             return NoKatsuyoText(text=self.text + post.text)
+        elif issubclass(type(post), KatsuyoText):
+            return KatsuyoText(
+                gokan=self.text + post.gokan,
+                katsuyo=post.katsuyo,
+            )
+        elif issubclass(type(post), IKatsuyoTextHelper):
+            # 言語の特性上、活用形の前に接続される品詞の影響を受ける。
+            # 値を調整できるようにbridgeとする
+            return post.bridge(self)
 
-        # if "KatsuyoText"
-        return KatsuyoText(
-            gokan=self.text + post.gokan,
-            katsuyo=post.katsuyo,
-        )
+        raise ValueError(f"Invalid type in addition: {type(post)}")
 
     def __str__(self):
         return self.text
+
+
+class IKatsuyoTextHelper(abc.ABC):
+    """
+    柔軟に活用系を変換するためのクラス
+    """
+
+    def __init__(
+        self,
+        bridge: Callable[[Union[KatsuyoText, NoKatsuyoText]], KatsuyoText],
+    ) -> None:
+        # 文法的には不正な活用形の組み合わせを
+        # 任意の活用形に変換して返せるようにするための関数
+        self.bridge = bridge
+
+    def merge(self, pre: KatsuyoText) -> KatsuyoText:
+        result = self.try_merge(pre)
+        if result is None:
+            return self.bridge(pre)
+        return result
+
+    @abc.abstractmethod
+    def try_merge(self, pre: KatsuyoText) -> Optional[KatsuyoText]:
+        raise NotImplementedError()
 
 
 # ==============================================================================

@@ -81,4 +81,9 @@ def test_add(msg, katsuyo_text1, katsuyo_text2, expected):
     assert str(katsuyo_text1 + katsuyo_text2) == expected, msg
 
 
+def test_error():
+    with pytest.raises(ValueError):
+        KURU_KANJI + 1
+
+
 # TODO KatsuyoText x NonKatsuyoText のテストを追加する
