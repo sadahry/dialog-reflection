@@ -664,6 +664,7 @@ def test_spacy_katsuyo_text_detector(
             "それは仕方がない",
             "ない",
             "ADJ",
+            # TODO 格助詞「が」も取得できるように
             [Hitei],
         ),
     ],

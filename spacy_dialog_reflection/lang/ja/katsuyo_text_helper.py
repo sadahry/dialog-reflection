@@ -127,15 +127,53 @@ class Hitei(IKatsuyoTextHelper):
     # 現状、出力文字列としては「ない」のみサポート
     # TODO オプションで「ぬ」を選択できるように
 
-    def __init__(self) -> None:
-        # TODO 実装
-        def __default(pre: Union[kt.KatsuyoText, kt.NonKatsuyoText]) -> kt.KatsuyoText:
-            raise NotImplementedError()
+    def __init__(
+        self,
+        bridge: Optional[
+            Callable[[Union[kt.KatsuyoText, kt.NonKatsuyoText]], kt.KatsuyoText]
+        ] = None,
+    ) -> None:
+        if bridge is None:
 
-        super().__init__(__default)
+            def __default(
+                pre: Union[kt.KatsuyoText, kt.NonKatsuyoText]
+            ) -> kt.KatsuyoText:
+                if issubclass(
+                    type(pre),
+                    (kt.NonKatsuyoText),
+                ):
+                    # TODO 助詞のハンドリング
+                    deha = kt.NonKatsuyoText("では")
+                    return pre + deha + kt.Nai()
+
+                if issubclass(
+                    type(pre.katsuyo),
+                    k.KeiyoushiKatsuyo,
+                ):
+                    # 「ない」を形容詞として扱い連用形でブリッジ
+                    renyo_text = pre.gokan + pre.katsuyo.renyo
+                    return NonKatsuyoText(renyo_text) + kt.Nai()
+                elif issubclass(
+                    type(pre.katsuyo),
+                    k.KeiyoudoushiKatsuyo,
+                ):
+                    # 「ない」を形容詞として扱い連用形でブリッジ
+                    # 形容動詞は「ない」には特殊な形式で紐づく
+                    renyo_text = pre.gokan + pre.katsuyo.renyo_nai
+                    return NonKatsuyoText(renyo_text) + kt.Nai()
+
+                raise ValueError(f"Unsupported katsuyo_text in Hitei: {pre}")
+
+            bridge = __default
+
+        super().__init__(bridge)
 
     def try_merge(self, pre: kt.KatsuyoText) -> Optional[kt.KatsuyoText]:
-        return pre + kt.Nai()
+        katsuyo_class = type(pre.katsuyo)
+        if issubclass(katsuyo_class, k.DoushiKatsuyo):
+            return pre + kt.Nai()
+
+        return None
 
 
 # # 自分の希望
