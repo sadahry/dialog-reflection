@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional, List, Tuple
+from typing import Any, Optional, List, Tuple
 from itertools import dropwhile
 from spacy_dialog_reflection.lang.ja.katsuyo import (
     GODAN_BA_GYO,
@@ -18,7 +18,12 @@ from spacy_dialog_reflection.lang.ja.katsuyo import (
     SA_GYO_HENKAKU_ZURU,
     SHIMO_ICHIDAN,
 )
-from spacy_dialog_reflection.lang.ja.katsuyo_text import KURU, KURU_KANJI, KatsuyoText
+from spacy_dialog_reflection.lang.ja.katsuyo_text import (
+    KURU,
+    KURU_KANJI,
+    IKatsuyoTextHelper,
+    KatsuyoText,
+)
 
 from spacy_dialog_reflection.lang.ja.katsuyo_text_helper import (
     Hitei,
@@ -45,20 +50,26 @@ class IKatsuyoTextDetector(abc.ABC):
 
 
 class IKatsuyoTextAppendantsDetector(abc.ABC):
-    APPENDANTS = [
+    SUPPORTED_HELPERS = (
         Ukemi,
         Shieki,
         Hitei,
         KibouSelf,
         KibouOthers,
-    ]
+    )
 
-    def __init__(self, appendants_dict: Dict[type, KatsuyoText]) -> None:
-        self.appendants_dict = appendants_dict
+    def __init__(self, helpers: List[IKatsuyoTextHelper]) -> None:
+        # validate helpers
+        for helper in helpers:
+            if not isinstance(helper, self.SUPPORTED_HELPERS):
+                raise ValueError(f"Unsupported appendant helper: {helper}")
+
+        self.appendants_dict = {type(helper): helper for helper in helpers}
+
         # check appendants_dict
-        for appendant in self.APPENDANTS:
-            if appendant not in self.appendants_dict:
-                warnings.warn(f"appendants_dict doesn't have appendant: {appendant}")
+        for supported_helper in self.SUPPORTED_HELPERS:
+            if not issubclass(supported_helper, tuple(self.appendants_dict.keys())):
+                warnings.warn(f"this object doesn't have helper: {supported_helper}")
 
     def try_append(self, type: type, appendants: List[KatsuyoText]) -> bool:
         if type not in self.appendants_dict:

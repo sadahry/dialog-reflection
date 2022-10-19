@@ -1,5 +1,6 @@
 import pytest
 from spacy_dialog_reflection.lang.ja.katsuyo_text import (
+    IKatsuyoTextHelper,
     KatsuyoText,
 )
 from spacy_dialog_reflection.lang.ja.katsuyo import (
@@ -22,7 +23,9 @@ from spacy_dialog_reflection.lang.ja.katsuyo import (
     SA_GYO_HENKAKU_ZURU,
     SHIMO_ICHIDAN,
 )
-
+from spacy_dialog_reflection.lang.ja.katsuyo_text_detector import (
+    SpacyKatsuyoTextAppendantsDetector,
+)
 from spacy_dialog_reflection.lang.ja.katsuyo_text_helper import (
     KibouOthers,
     KibouSelf,
@@ -41,6 +44,32 @@ def spacy_detector():
 @pytest.fixture(scope="session")
 def spacy_appendants_detector():
     return SpacyKatsuyoTextBuilder().appendants_detector
+
+
+def katsuyo_texts_appendants_detector_init_validation_error():
+    class UnsupportedHelper(IKatsuyoTextHelper):
+        def __init__(self):
+            super().__init__(bridge=lambda x: x)
+
+        def try_merge(self, _):
+            return None
+
+    with pytest.raises(ValueError):
+        SpacyKatsuyoTextAppendantsDetector(
+            [
+                UnsupportedHelper(),
+            ]
+        )
+        assert False, "UnsupportedHelper should not be accepted."
+
+
+@pytest.mark.filterwarnings("ignore:this object doesn't have helper")
+def katsuyo_texts_appendants_detector_init_warning():
+    SpacyKatsuyoTextAppendantsDetector(
+        [
+            Ukemi(),
+        ]
+    )
 
 
 @pytest.mark.parametrize(

@@ -1,7 +1,6 @@
 from dataclasses import replace
 from typing import Any, Optional, List, Tuple
 from spacy_dialog_reflection.lang.ja.katsuyo_text import KatsuyoText
-
 from spacy_dialog_reflection.lang.ja.katsuyo_text_helper import (
     Hitei,
     Shieki,
@@ -89,12 +88,12 @@ class SpacyKatsuyoTextBuilder(IKatsuyoTextBuilder):
             root_detector=SpacyKatsuyoTextDetector(),
             appendants_detector=SpacyKatsuyoTextAppendantsDetector(
                 # TODO もっと柔軟な設定ができるように
-                {
-                    Ukemi: Ukemi(),
-                    Shieki: Shieki(),
-                    Hitei: Hitei(),
-                    KibouSelf: KibouSelf(),
-                    KibouOthers: KibouOthers(),
-                }
+                [
+                    Ukemi(),
+                    Shieki(),
+                    Hitei(),
+                    KibouSelf(),
+                    KibouOthers(),
+                ],
             ),
         )
