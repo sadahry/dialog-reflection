@@ -1,5 +1,6 @@
 from collections.abc import Callable
 from typing import Optional, Union
+from spacy_dialog_reflection.lang.ja.katsuyo_text import IKatsuyoTextHelper
 import spacy_dialog_reflection.lang.ja.katsuyo as k
 import spacy_dialog_reflection.lang.ja.katsuyo_text as kt
 
@@ -64,54 +65,51 @@ class Ukemi(kt.IKatsuyoTextHelper):
         return None
 
 
-# TODO 修正
-# # 使役
-# class Shieki(IKatsuyoTextAppendants):
-#     def append(self, katsuyo_text: kt.KatsuyoText) -> kt.KatsuyoText:
-#         katsuyo_class = type(katsuyo_text.katsuyo)
-#         # サ行変格活用のみ特殊
-#         if issubclass(katsuyo_class, k.SaGyoHenkakuKatsuyo):
-#             # 用法的に「〜する」は「れる/られる」どちらでもよいため固定
-#             # 用法的に「〜ずる」は文語が多いため未然形「〜ぜ られる」を採用
-#             if katsuyo_text.katsuyo.shushi == "する":
-#                 mizen_text = katsuyo_text.gokan + katsuyo_text.katsuyo.mizen_reru
-#                 return kt.KatsuyoText(
-#                     gokan=mizen_text + kt.SERU.gokan,
-#                     katsuyo=kt.SERU.katsuyo,
-#                 )
-#             elif katsuyo_text.katsuyo.shushi == "ずる":
-#                 mizen_text = katsuyo_text.gokan + katsuyo_text.katsuyo.renyo
-#                 return kt.KatsuyoText(
-#                     gokan=mizen_text + kt.SASERU.gokan,
-#                     katsuyo=kt.SASERU.katsuyo,
-#                 )
+class Shieki(IKatsuyoTextHelper):
+    def __init__(self) -> None:
+        # TODO 実装
+        def __default(pre: Union[kt.KatsuyoText, kt.NonKatsuyoText]) -> kt.KatsuyoText:
+            raise NotImplementedError()
 
-#         mizen_text = katsuyo_text.gokan + katsuyo_text.katsuyo.mizen
-#         if mizen_text[-1] in k.DAN["あ"]:
-#             return kt.KatsuyoText(
-#                 gokan=mizen_text + kt.SERU.gokan,
-#                 katsuyo=kt.SERU.katsuyo,
-#             )
-#         else:
-#             return kt.KatsuyoText(
-#                 gokan=mizen_text + kt.SASERU.gokan,
-#                 katsuyo=kt.SASERU.katsuyo,
-#             )
+        super().__init__(__default)
+
+    def try_merge(self, pre: kt.KatsuyoText) -> Optional[kt.KatsuyoText]:
+        katsuyo_class = type(pre.katsuyo)
+        if issubclass(katsuyo_class, k.DoushiKatsuyo):
+            # サ行変格活用のみ特殊
+            if issubclass(katsuyo_class, k.SaGyoHenkakuKatsuyo):
+                # 用法的に「〜する」は「せる/させる」どちらでもよいため固定
+                # 用法的に「〜ずる」は「〜じ させる」を採用
+                if pre.katsuyo.shushi == "する":
+                    return pre + kt.Seru()
+                elif pre.katsuyo.shushi == "ずる":
+                    return pre + kt.Saseru()
+
+            mizen_text = pre.gokan + pre.katsuyo.mizen
+            if mizen_text[-1] in k.DAN["あ"]:
+                return pre + kt.Seru()
+            else:
+                return pre + kt.Saseru()
+
+        return None
 
 
-# # 否定
-# # NOTE: 現状は「仕方が無い」といった否定以外の文字列も取れてしまう。
-# #       意味を扱うユースケースが発生したら、別途方針を決める。
-# class Nai(IKatsuyoTextAppendants):
-#     # 現状、出力文字列としては「ない」のみサポート
-#     # TODO オプションで「ぬ」を選択できるように
+# 否定
+# NOTE: 現状は「仕方が無い」といった否定以外の文字列も取れてしまう。
+#       意味を扱うユースケースが発生したら、別途方針を決める。
+class Hitei(IKatsuyoTextHelper):
+    # 現状、出力文字列としては「ない」のみサポート
+    # TODO オプションで「ぬ」を選択できるように
 
-#     def append(self, katsuyo_text: kt.KatsuyoText) -> kt.KatsuyoText:
-#         mizen_text = katsuyo_text.gokan + katsuyo_text.katsuyo.mizen
-#         return kt.KatsuyoText(
-#             gokan=mizen_text + kt.NAI.gokan,
-#             katsuyo=kt.NAI.katsuyo,
-#         )
+    def __init__(self) -> None:
+        # TODO 実装
+        def __default(pre: Union[kt.KatsuyoText, kt.NonKatsuyoText]) -> kt.KatsuyoText:
+            raise NotImplementedError()
+
+        super().__init__(__default)
+
+    def try_merge(self, pre: kt.KatsuyoText) -> Optional[kt.KatsuyoText]:
+        return pre + kt.Nai()
 
 
 # # 自分の希望

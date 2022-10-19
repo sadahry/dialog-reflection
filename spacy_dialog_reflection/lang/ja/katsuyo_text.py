@@ -192,24 +192,58 @@ class Rareru(ZyodoushiKatsuyoText):
 # 助動詞::使役
 # ==============================================================================
 
-SERU = KatsuyoText(
-    gokan="せ",
-    katsuyo=k.SHIMO_ICHIDAN,
-)
 
-SASERU = KatsuyoText(
-    gokan="させ",
-    katsuyo=k.SHIMO_ICHIDAN,
-)
+class Seru(ZyodoushiKatsuyoText):
+    def __init__(self):
+        super().__init__(
+            KatsuyoText(
+                gokan="せ",
+                katsuyo=k.SHIMO_ICHIDAN,
+            )
+        )
+
+    def merge(self, pre: KatsuyoText) -> KatsuyoText:
+        if issubclass(type(pre.katsuyo), k.SaGyoHenkakuKatsuyo):
+            prefix = pre.gokan + pre.katsuyo.mizen_reru
+            return NonKatsuyoText(prefix) + self.zyodoushi
+
+        prefix = pre.gokan + pre.katsuyo.mizen
+        return NonKatsuyoText(prefix) + self.zyodoushi
+
+
+class Saseru(ZyodoushiKatsuyoText):
+    def __init__(self):
+        super().__init__(
+            KatsuyoText(
+                gokan="させ",
+                katsuyo=k.SHIMO_ICHIDAN,
+            )
+        )
+
+    def merge(self, pre: KatsuyoText) -> KatsuyoText:
+        # 「〜ずる」には未然形「〜じ させる」を採用したため他と同一の未然形に
+        prefix = pre.gokan + pre.katsuyo.mizen
+        return NonKatsuyoText(prefix) + self.zyodoushi
+
 
 # ==============================================================================
 # 助動詞::否定
 # ==============================================================================
 
-NAI = KatsuyoText(
-    gokan="な",
-    katsuyo=k.KEIYOUSHI,
-)
+
+class Nai(ZyodoushiKatsuyoText):
+    def __init__(self):
+        super().__init__(
+            KatsuyoText(
+                gokan="な",
+                katsuyo=k.KEIYOUSHI,
+            )
+        )
+
+    def merge(self, pre: KatsuyoText) -> KatsuyoText:
+        prefix = pre.gokan + pre.katsuyo.mizen
+        return NonKatsuyoText(prefix) + self.zyodoushi
+
 
 # ==============================================================================
 # 助動詞::希望

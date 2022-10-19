@@ -20,13 +20,9 @@ from spacy_dialog_reflection.lang.ja.katsuyo import (
 )
 from spacy_dialog_reflection.lang.ja.katsuyo_text import KURU, KURU_KANJI, KatsuyoText
 
-# TODO 直す
-# from spacy_dialog_reflection.lang.ja.katsuyo_text_helper import (
-#     Nai,
-#     Shieki,
-#     Ukemi,
-# )
 from spacy_dialog_reflection.lang.ja.katsuyo_text_helper import (
+    Hitei,
+    Shieki,
     Ukemi,
 )
 import abc
@@ -49,8 +45,8 @@ class IKatsuyoTextDetector(abc.ABC):
 class IKatsuyoTextAppendantsDetector(abc.ABC):
     APPENDANTS = [
         Ukemi,
-        # Shieki,
-        # Nai,
+        Shieki,
+        Hitei,
     ]
 
     def __init__(self, appendants_dict: Dict[type, KatsuyoText]) -> None:
@@ -255,24 +251,24 @@ class SpacyKatsuyoTextAppendantsDetector(IKatsuyoTextAppendantsDetector):
                     is_succeeded = self.try_append(Ukemi, appendants)
                     has_error = has_error or not is_succeeded
                     continue
-                # elif lemma in ["せる", "させる"]:
-                #     is_succeeded = self.try_append(Shieki, appendants)
-                #     has_error = has_error or not is_succeeded
-                #     continue
-                # elif lemma in ["ない", "ぬ"]:
-                #     # 「ぬ」も「ない」として扱う
-                #     is_succeeded = self.try_append(Nai, appendants)
-                #     has_error = has_error or not is_succeeded
-                #     continue
+                elif lemma in ["せる", "させる"]:
+                    is_succeeded = self.try_append(Shieki, appendants)
+                    has_error = has_error or not is_succeeded
+                    continue
+                elif lemma in ["ない", "ぬ"]:
+                    # 「ぬ」も「ない」として扱う
+                    is_succeeded = self.try_append(Hitei, appendants)
+                    has_error = has_error or not is_succeeded
+                    continue
 
                 warnings.warn(f"Unsupported AUX: {lemma}", UserWarning)
                 has_error = True
                 continue
-            # elif pos_tag == "ADJ":
-            #     # 「ない」のみ対応
-            #     if lemma in ["ない", "無い"]:
-            #         is_succeeded = self.try_append(Nai, appendants)
-            #         has_error = has_error or not is_succeeded
-            #         continue
+            elif pos_tag == "ADJ":
+                # 「ない」のみ対応
+                if lemma in ["ない", "無い"]:
+                    is_succeeded = self.try_append(Hitei, appendants)
+                    has_error = has_error or not is_succeeded
+                    continue
 
         return appendants, has_error
