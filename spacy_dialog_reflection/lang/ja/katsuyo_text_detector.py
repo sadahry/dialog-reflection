@@ -21,12 +21,12 @@ from spacy_dialog_reflection.lang.ja.katsuyo import (
 from spacy_dialog_reflection.lang.ja.katsuyo_text import KURU, KURU_KANJI, KatsuyoText
 
 # TODO 直す
-# from spacy_dialog_reflection.lang.ja.zyodoushi_katsuyo_text import (
+# from spacy_dialog_reflection.lang.ja.katsuyo_text_helper import (
 #     Nai,
 #     Shieki,
 #     Ukemi,
 # )
-from spacy_dialog_reflection.lang.ja.zyodoushi_katsuyo_text import (
+from spacy_dialog_reflection.lang.ja.katsuyo_text_helper import (
     Ukemi,
 )
 import abc

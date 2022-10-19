@@ -24,8 +24,8 @@ from spacy_dialog_reflection.lang.ja.katsuyo import (
 )
 
 # TODO 直す
-# from spacy_dialog_reflection.lang.ja.zyodoushi_katsuyo_text import Nai, Shieki, Ukemi
-from spacy_dialog_reflection.lang.ja.zyodoushi_katsuyo_text import Ukemi
+# from spacy_dialog_reflection.lang.ja.katsuyo_text_helper import Nai, Shieki, Ukemi
+from spacy_dialog_reflection.lang.ja.katsuyo_text_helper import Ukemi
 from spacy_dialog_reflection.lang.ja.katsuyo_text_builder import SpacyKatsuyoTextBuilder
 
 

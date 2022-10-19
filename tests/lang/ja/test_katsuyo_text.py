@@ -79,3 +79,6 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text import (
 )
 def test_add(msg, katsuyo_text1, katsuyo_text2, expected):
     assert str(katsuyo_text1 + katsuyo_text2) == expected, msg
+
+
+# TODO KatsuyoText x NonKatsuyoText のテストを追加する

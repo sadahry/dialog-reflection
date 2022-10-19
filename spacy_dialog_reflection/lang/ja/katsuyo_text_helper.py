@@ -1,64 +1,40 @@
 from collections.abc import Callable
 from typing import Optional
+import abc
 import spacy_dialog_reflection.lang.ja.katsuyo as k
 import spacy_dialog_reflection.lang.ja.katsuyo_text as kt
 
 
-class ZyodoushiKatsuyoText(kt.KatsuyoText):
-    def __init__(self, zyodoushi: kt.KatsuyoText):
-        self.zyodoushi = zyodoushi
-        super().__init__(
-            zyodoushi.gokan,
-            zyodoushi.katsuyo,
-        )
-
-
-class Reru(ZyodoushiKatsuyoText):
-    def __init__(self):
-        super().__init__(
-            kt.KatsuyoText(
-                gokan="れ",
-                katsuyo=k.SHIMO_ICHIDAN,
-            )
-        )
-
-    def merge(self, pre: kt.KatsuyoText) -> kt.KatsuyoText:
-        if issubclass(type(pre.katsuyo), k.SaGyoHenkakuKatsuyo):
-            prefix = pre.gokan + pre.katsuyo.mizen_reru
-            return kt.NoKatsuyoText(prefix) + self.zyodoushi
-
-        prefix = pre.gokan + pre.katsuyo.mizen
-        return kt.NoKatsuyoText(prefix) + self.zyodoushi
-
-
-class Rareru(ZyodoushiKatsuyoText):
-    def __init__(self):
-        super().__init__(
-            kt.KatsuyoText(
-                gokan="られ",
-                katsuyo=k.SHIMO_ICHIDAN,
-            )
-        )
-
-    def merge(self, pre: kt.KatsuyoText) -> kt.KatsuyoText:
-        if issubclass(type(pre.katsuyo), k.SaGyoHenkakuKatsuyo):
-            prefix = pre.gokan + pre.katsuyo.mizen_rareru
-            return kt.NoKatsuyoText(prefix) + self.zyodoushi
-
-        prefix = pre.gokan + pre.katsuyo.mizen
-        return kt.NoKatsuyoText(prefix) + self.zyodoushi
-
-
-class Ukemi(Reru):
+class IKatsuyoTextHelper(abc.ABC):
     def __init__(
         self,
-        bridge_text_func: Optional[Callable[[kt.KatsuyoText], str]] = None,
+        bridge: Callable[[kt.KatsuyoText], kt.KatsuyoText],
     ) -> None:
-        super().__init__()
+        # 文法的には不正な活用形の組み合わせを
+        # 任意の活用形に変換して返せるようにするための関数
+        self.bridge = bridge
 
-        if bridge_text_func is None:
+    def merge(self, pre: kt.KatsuyoText) -> kt.KatsuyoText:
+        result = self.try_merge(pre)
+        if result is None:
+            return self.bridge(pre)
+        return result
 
-            def __default(pre: kt.KatsuyoText) -> str:
+    @abc.abstractmethod
+    def try_merge(self, pre: kt.KatsuyoText) -> Optional[kt.KatsuyoText]:
+        raise NotImplementedError()
+
+
+# TODO このクラスは、KatsuyoTextBuilder的な名前のクラスに変更する
+#      gokan等が必要なく、KatsuyoTextを返すだけのクラスにする
+class Ukemi(IKatsuyoTextHelper):
+    def __init__(
+        self,
+        bridge_func: Optional[Callable[[kt.KatsuyoText], kt.KatsuyoText]] = None,
+    ) -> None:
+        if bridge_func is None:
+
+            def __default(pre: kt.KatsuyoText) -> kt.KatsuyoText:
                 if issubclass(
                     type(pre.katsuyo),
                     (k.KeiyoushiKatsuyo, k.KeiyoudoushiKatsuyo),
@@ -68,15 +44,15 @@ class Ukemi(Reru):
                         gokan="な",
                         katsuyo=k.GODAN_RA_GYO,
                     )
-                    return pre + naru + Reru()
+                    return pre + naru + kt.Reru()
 
                 raise ValueError(f"Unsupported katsuyo_text in Ukemi: {pre}")
 
-            bridge_text_func = __default
+            bridge_func = __default
 
-        self.bridge_text_func: Callable[[kt.KatsuyoText], str] = bridge_text_func
+        super().__init__(bridge_func)
 
-    def merge(self, pre: kt.KatsuyoText) -> kt.KatsuyoText:
+    def try_merge(self, pre: kt.KatsuyoText) -> Optional[kt.KatsuyoText]:
         katsuyo_class = type(pre.katsuyo)
         if issubclass(katsuyo_class, k.DoushiKatsuyo):
             # サ行変格活用のみ特殊
@@ -84,18 +60,17 @@ class Ukemi(Reru):
                 # 用法的に「〜する」は「れる/られる」どちらでもよいため固定
                 # 用法的に「〜ずる」は文語が多いため未然形「〜ぜ られる」を採用
                 if pre.katsuyo.shushi == "する":
-                    return pre + Reru()
+                    return pre + kt.Reru()
                 elif pre.katsuyo.shushi == "ずる":
-                    return pre + Rareru()
+                    return pre + kt.Rareru()
 
             mizen_text = pre.gokan + pre.katsuyo.mizen
             if mizen_text[-1] in k.DAN["あ"]:
-                return pre + Reru()
+                return pre + kt.Reru()
             else:
-                return pre + Rareru()
+                return pre + kt.Rareru()
 
-        # 文法的な置き換えができない単語はbridge_text_funcで処理
-        return self.bridge_text_func(pre)
+        return None
 
 
 # TODO 修正

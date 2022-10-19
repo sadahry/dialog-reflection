@@ -105,19 +105,56 @@ ZURU = KatsuyoText(
 # see: https://ja.wikipedia.org/wiki/助動詞_(国文法)
 # ==============================================================================
 
+
+class ZyodoushiKatsuyoText(KatsuyoText):
+    def __init__(self, zyodoushi: KatsuyoText):
+        self.zyodoushi = zyodoushi
+        super().__init__(
+            zyodoushi.gokan,
+            zyodoushi.katsuyo,
+        )
+
+
 # ==============================================================================
 # 助動詞::受身
 # ==============================================================================
 
-RERU = KatsuyoText(
-    gokan="れ",
-    katsuyo=k.SHIMO_ICHIDAN,
-)
 
-RARERU = KatsuyoText(
-    gokan="られ",
-    katsuyo=k.SHIMO_ICHIDAN,
-)
+class Reru(ZyodoushiKatsuyoText):
+    def __init__(self):
+        super().__init__(
+            KatsuyoText(
+                gokan="れ",
+                katsuyo=k.SHIMO_ICHIDAN,
+            )
+        )
+
+    def merge(self, pre: KatsuyoText) -> KatsuyoText:
+        if issubclass(type(pre.katsuyo), k.SaGyoHenkakuKatsuyo):
+            prefix = pre.gokan + pre.katsuyo.mizen_reru
+            return NoKatsuyoText(prefix) + self.zyodoushi
+
+        prefix = pre.gokan + pre.katsuyo.mizen
+        return NoKatsuyoText(prefix) + self.zyodoushi
+
+
+class Rareru(ZyodoushiKatsuyoText):
+    def __init__(self):
+        super().__init__(
+            KatsuyoText(
+                gokan="られ",
+                katsuyo=k.SHIMO_ICHIDAN,
+            )
+        )
+
+    def merge(self, pre: KatsuyoText) -> KatsuyoText:
+        if issubclass(type(pre.katsuyo), k.SaGyoHenkakuKatsuyo):
+            prefix = pre.gokan + pre.katsuyo.mizen_rareru
+            return NoKatsuyoText(prefix) + self.zyodoushi
+
+        prefix = pre.gokan + pre.katsuyo.mizen
+        return NoKatsuyoText(prefix) + self.zyodoushi
+
 
 # ==============================================================================
 # 助動詞::使役
