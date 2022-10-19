@@ -163,6 +163,15 @@ class Reru(ZyodoushiKatsuyoText):
         )
 
     def merge(self, pre: KatsuyoText) -> KatsuyoText:
+        if issubclass(type(pre), NonKatsuyoText):
+            raise ValueError(
+                f"Unsupported katsuyo_text in Reru: {pre} type: {type(pre)}"
+            )
+        if not issubclass(type(pre.katsuyo), k.DoushiKatsuyo):
+            raise ValueError(
+                f"Unsupported katsuyo_text in Reru: {pre} type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
+            )
+
         if issubclass(type(pre.katsuyo), k.SaGyoHenkakuKatsuyo):
             prefix = pre.gokan + pre.katsuyo.mizen_reru
             return NonKatsuyoText(prefix) + self.zyodoushi
@@ -181,6 +190,15 @@ class Rareru(ZyodoushiKatsuyoText):
         )
 
     def merge(self, pre: KatsuyoText) -> KatsuyoText:
+        if issubclass(type(pre), NonKatsuyoText):
+            raise ValueError(
+                f"Unsupported katsuyo_text in Rareru: {pre} type: {type(pre)}"
+            )
+        if not issubclass(type(pre.katsuyo), k.DoushiKatsuyo):
+            raise ValueError(
+                f"Unsupported katsuyo_text in Rareru: {pre} type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
+            )
+
         if issubclass(type(pre.katsuyo), k.SaGyoHenkakuKatsuyo):
             prefix = pre.gokan + pre.katsuyo.mizen_rareru
             return NonKatsuyoText(prefix) + self.zyodoushi
@@ -204,6 +222,15 @@ class Seru(ZyodoushiKatsuyoText):
         )
 
     def merge(self, pre: KatsuyoText) -> KatsuyoText:
+        if issubclass(type(pre), NonKatsuyoText):
+            raise ValueError(
+                f"Unsupported katsuyo_text in Seru: {pre} type: {type(pre)}"
+            )
+        if not issubclass(type(pre.katsuyo), k.DoushiKatsuyo):
+            raise ValueError(
+                f"Unsupported katsuyo_text in Seru: {pre} type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
+            )
+
         if issubclass(type(pre.katsuyo), k.SaGyoHenkakuKatsuyo):
             prefix = pre.gokan + pre.katsuyo.mizen_reru
             return NonKatsuyoText(prefix) + self.zyodoushi
@@ -222,6 +249,15 @@ class Saseru(ZyodoushiKatsuyoText):
         )
 
     def merge(self, pre: KatsuyoText) -> KatsuyoText:
+        if issubclass(type(pre), NonKatsuyoText):
+            raise ValueError(
+                f"Unsupported katsuyo_text in Saseru: {pre} type: {type(pre)}"
+            )
+        if not issubclass(type(pre.katsuyo), k.DoushiKatsuyo):
+            raise ValueError(
+                f"Unsupported katsuyo_text in Saseru: {pre} type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
+            )
+
         # 「〜ずる」には未然形「〜じ させる」を採用したため他と同一の未然形に
         prefix = pre.gokan + pre.katsuyo.mizen
         return NonKatsuyoText(prefix) + self.zyodoushi
@@ -242,6 +278,15 @@ class Nai(ZyodoushiKatsuyoText):
         )
 
     def merge(self, pre: KatsuyoText) -> KatsuyoText:
+        if issubclass(type(pre), NonKatsuyoText):
+            raise ValueError(
+                f"Unsupported katsuyo_text in Nai: {pre} type: {type(pre)}"
+            )
+        if not issubclass(type(pre.katsuyo), k.DoushiKatsuyo):
+            raise ValueError(
+                f"Unsupported katsuyo_text in Nai: {pre} type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
+            )
+
         prefix = pre.gokan + pre.katsuyo.mizen
         return NonKatsuyoText(prefix) + self.zyodoushi
 
