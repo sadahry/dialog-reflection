@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+import attrs
 from typing import Optional
 
 DAN = {
@@ -28,8 +28,9 @@ GYO = {
 }
 
 
-@dataclass(frozen=True)
+@attrs.define(frozen=True, slots=True)
 class Katsuyo:
+    # TODO Optionalのfieldは後で下位クラスに渡して消す
     mizen: str
     renyo: Optional[str]
     shushi: str
@@ -57,7 +58,7 @@ class DoushiKatsuyo(Katsuyo):
 # ==============================================================================
 
 
-@dataclass(frozen=True)
+@attrs.define(frozen=True, slots=True)
 class GodanKatsuyo(DoushiKatsuyo):
     # 未然形（ア段）が意思・推量の語尾（あるいは助動詞）の「う」に接続する際にオ段となる。
     mizen_u: str
@@ -191,7 +192,6 @@ GODAN_IKU = GodanKatsuyo(
 # ==============================================================================
 
 
-@dataclass(frozen=True)
 class KamiIchidanKatsuyo(DoushiKatsuyo):
     # 命令形「-○よ」は登録しない
     # 「-○ろ」のほうが口語的だと判断
@@ -213,7 +213,6 @@ KAMI_ICHIDAN = KamiIchidanKatsuyo(
 # ==============================================================================
 
 
-@dataclass(frozen=True)
 class ShimoIchidanKatsuyo(DoushiKatsuyo):
     # 命令形「-○よ」は登録しない
     # 「-○ろ」のほうが口語的だと判断
@@ -235,7 +234,6 @@ SHIMO_ICHIDAN = ShimoIchidanKatsuyo(
 # ==============================================================================
 
 
-@dataclass(frozen=True)
 class KaGyoHenkakuKatsuyo(DoushiKatsuyo):
     pass
 
@@ -267,7 +265,7 @@ KA_GYO_HENKAKU_KURU_KANJI = KaGyoHenkakuKatsuyo(
 # ==============================================================================
 
 
-@dataclass(frozen=True)
+@attrs.define(frozen=True, slots=True)
 class SaGyoHenkakuKatsuyo(DoushiKatsuyo):
     # せる/れる
     mizen_reru: str
@@ -310,7 +308,7 @@ SA_GYO_HENKAKU_ZURU = SaGyoHenkakuKatsuyo(
 # ==============================================================================
 
 
-@dataclass(frozen=True)
+@attrs.define(frozen=True, slots=True)
 class KeiyoushiKatsuyo(Katsuyo):
     # 連用形に「た」が続くとき、活用語尾が変化する。
     renyo_ta: str
@@ -332,7 +330,7 @@ KEIYOUSHI = KeiyoushiKatsuyo(
 # ==============================================================================
 
 
-@dataclass(frozen=True)
+@attrs.define(frozen=True, slots=True)
 class KeiyoudoushiKatsuyo(Katsuyo):
     # 連用形に「た」が続くとき、活用語尾が変化する。
     renyo_ta: str
@@ -357,7 +355,6 @@ KEIYOUDOUSHI = KeiyoudoushiKatsuyo(
 # ==============================================================================
 
 
-@dataclass(frozen=True)
 class ZyodoushiKatsuyo(Katsuyo):
     """
     このクラスは助動詞の活用形を表すクラスではなく、
@@ -367,7 +364,6 @@ class ZyodoushiKatsuyo(Katsuyo):
     pass
 
 
-@dataclass(frozen=True)
 class TaKatsuyo(ZyodoushiKatsuyo):
     pass
 

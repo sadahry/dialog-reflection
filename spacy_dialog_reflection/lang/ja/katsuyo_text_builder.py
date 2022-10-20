@@ -1,4 +1,3 @@
-from dataclasses import replace
 from typing import Any, Optional, List, Tuple
 from spacy_dialog_reflection.lang.ja.katsuyo_text import KatsuyoText
 from spacy_dialog_reflection.lang.ja.katsuyo_text_helper import (
@@ -15,6 +14,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text_detector import (
     SpacyKatsuyoTextDetector,
 )
 import abc
+import attrs
 import warnings
 
 
@@ -31,7 +31,7 @@ class IKatsuyoTextBuilder(abc.ABC):
         self, root: KatsuyoText, appendants: List[KatsuyoText]
     ) -> Tuple[KatsuyoText, bool]:
         # clone KatsuyoText
-        result = replace(root)
+        result = attrs.evolve(root)
 
         has_error = False
         for appendant in appendants:

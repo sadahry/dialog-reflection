@@ -1,11 +1,11 @@
 from collections.abc import Callable
 from typing import Union, Optional
-from dataclasses import dataclass
+import attrs
 import abc
 import spacy_dialog_reflection.lang.ja.katsuyo as k
 
 
-@dataclass(frozen=True)
+@attrs.define(frozen=True, slots=True)
 class KatsuyoText:
     """
     活用形を含む動詞,形容詞,形容動詞,副詞の表現を表すクラス。用言を表す。
@@ -53,7 +53,7 @@ class KatsuyoText:
         return f"{self.gokan}{self.katsuyo}"
 
 
-@dataclass(frozen=True)
+@attrs.define(frozen=True, slots=True)
 class NonKatsuyoText:
     """
     活用形を含まない文字列を表すクラス。
@@ -140,11 +140,11 @@ ZURU = KatsuyoText(
 
 
 class ZyodoushiKatsuyoText(KatsuyoText):
-    def __init__(self, zyodoushi: KatsuyoText):
-        self.zyodoushi = zyodoushi
-        super().__init__(
-            zyodoushi.gokan,
-            zyodoushi.katsuyo,
+    @property
+    def zyodoushi(self):
+        return KatsuyoText(
+            gokan=self.gokan,
+            katsuyo=self.katsuyo,
         )
 
 
@@ -156,10 +156,8 @@ class ZyodoushiKatsuyoText(KatsuyoText):
 class Reru(ZyodoushiKatsuyoText):
     def __init__(self):
         super().__init__(
-            KatsuyoText(
-                gokan="れ",
-                katsuyo=k.SHIMO_ICHIDAN,
-            )
+            gokan="れ",
+            katsuyo=k.SHIMO_ICHIDAN,
         )
 
     def merge(self, pre: KatsuyoText) -> KatsuyoText:
@@ -183,10 +181,8 @@ class Reru(ZyodoushiKatsuyoText):
 class Rareru(ZyodoushiKatsuyoText):
     def __init__(self):
         super().__init__(
-            KatsuyoText(
-                gokan="られ",
-                katsuyo=k.SHIMO_ICHIDAN,
-            )
+            gokan="られ",
+            katsuyo=k.SHIMO_ICHIDAN,
         )
 
     def merge(self, pre: KatsuyoText) -> KatsuyoText:
@@ -215,10 +211,8 @@ class Rareru(ZyodoushiKatsuyoText):
 class Seru(ZyodoushiKatsuyoText):
     def __init__(self):
         super().__init__(
-            KatsuyoText(
-                gokan="せ",
-                katsuyo=k.SHIMO_ICHIDAN,
-            )
+            gokan="せ",
+            katsuyo=k.SHIMO_ICHIDAN,
         )
 
     def merge(self, pre: KatsuyoText) -> KatsuyoText:
@@ -242,10 +236,8 @@ class Seru(ZyodoushiKatsuyoText):
 class Saseru(ZyodoushiKatsuyoText):
     def __init__(self):
         super().__init__(
-            KatsuyoText(
-                gokan="させ",
-                katsuyo=k.SHIMO_ICHIDAN,
-            )
+            gokan="させ",
+            katsuyo=k.SHIMO_ICHIDAN,
         )
 
     def merge(self, pre: KatsuyoText) -> KatsuyoText:
@@ -271,10 +263,8 @@ class Saseru(ZyodoushiKatsuyoText):
 class Nai(ZyodoushiKatsuyoText):
     def __init__(self):
         super().__init__(
-            KatsuyoText(
-                gokan="な",
-                katsuyo=k.KEIYOUSHI,
-            )
+            gokan="な",
+            katsuyo=k.KEIYOUSHI,
         )
 
     def merge(self, pre: KatsuyoText) -> KatsuyoText:
@@ -299,10 +289,8 @@ class Nai(ZyodoushiKatsuyoText):
 class Tai(ZyodoushiKatsuyoText):
     def __init__(self):
         super().__init__(
-            KatsuyoText(
-                gokan="た",
-                katsuyo=k.KEIYOUSHI,
-            )
+            gokan="た",
+            katsuyo=k.KEIYOUSHI,
         )
 
     def merge(self, pre: KatsuyoText) -> KatsuyoText:
@@ -322,10 +310,8 @@ class Tai(ZyodoushiKatsuyoText):
 class Tagaru(ZyodoushiKatsuyoText):
     def __init__(self):
         super().__init__(
-            KatsuyoText(
-                gokan="たが",
-                katsuyo=k.GODAN_RA_GYO,
-            )
+            gokan="たが",
+            katsuyo=k.GODAN_RA_GYO,
         )
 
     def merge(self, pre: KatsuyoText) -> KatsuyoText:
@@ -350,10 +336,8 @@ class Tagaru(ZyodoushiKatsuyoText):
 class Ta(ZyodoushiKatsuyoText):
     def __init__(self):
         super().__init__(
-            KatsuyoText(
-                gokan="",
-                katsuyo=k.ZYODOUSHI_TA,
-            )
+            gokan="",
+            katsuyo=k.ZYODOUSHI_TA,
         )
 
     def merge(self, pre: KatsuyoText) -> KatsuyoText:
@@ -382,10 +366,8 @@ class Ta(ZyodoushiKatsuyoText):
 class Da(ZyodoushiKatsuyoText):
     def __init__(self):
         super().__init__(
-            KatsuyoText(
-                gokan="",
-                katsuyo=k.ZYODOUSHI_DA,
-            )
+            gokan="",
+            katsuyo=k.ZYODOUSHI_DA,
         )
 
     def merge(self, pre: KatsuyoText) -> KatsuyoText:
