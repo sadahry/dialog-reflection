@@ -6,8 +6,7 @@
     "python.linting.flake8Args": [
         "--ignore=E203,E501"
     ],
-    // enable mypy when checking type hints
-    // "python.linting.mypyEnabled": true,
+    "python.linting.mypyEnabled": true,
     "python.linting.lintOnSave": true,
     "python.formatting.provider": "black",
     "editor.formatOnSave": true,
