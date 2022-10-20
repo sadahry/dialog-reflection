@@ -27,17 +27,32 @@ GYO = {
 }
 
 
-@attrs.define(frozen=True, slots=True)
+# ==============================================================================
+# 活用系ベース
+# ==============================================================================
+
+
 class Katsuyo:
-    # shushi以外のfieldは下位クラスに定義
-    # e.g.
-    # mizen: str
-    # renyo: str
-    # shushi: str
-    # rentai: str
-    # # NOTE: izen(已然形)はkateiに含める
-    # katei: str
-    # meirei: str
+    pass
+
+
+@attrs.define(frozen=True, slots=False)
+class MizenMixin:
+    """未然形"""
+
+    mizen: str
+
+
+@attrs.define(frozen=True, slots=False)
+class RenyoMixin:
+    """連用形"""
+
+    renyo: str
+
+
+@attrs.define(frozen=True, slots=False)
+class ShushiMixin:
+    """終止形"""
 
     shushi: str
 
@@ -45,19 +60,99 @@ class Katsuyo:
         return self.shushi
 
 
-# ==============================================================================
-# 動詞
-# ==============================================================================
+@attrs.define(frozen=True, slots=False)
+class RentaiMixin:
+    """連体形"""
 
-
-@attrs.define(frozen=True, slots=True)
-class DoushiKatsuyo(Katsuyo):
-    mizen: str
-    renyo: str
-    shushi: str
     rentai: str
+
+
+@attrs.define(frozen=True, slots=False)
+class KateiMixin:
+    """
+    仮定形
+    已然形(izen)は仮定形に含める
+    """
+
     katei: str
+
+
+@attrs.define(frozen=True, slots=False)
+class MeireiMixin:
+    """命令形"""
+
     meirei: str
+
+
+# 特殊な活用系
+
+
+@attrs.define(frozen=True, slots=False)
+class MizenUMixin:
+    """
+    未然形が意思・推量の語尾（あるいは助動詞）の
+    「う」に続くとき、活用語尾が変化する活用形が存在する。
+    """
+
+    mizen_u: str
+
+
+@attrs.define(frozen=True, slots=False)
+class MizenReruMixin:
+    """
+    未然形が受身の「れる」使役の「せる」に続くとき、
+    活用語尾が変化する活用形が存在する。
+    """
+
+    mizen_reru: str
+
+
+@attrs.define(frozen=True, slots=False)
+class MizenRareeruMixin:
+    """
+    未然形が受身の「られる」や否定の「ぬ」に続くとき、
+    活用語尾が変化する活用形が存在する。
+    """
+
+    mizen_rareru: str
+
+
+@attrs.define(frozen=True, slots=False)
+class RenyoTaMixin:
+    """
+    連用形に「た・て」などが続くとき、
+    活用語尾が変化する活用形が存在する。
+    """
+
+    renyo_ta: str
+
+
+@attrs.define(frozen=True, slots=False)
+class RenyoNaiMixin:
+    """
+    連用形に「ない」などが続くとき、
+    活用語尾が変化する活用形が存在する。
+    """
+
+    renyo_nai: str
+
+
+# ==============================================================================
+# 動詞ベース
+# ==============================================================================
+
+
+@attrs.define(frozen=True, slots=False)
+class DoushiKatsuyo(
+    Katsuyo,
+    MizenMixin,
+    RenyoMixin,
+    ShushiMixin,
+    RentaiMixin,
+    KateiMixin,
+    MeireiMixin,
+):
+    pass
 
 
 # ==============================================================================
@@ -67,11 +162,13 @@ class DoushiKatsuyo(Katsuyo):
 
 
 @attrs.define(frozen=True, slots=True)
-class GodanKatsuyo(DoushiKatsuyo):
-    # 未然形（ア段）が意思・推量の語尾（あるいは助動詞）の「う」に接続する際にオ段となる。
-    mizen_u: str
-    # 五段活用の連用形に「た・て」などが続くとき、活用語尾が変化する。
-    renyo_ta: str
+class GodanKatsuyo(
+    DoushiKatsuyo,
+    # 「う」の場合、オ段となる
+    MizenUMixin,
+    RenyoTaMixin,
+):
+    pass
 
 
 # カ行
@@ -200,9 +297,12 @@ GODAN_IKU = GodanKatsuyo(
 # ==============================================================================
 
 
-class KamiIchidanKatsuyo(DoushiKatsuyo):
+@attrs.define(frozen=True, slots=True)
+class KamiIchidanKatsuyo(
     # 命令形「-○よ」は登録しない
     # 「-○ろ」のほうが口語的だと判断
+    DoushiKatsuyo,
+):
     pass
 
 
@@ -221,9 +321,12 @@ KAMI_ICHIDAN = KamiIchidanKatsuyo(
 # ==============================================================================
 
 
-class ShimoIchidanKatsuyo(DoushiKatsuyo):
+@attrs.define(frozen=True, slots=True)
+class ShimoIchidanKatsuyo(
     # 命令形「-○よ」は登録しない
     # 「-○ろ」のほうが口語的だと判断
+    DoushiKatsuyo,
+):
     pass
 
 
@@ -242,7 +345,10 @@ SHIMO_ICHIDAN = ShimoIchidanKatsuyo(
 # ==============================================================================
 
 
-class KaGyoHenkakuKatsuyo(DoushiKatsuyo):
+@attrs.define(frozen=True, slots=True)
+class KaGyoHenkakuKatsuyo(
+    DoushiKatsuyo,
+):
     pass
 
 
@@ -274,13 +380,14 @@ KA_GYO_HENKAKU_KURU_KANJI = KaGyoHenkakuKatsuyo(
 
 
 @attrs.define(frozen=True, slots=True)
-class SaGyoHenkakuKatsuyo(DoushiKatsuyo):
-    # せる/れる
-    mizen_reru: str
-    # ぬ/られる
-    mizen_rareru: str
+class SaGyoHenkakuKatsuyo(
     # 命令形「せよ」は登録しない
     # 「しろ」のほうが口語的だと判断
+    DoushiKatsuyo,
+    MizenReruMixin,
+    MizenRareeruMixin,
+):
+    pass
 
 
 # 「〜する」の特殊な活用形
@@ -317,15 +424,17 @@ SA_GYO_HENKAKU_ZURU = SaGyoHenkakuKatsuyo(
 
 
 @attrs.define(frozen=True, slots=True)
-class KeiyoushiKatsuyo(Katsuyo):
-    mizen: str
-    renyo: str
-    shushi: str
-    rentai: str
-    # 連用形に「た」が続くとき、活用語尾が変化する。
-    renyo_ta: str
-    katei: str
-    # meirei: None
+class KeiyoushiKatsuyo(
+    Katsuyo,
+    MizenMixin,
+    RenyoMixin,
+    RenyoTaMixin,
+    ShushiMixin,
+    RentaiMixin,
+    KateiMixin,
+    # NO: MeireiMixin,
+):
+    pass
 
 
 KEIYOUSHI = KeiyoushiKatsuyo(
@@ -344,17 +453,18 @@ KEIYOUSHI = KeiyoushiKatsuyo(
 
 
 @attrs.define(frozen=True, slots=True)
-class KeiyoudoushiKatsuyo(Katsuyo):
-    mizen: str
-    renyo: str
-    shushi: str
-    rentai: str
-    # 連用形に「た」が続くとき、活用語尾が変化する。
-    renyo_ta: str
-    # 連用形に「ない」など形容詞が続くとき、活用語尾が変化する。
-    renyo_nai: str
-    katei: str
-    # meirei: None
+class KeiyoudoushiKatsuyo(
+    Katsuyo,
+    MizenMixin,
+    RenyoMixin,
+    RenyoTaMixin,
+    RenyoNaiMixin,
+    ShushiMixin,
+    RentaiMixin,
+    KateiMixin,
+    # NO: MeireiMixin,
+):
+    pass
 
 
 KEIYOUDOUSHI = KeiyoudoushiKatsuyo(
@@ -368,11 +478,12 @@ KEIYOUDOUSHI = KeiyoudoushiKatsuyo(
 )
 
 # ==============================================================================
-# 助動詞
+# 助動詞ベース
 # see: https://ja.wikipedia.org/wiki/助動詞_(国文法)
 # ==============================================================================
 
 
+@attrs.define(frozen=True, slots=False)
 class ZyodoushiKatsuyo(Katsuyo):
     """
     このクラスは助動詞の活用形を表すクラスではなく、
@@ -382,14 +493,21 @@ class ZyodoushiKatsuyo(Katsuyo):
     pass
 
 
+# ==============================================================================
+# 助動詞「た」「だ」
+# ==============================================================================
+
+
 @attrs.define(frozen=True, slots=True)
-class TaKatsuyo(ZyodoushiKatsuyo):
-    mizen: str
-    # renyo: None
-    shushi: str
-    rentai: str
-    katei: str
-    # meirei: None
+class TaKatsuyo(
+    ZyodoushiKatsuyo,
+    MizenMixin,
+    # NO: RenyoMixin,
+    ShushiMixin,
+    RentaiMixin,
+    KateiMixin,
+    # NO: MeireiMixin,
+):
     pass
 
 
