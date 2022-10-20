@@ -597,6 +597,11 @@ def test_zyodoushi_kibou_others_value_error(msg, katsuyo_text):
             ),
             "綺麗だった",
         ),
+        (
+            "NonKatsuyoText",
+            NonKatsuyoText("状態"),
+            "状態だった",
+        ),
     ],
 )
 def test_zyodoushi_kako_kanryo(msg, katsuyo_text, expected):

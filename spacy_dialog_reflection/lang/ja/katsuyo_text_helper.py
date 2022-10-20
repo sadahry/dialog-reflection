@@ -256,7 +256,17 @@ class KakoKanryo(IKatsuyoTextHelper):
             def __default(
                 pre: Union[kt.KatsuyoText, kt.NonKatsuyoText]
             ) -> kt.KatsuyoText:
-                raise NotImplementedError()
+                if issubclass(
+                    type(pre),
+                    (kt.NonKatsuyoText),
+                ):
+                    # TODO 助詞のハンドリング
+                    datt = kt.NonKatsuyoText("だっ")
+                    return pre + datt + kt.Ta()
+
+                raise ValueError(
+                    f"Unsupported katsuyo_text in KakoKanryo: {pre} type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
+                )
 
             bridge = __default
 
