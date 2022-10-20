@@ -275,7 +275,7 @@ class KakoKanryo(IKatsuyoTextHelper):
     def try_merge(self, pre: kt.KatsuyoText) -> Optional[kt.KatsuyoText]:
         if pre.katsuyo.renyo is not None:
             if issubclass(type(pre.katsuyo), k.GodanKatsuyo) and (
-                pre.katsuyo.shushi in ["ぐ", "む", "ぶ", "む"]
+                pre.katsuyo.shushi in ["ぐ", "ぬ", "ぶ", "む"]
             ):
                 return pre + kt.Da()
 

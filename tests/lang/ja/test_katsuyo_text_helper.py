@@ -7,9 +7,17 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text import (
     NonKatsuyoText,
 )
 from spacy_dialog_reflection.lang.ja.katsuyo import (
-    GODAN_KA_GYO,
-    Katsuyo,
     GODAN_BA_GYO,
+    GODAN_GA_GYO,
+    GODAN_IKU,
+    GODAN_KA_GYO,
+    GODAN_MA_GYO,
+    GODAN_NA_GYO,
+    GODAN_RA_GYO,
+    GODAN_SA_GYO,
+    GODAN_TA_GYO,
+    GODAN_WAA_GYO,
+    Katsuyo,
     KA_GYO_HENKAKU_KURU,
     KAMI_ICHIDAN,
     KEIYOUDOUSHI,
@@ -520,6 +528,7 @@ def test_zyodoushi_kibou_others_value_error(msg, katsuyo_text):
 @pytest.mark.parametrize(
     "msg, katsuyo_text, expected",
     [
+        # 五段活用を念入りにテスト
         (
             "五段活用",
             KatsuyoText(
@@ -531,10 +540,74 @@ def test_zyodoushi_kibou_others_value_error(msg, katsuyo_text):
         (
             "五段活用",
             KatsuyoText(
+                gokan="稼",
+                katsuyo=GODAN_GA_GYO,
+            ),
+            "稼いだ",
+        ),
+        (
+            "五段活用",
+            KatsuyoText(
+                gokan="話",
+                katsuyo=GODAN_SA_GYO,
+            ),
+            "話した",
+        ),
+        (
+            "五段活用",
+            KatsuyoText(
+                gokan="待",
+                katsuyo=GODAN_TA_GYO,
+            ),
+            "待った",
+        ),
+        (
+            "五段活用",
+            KatsuyoText(
+                gokan="死",
+                katsuyo=GODAN_NA_GYO,
+            ),
+            "死んだ",
+        ),
+        (
+            "五段活用",
+            KatsuyoText(
                 gokan="遊",
                 katsuyo=GODAN_BA_GYO,
             ),
             "遊んだ",
+        ),
+        (
+            "五段活用",
+            KatsuyoText(
+                gokan="読",
+                katsuyo=GODAN_MA_GYO,
+            ),
+            "読んだ",
+        ),
+        (
+            "五段活用",
+            KatsuyoText(
+                gokan="帰",
+                katsuyo=GODAN_RA_GYO,
+            ),
+            "帰った",
+        ),
+        (
+            "五段活用",
+            KatsuyoText(
+                gokan="買",
+                katsuyo=GODAN_WAA_GYO,
+            ),
+            "買った",
+        ),
+        (
+            "五段活用",
+            KatsuyoText(
+                gokan="行",
+                katsuyo=GODAN_IKU,
+            ),
+            "行った",
         ),
         (
             "上一段活用",
