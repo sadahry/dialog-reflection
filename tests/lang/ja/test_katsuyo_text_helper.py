@@ -7,6 +7,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text import (
     NonKatsuyoText,
 )
 from spacy_dialog_reflection.lang.ja.katsuyo import (
+    GODAN_KA_GYO,
     Katsuyo,
     GODAN_BA_GYO,
     KA_GYO_HENKAKU_KURU,
@@ -24,6 +25,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text_helper import (
     Shieki,
     Ukemi,
     KibouSelf,
+    KakoKanryo,
 )
 from spacy_dialog_reflection.lang.ja.katsuyo_text_builder import (
     SpacyKatsuyoTextBuilder,
@@ -513,6 +515,94 @@ def test_zyodoushi_kibou_others_value_error(msg, katsuyo_text):
     with pytest.raises(ValueError, match=re.compile(r"Unsupported.*")):
         katsuyo_text + zyodoushi
         assert False, msg
+
+
+@pytest.mark.parametrize(
+    "msg, katsuyo_text, expected",
+    [
+        (
+            "五段活用",
+            KatsuyoText(
+                gokan="歩",
+                katsuyo=GODAN_KA_GYO,
+            ),
+            "歩いた",
+        ),
+        (
+            "五段活用",
+            KatsuyoText(
+                gokan="遊",
+                katsuyo=GODAN_BA_GYO,
+            ),
+            "遊んだ",
+        ),
+        (
+            "上一段活用",
+            KatsuyoText(
+                gokan="見",
+                katsuyo=KAMI_ICHIDAN,
+            ),
+            "見た",
+        ),
+        (
+            "下一段活用",
+            KatsuyoText(
+                gokan="求め",
+                katsuyo=SHIMO_ICHIDAN,
+            ),
+            "求めた",
+        ),
+        (
+            "カ変活用",
+            KURU,
+            "きた",
+        ),
+        (
+            "サ変活用",
+            KatsuyoText(
+                gokan="ウォーキング",
+                katsuyo=SA_GYO_HENKAKU_SURU,
+            ),
+            "ウォーキングした",
+        ),
+        (
+            "サ変活用(する)",
+            KatsuyoText(
+                gokan="尊重",
+                katsuyo=SA_GYO_HENKAKU_SURU,
+            ),
+            "尊重した",
+        ),
+        (
+            "サ変活用(ずる)",
+            KatsuyoText(
+                gokan="重ん",
+                katsuyo=SA_GYO_HENKAKU_ZURU,
+            ),
+            "重んじた",
+        ),
+        (
+            "形容詞",
+            KatsuyoText(
+                gokan="美し",
+                katsuyo=KEIYOUSHI,
+            ),
+            "美しかった",
+        ),
+        (
+            "形容動詞",
+            KatsuyoText(
+                gokan="綺麗",
+                katsuyo=KEIYOUDOUSHI,
+            ),
+            "綺麗だった",
+        ),
+    ],
+)
+def test_zyodoushi_kako_kanryo(msg, katsuyo_text, expected):
+    zyodoushi = KakoKanryo()
+    result = katsuyo_text + zyodoushi
+    assert str(result) == expected, msg
 
 
 @pytest.mark.filterwarnings("ignore:ValueError")

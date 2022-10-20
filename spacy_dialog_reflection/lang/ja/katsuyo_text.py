@@ -340,3 +340,72 @@ class Tagaru(ZyodoushiKatsuyoText):
 
         prefix = pre.gokan + pre.katsuyo.renyo
         return NonKatsuyoText(prefix) + self.zyodoushi
+
+
+# ==============================================================================
+# 助動詞::過去・完了
+# ==============================================================================
+
+
+class Ta(ZyodoushiKatsuyoText):
+    def __init__(self):
+        super().__init__(
+            KatsuyoText(
+                gokan="",
+                katsuyo=k.ZYODOUSHI_TA,
+            )
+        )
+
+    def merge(self, pre: KatsuyoText) -> KatsuyoText:
+        if issubclass(type(pre), NonKatsuyoText):
+            raise ValueError(f"Unsupported katsuyo_text in Ta: {pre} type: {type(pre)}")
+        if pre.katsuyo.renyo is None:
+            raise ValueError(
+                f"Unsupported the katsuyo_text which is not have renyo in Ta: {pre} type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
+            )
+
+        if issubclass(
+            type(pre.katsuyo),
+            (
+                k.GodanKatsuyo,
+                k.KeiyoushiKatsuyo,
+                k.KeiyoudoushiKatsuyo,
+            ),
+        ):
+            prefix = pre.gokan + pre.katsuyo.renyo_ta
+            return NonKatsuyoText(prefix) + self.zyodoushi
+
+        prefix = pre.gokan + pre.katsuyo.renyo
+        return NonKatsuyoText(prefix) + self.zyodoushi
+
+
+class Da(ZyodoushiKatsuyoText):
+    def __init__(self):
+        super().__init__(
+            KatsuyoText(
+                gokan="",
+                katsuyo=k.ZYODOUSHI_DA,
+            )
+        )
+
+    def merge(self, pre: KatsuyoText) -> KatsuyoText:
+        if issubclass(type(pre), NonKatsuyoText):
+            raise ValueError(f"Unsupported katsuyo_text in Ta: {pre} type: {type(pre)}")
+        if pre.katsuyo.renyo is None:
+            raise ValueError(
+                f"Unsupported the katsuyo_text which is not have renyo in Ta: {pre} type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
+            )
+
+        if issubclass(
+            type(pre.katsuyo),
+            (
+                k.GodanKatsuyo,
+                k.KeiyoushiKatsuyo,
+                k.KeiyoudoushiKatsuyo,
+            ),
+        ):
+            prefix = pre.gokan + pre.katsuyo.renyo_ta
+            return NonKatsuyoText(prefix) + self.zyodoushi
+
+        prefix = pre.gokan + pre.katsuyo.renyo
+        return NonKatsuyoText(prefix) + self.zyodoushi

@@ -31,7 +31,7 @@ GYO = {
 @dataclass(frozen=True)
 class Katsuyo:
     mizen: str
-    renyo: str
+    renyo: Optional[str]
     shushi: str
     rentai: str
     # 已然形もkateiに含める
@@ -348,5 +348,44 @@ KEIYOUDOUSHI = KeiyoudoushiKatsuyo(
     shushi="だ",
     rentai="な",
     katei="なら",
+    meirei=None,
+)
+
+# ==============================================================================
+# 助動詞
+# see: https://ja.wikipedia.org/wiki/助動詞_(国文法)
+# ==============================================================================
+
+
+@dataclass(frozen=True)
+class ZyodoushiKatsuyo(Katsuyo):
+    """
+    このクラスは助動詞の活用形を表すクラスではなく、
+    特殊な活用であることを表すクラスである。
+    """
+
+    pass
+
+
+@dataclass(frozen=True)
+class TaKatsuyo(ZyodoushiKatsuyo):
+    pass
+
+
+ZYODOUSHI_TA = TaKatsuyo(
+    mizen="たろ",
+    renyo=None,
+    shushi="た",
+    rentai="た",
+    katei="たら",
+    meirei=None,
+)
+
+ZYODOUSHI_DA = TaKatsuyo(
+    mizen="だ",
+    renyo=None,
+    shushi="だ",
+    rentai="だ",
+    katei="だら",
     meirei=None,
 )

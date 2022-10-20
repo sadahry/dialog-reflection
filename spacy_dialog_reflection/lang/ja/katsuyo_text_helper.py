@@ -241,3 +241,34 @@ class KibouOthers(IKatsuyoTextHelper):
             return pre + kt.Tagaru()
 
         return None
+
+
+# 過去/完了/存続/確認
+class KakoKanryo(IKatsuyoTextHelper):
+    def __init__(
+        self,
+        bridge: Optional[
+            Callable[[Union[kt.KatsuyoText, kt.NonKatsuyoText]], kt.KatsuyoText]
+        ] = None,
+    ) -> None:
+        if bridge is None:
+
+            def __default(
+                pre: Union[kt.KatsuyoText, kt.NonKatsuyoText]
+            ) -> kt.KatsuyoText:
+                raise NotImplementedError()
+
+            bridge = __default
+
+        super().__init__(bridge)
+
+    def try_merge(self, pre: kt.KatsuyoText) -> Optional[kt.KatsuyoText]:
+        if pre.katsuyo.renyo is not None:
+            if issubclass(type(pre.katsuyo), k.GodanKatsuyo) and (
+                pre.katsuyo.shushi in ["ぐ", "む", "ぶ", "む"]
+            ):
+                return pre + kt.Da()
+
+            return pre + kt.Ta()
+
+        return None
