@@ -53,12 +53,7 @@ def unsupported_katsuyo_text():
     return KatsuyoText(
         gokan="",
         katsuyo=UnsupportedKatsuyo(
-            mizen="",
-            renyo="",
             shushi="",
-            rentai="",
-            katei="",
-            meirei="",
         ),
     )
 

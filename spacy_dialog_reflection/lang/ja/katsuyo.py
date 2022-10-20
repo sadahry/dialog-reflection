@@ -30,14 +30,17 @@ GYO = {
 
 @attrs.define(frozen=True, slots=True)
 class Katsuyo:
-    # TODO Optionalのfieldは後で下位クラスに渡して消す
-    mizen: str
-    renyo: Optional[str]
+    # shushi以外のfieldは下位クラスに定義
+    # e.g.
+    # mizen: str
+    # renyo: str
+    # shushi: str
+    # rentai: str
+    # # NOTE: izen(已然形)はkateiに含める
+    # katei: str
+    # meirei: str
+
     shushi: str
-    rentai: str
-    # 已然形もkateiに含める
-    katei: str
-    meirei: Optional[str]
 
     def __str__(self) -> str:
         return self.shushi
@@ -48,8 +51,14 @@ class Katsuyo:
 # ==============================================================================
 
 
+@attrs.define(frozen=True, slots=True)
 class DoushiKatsuyo(Katsuyo):
-    pass
+    mizen: str
+    renyo: str
+    shushi: str
+    rentai: str
+    katei: str
+    meirei: str
 
 
 # ==============================================================================
@@ -310,8 +319,14 @@ SA_GYO_HENKAKU_ZURU = SaGyoHenkakuKatsuyo(
 
 @attrs.define(frozen=True, slots=True)
 class KeiyoushiKatsuyo(Katsuyo):
+    mizen: str
+    renyo: str
+    shushi: str
+    rentai: str
     # 連用形に「た」が続くとき、活用語尾が変化する。
     renyo_ta: str
+    katei: str
+    # meirei: None
 
 
 KEIYOUSHI = KeiyoushiKatsuyo(
@@ -321,7 +336,6 @@ KEIYOUSHI = KeiyoushiKatsuyo(
     shushi="い",
     rentai="い",
     katei="けれ",
-    meirei=None,
 )
 
 # ==============================================================================
@@ -332,10 +346,16 @@ KEIYOUSHI = KeiyoushiKatsuyo(
 
 @attrs.define(frozen=True, slots=True)
 class KeiyoudoushiKatsuyo(Katsuyo):
+    mizen: str
+    renyo: str
+    shushi: str
+    rentai: str
     # 連用形に「た」が続くとき、活用語尾が変化する。
     renyo_ta: str
     # 連用形に「ない」など形容詞が続くとき、活用語尾が変化する。
     renyo_nai: str
+    katei: str
+    # meirei: None
 
 
 KEIYOUDOUSHI = KeiyoudoushiKatsuyo(
@@ -346,7 +366,6 @@ KEIYOUDOUSHI = KeiyoudoushiKatsuyo(
     shushi="だ",
     rentai="な",
     katei="なら",
-    meirei=None,
 )
 
 # ==============================================================================
@@ -364,24 +383,27 @@ class ZyodoushiKatsuyo(Katsuyo):
     pass
 
 
+@attrs.define(frozen=True, slots=True)
 class TaKatsuyo(ZyodoushiKatsuyo):
+    mizen: str
+    # renyo: None
+    shushi: str
+    rentai: str
+    katei: str
+    # meirei: None
     pass
 
 
 ZYODOUSHI_TA = TaKatsuyo(
     mizen="たろ",
-    renyo=None,
     shushi="た",
     rentai="た",
     katei="たら",
-    meirei=None,
 )
 
 ZYODOUSHI_DA = TaKatsuyo(
     mizen="だ",
-    renyo=None,
     shushi="だ",
     rentai="だ",
     katei="だら",
-    meirei=None,
 )
