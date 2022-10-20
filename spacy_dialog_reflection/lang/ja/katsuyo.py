@@ -1,5 +1,4 @@
 import attrs
-from typing import Optional
 
 DAN = {
     "あ": ["あ", "か", "さ", "た", "な", "は", "ま", "や", "ら", "わ", "が", "ざ", "だ", "ば", "ぱ"],
