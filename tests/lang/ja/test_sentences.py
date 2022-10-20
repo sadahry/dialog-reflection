@@ -79,6 +79,7 @@ class TestReflectionBuilder:
     ):
         doc = reflector.nlp(text)
         sentence = reflector.builder._select_sentence(doc)
+        assert sentence is not None
         assert sentence.text == expected, assert_message
 
     @pytest.mark.parametrize(
