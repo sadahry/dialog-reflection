@@ -91,7 +91,10 @@ class JaSpacyReflectionTextBuilder(ISpacyReflectionTextBuilder):
 
             return token
 
-        # extract head_token from src or root
+        # extract head_token from root when src is after root
+        # since dependencies will be gathered from root in Japanese
+        # e.g. "彼女を愛している。"
+        # src: "いる" root: "愛し" dep: "彼女" <-- "愛し" --> "いる"
         extract_from = min([src, src.sent.root], key=lambda t: t.i)
         head_token = _extract_head_token(extract_from)
         return src.doc[head_token.i : src.i]

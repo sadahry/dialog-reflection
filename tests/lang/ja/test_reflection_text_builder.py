@@ -113,6 +113,11 @@ class TestReflectionBuilder:
                 "行き",
                 "not extract last sentence ADV",
             ),
+            (
+                "もらってきてアレを。",
+                "き",
+                "latest src(VARB) before root token(PRON)",
+            ),
         ],
     )
     def test_extract_source_token(
@@ -154,30 +159,47 @@ class TestReflectionBuilder:
             assert False, assert_message
 
     @pytest.mark.parametrize(
-        "text, expected, assert_message",
+        "text, src_text, expected, assert_message",
         [
             (
                 "今日は旅行へ行った。",
+                "行っ",
                 "旅行へ",
                 "sample sentence",
             ),
             (
                 "社員をする。",
+                "する",
                 "社員を",
                 "obj dependency",
             ),
             (
                 "民間の社員をする。",
+                "する",
                 "民間の社員を",
                 "obj dependency multi-word",
             ),
             (
                 "今年から社員をする。",
+                "する",
                 "社員を",
                 "obj dependency does not extract distant dependencies",
             ),
             (
+                "旅行に行ってくる。",
+                "くる",
+                "旅行に行って",
+                "latest src(VARB) after root token(VERB)",
+            ),
+            (
+                "もらってきてアレを。",
+                "き",
+                "もらって",
+                "latest src(VARB) before root token(PRON)",
+            ),
+            (
                 "働く。",
+                "働く",
                 "",
                 "no dependencies",
             ),
@@ -188,14 +210,16 @@ class TestReflectionBuilder:
         nlp_ja,
         builder: JaSpacyReflectionTextBuilder,
         text,
+        src_text,
         expected,
         assert_message,
     ):
-        root = next(nlp_ja(text).sents).root
-        func = builder._extract_tokens_with_nearest_heads
-        tokens = func(root)
-        text = "".join(map(lambda t: t.text, tokens))
-        assert text == expected, assert_message
+        doc = nlp_ja(text)
+        src = builder._extract_source_token(doc)
+        assert src.text == src_text, "extracted source token is correct"
+        tokens = builder._extract_tokens_with_nearest_heads(src)
+        result = "".join(map(lambda t: t.text, tokens))
+        assert result == expected, assert_message
 
     @pytest.mark.parametrize(
         "text, expected, assert_message",
