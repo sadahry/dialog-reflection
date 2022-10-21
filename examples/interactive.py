@@ -14,9 +14,9 @@ refactor = Reflector(nlp)
 
 print("Ctrl+C to exit")
 print()
-print("システム: あなたの言葉に対して、伝え返しをします。")
-print("システム: 今日の出来事について教えてください。")
-print("システム: たとえば「今日は旅行へ行った」という言葉に対して「旅行へ行ったんですね」と返します。")
+print("システム: あなたの言葉に対して、おうむ返しをします。")
+print("システム: 今日の出来事について、教えてください。")
+print("システム: たとえば「今日は旅行へ行った」という言葉に対して、私は「旅行へ行ったんですね」と返します。")
 while True:
     message = input("あなた: ")
     response = refactor.reflect(message)

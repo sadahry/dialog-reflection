@@ -74,7 +74,7 @@ class ReflectionTextBuilder:
             pass
 
         if sent is None:
-            warnings.warn("no valid sentenses", UserWarning)
+            warnings.warn(f"no valid sentenses doc: {doc}", UserWarning)
         return sent
 
     def _extract_tokens_with_nearest_root_heads(
