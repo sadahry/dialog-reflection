@@ -32,7 +32,7 @@ GYO = {
 # ==============================================================================
 
 
-class Katsuyo:
+class IKatsuyo:
     pass
 
 
@@ -143,8 +143,8 @@ class RenyoNaiMixin:
 
 
 @attrs.define(frozen=True, slots=False)
-class DoushiKatsuyo(
-    Katsuyo,
+class IDoushiKatsuyo(
+    IKatsuyo,
     MizenMixin,
     RenyoMixin,
     ShushiMixin,
@@ -163,7 +163,7 @@ class DoushiKatsuyo(
 
 @attrs.define(frozen=True, slots=True)
 class GodanKatsuyo(
-    DoushiKatsuyo,
+    IDoushiKatsuyo,
     # 「う」の場合、オ段となる
     MizenUMixin,
     RenyoTaMixin,
@@ -301,7 +301,7 @@ GODAN_IKU = GodanKatsuyo(
 class KamiIchidanKatsuyo(
     # 命令形「-○よ」は登録しない
     # 「-○ろ」のほうが口語的だと判断
-    DoushiKatsuyo,
+    IDoushiKatsuyo,
 ):
     pass
 
@@ -325,7 +325,7 @@ KAMI_ICHIDAN = KamiIchidanKatsuyo(
 class ShimoIchidanKatsuyo(
     # 命令形「-○よ」は登録しない
     # 「-○ろ」のほうが口語的だと判断
-    DoushiKatsuyo,
+    IDoushiKatsuyo,
 ):
     pass
 
@@ -347,7 +347,7 @@ SHIMO_ICHIDAN = ShimoIchidanKatsuyo(
 
 @attrs.define(frozen=True, slots=True)
 class KaGyoHenkakuKatsuyo(
-    DoushiKatsuyo,
+    IDoushiKatsuyo,
 ):
     pass
 
@@ -383,7 +383,7 @@ KA_GYO_HENKAKU_KURU_KANJI = KaGyoHenkakuKatsuyo(
 class SaGyoHenkakuKatsuyo(
     # 命令形「せよ」は登録しない
     # 「しろ」のほうが口語的だと判断
-    DoushiKatsuyo,
+    IDoushiKatsuyo,
     MizenReruMixin,
     MizenRareeruMixin,
 ):
@@ -425,7 +425,7 @@ SA_GYO_HENKAKU_ZURU = SaGyoHenkakuKatsuyo(
 
 @attrs.define(frozen=True, slots=True)
 class KeiyoushiKatsuyo(
-    Katsuyo,
+    IKatsuyo,
     MizenMixin,
     RenyoMixin,
     RenyoTaMixin,
@@ -454,7 +454,7 @@ KEIYOUSHI = KeiyoushiKatsuyo(
 
 @attrs.define(frozen=True, slots=True)
 class KeiyoudoushiKatsuyo(
-    Katsuyo,
+    IKatsuyo,
     MizenMixin,
     RenyoMixin,
     RenyoTaMixin,
@@ -484,7 +484,7 @@ KEIYOUDOUSHI = KeiyoudoushiKatsuyo(
 
 
 @attrs.define(frozen=True, slots=False)
-class ZyodoushiKatsuyo(Katsuyo):
+class IZyodoushiKatsuyo(IKatsuyo):
     """
     このクラスは助動詞の活用形を表すクラスではなく、
     特殊な活用であることを表すクラスである。
@@ -500,7 +500,7 @@ class ZyodoushiKatsuyo(Katsuyo):
 
 @attrs.define(frozen=True, slots=True)
 class TaKatsuyo(
-    ZyodoushiKatsuyo,
+    IZyodoushiKatsuyo,
     MizenMixin,
     # NO: RenyoMixin,
     ShushiMixin,

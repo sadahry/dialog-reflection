@@ -59,7 +59,7 @@ class Ukemi(kt.IKatsuyoTextHelper):
         super().__init__(bridge)
 
     def try_merge(self, pre: kt.KatsuyoText) -> Optional[kt.KatsuyoText]:
-        if issubclass(type(pre.katsuyo), k.DoushiKatsuyo):
+        if issubclass(type(pre.katsuyo), k.IDoushiKatsuyo):
             # サ行変格活用のみ特殊
             if type(pre.katsuyo) is k.SaGyoHenkakuKatsuyo:
                 # 用法的に「〜する」は「れる/られる」どちらでもよいため固定
@@ -69,7 +69,7 @@ class Ukemi(kt.IKatsuyoTextHelper):
                 elif pre.katsuyo.shushi == "ずる":
                     return cast(kt.KatsuyoText, pre + kt.Rareru())
 
-            mizen = cast(k.DoushiKatsuyo, pre.katsuyo).mizen
+            mizen = cast(k.IDoushiKatsuyo, pre.katsuyo).mizen
             if mizen and mizen in k.DAN["あ"]:
                 return cast(kt.KatsuyoText, pre + kt.Reru())
             else:
@@ -125,7 +125,7 @@ class Shieki(IKatsuyoTextHelper):
         super().__init__(bridge)
 
     def try_merge(self, pre: kt.KatsuyoText) -> Optional[kt.KatsuyoText]:
-        if issubclass(type(pre.katsuyo), k.DoushiKatsuyo):
+        if issubclass(type(pre.katsuyo), k.IDoushiKatsuyo):
             # サ行変格活用のみ特殊
             if type(pre.katsuyo) is k.SaGyoHenkakuKatsuyo:
                 # 用法的に「〜する」は「せる/させる」どちらでもよいため固定
@@ -135,7 +135,7 @@ class Shieki(IKatsuyoTextHelper):
                 elif pre.katsuyo.shushi == "ずる":
                     return cast(kt.KatsuyoText, pre + kt.Saseru())
 
-            mizen = cast(k.DoushiKatsuyo, pre.katsuyo).mizen
+            mizen = cast(k.IDoushiKatsuyo, pre.katsuyo).mizen
             if mizen and mizen in k.DAN["あ"]:
                 return cast(kt.KatsuyoText, pre + kt.Seru())
             else:
@@ -197,7 +197,7 @@ class Hitei(IKatsuyoTextHelper):
         super().__init__(bridge)
 
     def try_merge(self, pre: kt.KatsuyoText) -> Optional[kt.KatsuyoText]:
-        if issubclass(type(pre.katsuyo), k.DoushiKatsuyo):
+        if issubclass(type(pre.katsuyo), k.IDoushiKatsuyo):
             return cast(kt.KatsuyoText, pre + kt.Nai())
 
         return None
@@ -227,7 +227,7 @@ class KibouSelf(IKatsuyoTextHelper):
         super().__init__(bridge)
 
     def try_merge(self, pre: kt.KatsuyoText) -> Optional[kt.KatsuyoText]:
-        if issubclass(type(pre.katsuyo), k.DoushiKatsuyo):
+        if issubclass(type(pre.katsuyo), k.IDoushiKatsuyo):
             return cast(kt.KatsuyoText, pre + kt.Tai())
 
         return None
@@ -256,7 +256,7 @@ class KibouOthers(IKatsuyoTextHelper):
         super().__init__(bridge)
 
     def try_merge(self, pre: kt.KatsuyoText) -> Optional[kt.KatsuyoText]:
-        if issubclass(type(pre.katsuyo), k.DoushiKatsuyo):
+        if issubclass(type(pre.katsuyo), k.IDoushiKatsuyo):
             return cast(kt.KatsuyoText, pre + kt.Tagaru())
 
         return None

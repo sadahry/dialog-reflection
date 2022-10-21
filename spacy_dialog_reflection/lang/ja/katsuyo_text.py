@@ -21,7 +21,7 @@ class KatsuyoText:
     接続される品詞の情報を含むことがある。
     e.g. こられるそうだ -> gokan=こられる
     """
-    katsuyo: k.Katsuyo
+    katsuyo: k.IKatsuyo
 
     def __add__(
         self, post: Union["KatsuyoText", "NonKatsuyoText", "IKatsuyoTextHelper"]
@@ -186,11 +186,11 @@ class Reru(ZyodoushiKatsuyoText):
         )
 
     def merge(self, pre: KatsuyoText) -> KatsuyoText:
-        if issubclass(type(pre.katsuyo), k.DoushiKatsuyo):
+        if issubclass(type(pre.katsuyo), k.IDoushiKatsuyo):
             if type(pre.katsuyo) is k.SaGyoHenkakuKatsuyo:
                 mizen_reru = pre.katsuyo.mizen_reru
                 return NonKatsuyoText(pre.gokan + mizen_reru) + self.zyodoushi
-            mizen = cast(k.DoushiKatsuyo, pre.katsuyo).mizen
+            mizen = cast(k.IDoushiKatsuyo, pre.katsuyo).mizen
             return NonKatsuyoText(pre.gokan + mizen) + self.zyodoushi
 
         raise KatsuyoTextError(
@@ -207,11 +207,11 @@ class Rareru(ZyodoushiKatsuyoText):
         )
 
     def merge(self, pre: KatsuyoText) -> KatsuyoText:
-        if issubclass(type(pre.katsuyo), k.DoushiKatsuyo):
+        if issubclass(type(pre.katsuyo), k.IDoushiKatsuyo):
             if type(pre.katsuyo) is k.SaGyoHenkakuKatsuyo:
                 mizen_rareru = pre.katsuyo.mizen_rareru
                 return NonKatsuyoText(pre.gokan + mizen_rareru) + self.zyodoushi
-            mizen = cast(k.DoushiKatsuyo, pre.katsuyo).mizen
+            mizen = cast(k.IDoushiKatsuyo, pre.katsuyo).mizen
             return NonKatsuyoText(pre.gokan + mizen) + self.zyodoushi
 
         raise KatsuyoTextError(
@@ -233,11 +233,11 @@ class Seru(ZyodoushiKatsuyoText):
         )
 
     def merge(self, pre: KatsuyoText) -> KatsuyoText:
-        if issubclass(type(pre.katsuyo), k.DoushiKatsuyo):
+        if issubclass(type(pre.katsuyo), k.IDoushiKatsuyo):
             if type(pre.katsuyo) is k.SaGyoHenkakuKatsuyo:
                 mizen_reru = pre.katsuyo.mizen_reru
                 return NonKatsuyoText(pre.gokan + mizen_reru) + self.zyodoushi
-            mizen = cast(k.DoushiKatsuyo, pre.katsuyo).mizen
+            mizen = cast(k.IDoushiKatsuyo, pre.katsuyo).mizen
             return NonKatsuyoText(pre.gokan + mizen) + self.zyodoushi
 
         raise KatsuyoTextError(
@@ -254,9 +254,9 @@ class Saseru(ZyodoushiKatsuyoText):
         )
 
     def merge(self, pre: KatsuyoText) -> KatsuyoText:
-        if issubclass(type(pre.katsuyo), k.DoushiKatsuyo):
+        if issubclass(type(pre.katsuyo), k.IDoushiKatsuyo):
             # サ変活用「〜ずる」には未然形「〜じ させる」を採用したため他と同一の未然形に
-            mizen = cast(k.DoushiKatsuyo, pre.katsuyo).mizen
+            mizen = cast(k.IDoushiKatsuyo, pre.katsuyo).mizen
             return NonKatsuyoText(pre.gokan + mizen) + self.zyodoushi
 
         raise KatsuyoTextError(
@@ -278,8 +278,8 @@ class Nai(ZyodoushiKatsuyoText):
         )
 
     def merge(self, pre: KatsuyoText) -> KatsuyoText:
-        if issubclass(type(pre.katsuyo), k.DoushiKatsuyo):
-            mizen = cast(k.DoushiKatsuyo, pre.katsuyo).mizen
+        if issubclass(type(pre.katsuyo), k.IDoushiKatsuyo):
+            mizen = cast(k.IDoushiKatsuyo, pre.katsuyo).mizen
             return NonKatsuyoText(pre.gokan + mizen) + self.zyodoushi
 
         raise KatsuyoTextError(
@@ -301,8 +301,8 @@ class Tai(ZyodoushiKatsuyoText):
         )
 
     def merge(self, pre: KatsuyoText) -> KatsuyoText:
-        if issubclass(type(pre.katsuyo), k.DoushiKatsuyo):
-            renyo = cast(k.DoushiKatsuyo, pre.katsuyo).renyo
+        if issubclass(type(pre.katsuyo), k.IDoushiKatsuyo):
+            renyo = cast(k.IDoushiKatsuyo, pre.katsuyo).renyo
             return NonKatsuyoText(pre.gokan + renyo) + self.zyodoushi
 
         raise KatsuyoTextError(
@@ -319,8 +319,8 @@ class Tagaru(ZyodoushiKatsuyoText):
         )
 
     def merge(self, pre: KatsuyoText) -> KatsuyoText:
-        if issubclass(type(pre.katsuyo), k.DoushiKatsuyo):
-            renyo = cast(k.DoushiKatsuyo, pre.katsuyo).renyo
+        if issubclass(type(pre.katsuyo), k.IDoushiKatsuyo):
+            renyo = cast(k.IDoushiKatsuyo, pre.katsuyo).renyo
             return NonKatsuyoText(pre.gokan + renyo) + self.zyodoushi
 
         raise KatsuyoTextError(

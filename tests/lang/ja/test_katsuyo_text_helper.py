@@ -18,7 +18,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo import (
     GODAN_SA_GYO,
     GODAN_TA_GYO,
     GODAN_WAA_GYO,
-    Katsuyo,
+    IKatsuyo,
     KA_GYO_HENKAKU_KURU,
     KAMI_ICHIDAN,
     KEIYOUDOUSHI,
@@ -49,7 +49,7 @@ def append_multiple():
 
 @pytest.fixture(scope="session")
 def unsupported_katsuyo_text():
-    class UnsupportedKatsuyo(Katsuyo, ShushiMixin):
+    class UnsupportedKatsuyo(IKatsuyo, ShushiMixin):
         pass
 
     return KatsuyoText(
