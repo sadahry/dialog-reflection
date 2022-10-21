@@ -183,7 +183,7 @@ class TestReflectionBuilder:
             ),
         ],
     )
-    def test_extract_tokens_with_nearest_root_heads(
+    def test_extract_tokens_with_nearest_heads(
         self,
         nlp_ja,
         builder: JaSpacyReflectionTextBuilder,
@@ -192,7 +192,7 @@ class TestReflectionBuilder:
         assert_message,
     ):
         root = next(nlp_ja(text).sents).root
-        func = builder._extract_tokens_with_nearest_root_heads
+        func = builder._extract_tokens_with_nearest_heads
         tokens = func(root)
         text = "".join(map(lambda t: t.text, tokens))
         assert text == expected, assert_message

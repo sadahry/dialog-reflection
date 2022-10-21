@@ -41,7 +41,7 @@ class JaSpacyReflectionTextBuilder(ISpacyReflectionTextBuilder):
         if doc.text.strip() == "":
             raise ReflectionTextError("EMPTY DOC")
         src = self._extract_source_token(doc)
-        reflection_tokens = self._extract_tokens_with_nearest_root_heads(src)
+        reflection_tokens = self._extract_tokens_with_nearest_heads(src)
         return self._build_text(reflection_tokens, src)
 
     def _extract_source_token(
@@ -68,12 +68,12 @@ class JaSpacyReflectionTextBuilder(ISpacyReflectionTextBuilder):
 
         return src
 
-    def _extract_tokens_with_nearest_root_heads(
+    def _extract_tokens_with_nearest_heads(
         self,
-        root: spacy.tokens.Token,
+        src: spacy.tokens.Token,
     ) -> spacy.tokens.Span:
         """
-        e.g. "私は彼女を愛している。" -> ["私", "は", "彼女", "を"]
+        e.g. "いる" from "私は彼女を愛している。" -> ["彼女", "を", "愛", "して"]
         """
 
         # process recursively
@@ -91,8 +91,10 @@ class JaSpacyReflectionTextBuilder(ISpacyReflectionTextBuilder):
 
             return token
 
-        head_token = _extract_head_token(root)
-        return root.doc[head_token.i : root.i]
+        # extract head_token from src or root
+        extract_from = min([src, src.sent.root], key=lambda t: t.i)
+        head_token = _extract_head_token(extract_from)
+        return src.doc[head_token.i : src.i]
 
     def _build_text(
         self,
