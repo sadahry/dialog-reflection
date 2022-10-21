@@ -206,3 +206,24 @@ class TestReflectionBuilder:
         func = builder._build_suffix
         text = func(root)
         assert text == expected, assert_message
+
+    @pytest.mark.filterwarnings("ignore:Unsupported Tag")
+    def test_build_suffix_error(
+        self,
+        nlp_ja,
+        builder: JaSpacyReflectionTextBuilder,
+    ):
+        """
+        _build_suffixでエラーとなりテキストを返すケース
+        """
+        # rootが副詞の場合はエラーとなる想定
+        text = "どう"
+        root = next(nlp_ja(text).sents).root
+        assert root.tag_ == "副詞"
+        func = builder._build_suffix
+        with pytest.raises(ReflectionTextError) as e:
+            func(root)
+
+        # エラー時には元rootの文字列を含んだ状態で返す想定
+        excepted = text + builder.word_ending_unpersed
+        assert e.value.instant_reflection_text == excepted
