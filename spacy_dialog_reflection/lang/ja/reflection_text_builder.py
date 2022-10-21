@@ -34,7 +34,7 @@ class JaSpacyReflectionTextBuilder(ISpacyReflectionTextBuilder):
         self.allowed_tag_pattern = self._build_allowed_tag_pattern(allowed_src_tags)
 
     def _build_allowed_tag_pattern(self, allowed_src_tags: Set[str]) -> re.Pattern:
-        # e.g. /^動詞.*|^名詞.*|^形容詞.*|^形容動詞.*/
+        # e.g. /^動詞.*|^名詞.*|^形容詞.*|^形状詞.*/
         return re.compile(r"^" + r".*|^".join(allowed_src_tags) + r".*")
 
     def build(self, doc: spacy.tokens.Doc) -> str:
