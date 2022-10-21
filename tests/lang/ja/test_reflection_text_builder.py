@@ -227,3 +227,25 @@ class TestReflectionBuilder:
         # エラー時には元rootの文字列を含んだ状態で返す想定
         excepted = text + builder.word_ending_unpersed
         assert e.value.instant_reflection_text == excepted
+
+    @pytest.mark.filterwarnings(r"ignore:.*NO VALID SENTENSES IN DOC")
+    def test_safe_build_catch_error(
+        self,
+        nlp_ja,
+        builder: JaSpacyReflectionTextBuilder,
+    ):
+        """
+        safe_buildでエラーとならないでテキストを返すケース
+        """
+        # rootが副詞の場合はエラーとなる想定
+        text = "どう"
+        doc = nlp_ja(text)
+
+        root = next(doc.sents).root
+        assert root.tag_ == "副詞"
+
+        result = builder.safe_build(doc)
+
+        # rootの選出時にエラーとなるはずなので、エラー用テキストを返す想定
+        excepted = builder.message_when_not_valid_doc
+        assert result == excepted
