@@ -21,7 +21,7 @@ class KatsuyoText:
 
     def __add__(
         self, post: Union["KatsuyoText", "NonKatsuyoText", "IKatsuyoTextHelper"]
-    ) -> Union["KatsuyoText", "NonKatsuyoText"]:
+    ) -> Union["KatsuyoText", "NonKatsuyoText"]:  # IKatsuyoTextHelper は return しない
         if issubclass(type(post), NonKatsuyoText):
             post = cast(NonKatsuyoText, post)
             return self.append(post)
@@ -84,7 +84,7 @@ class NonKatsuyoText:
 
     def __add__(
         self, post: Union["KatsuyoText", "NonKatsuyoText", "IKatsuyoTextHelper"]
-    ) -> Union["KatsuyoText", "NonKatsuyoText"]:
+    ) -> Union["KatsuyoText", "NonKatsuyoText"]:  # IKatsuyoTextHelper は return しない
         if issubclass(type(post), NonKatsuyoText):
             post = cast(NonKatsuyoText, post)
             return NonKatsuyoText(text=self.text + post.text)
@@ -186,7 +186,7 @@ class Reru(ZyodoushiKatsuyoText):
             if type(pre.katsuyo) is k.SaGyoHenkakuKatsuyo:
                 mizen_reru = pre.katsuyo.mizen_reru
                 return NonKatsuyoText(pre.gokan + mizen_reru) + self.zyodoushi
-            mizen = cast(k.DoushiKatsuyo, pre).mizen
+            mizen = cast(k.DoushiKatsuyo, pre.katsuyo).mizen
             return NonKatsuyoText(pre.gokan + mizen) + self.zyodoushi
 
         raise ValueError(
@@ -207,7 +207,7 @@ class Rareru(ZyodoushiKatsuyoText):
             if type(pre.katsuyo) is k.SaGyoHenkakuKatsuyo:
                 mizen_rareru = pre.katsuyo.mizen_rareru
                 return NonKatsuyoText(pre.gokan + mizen_rareru) + self.zyodoushi
-            mizen = cast(k.DoushiKatsuyo, pre).mizen
+            mizen = cast(k.DoushiKatsuyo, pre.katsuyo).mizen
             return NonKatsuyoText(pre.gokan + mizen) + self.zyodoushi
 
         raise ValueError(
@@ -233,7 +233,7 @@ class Seru(ZyodoushiKatsuyoText):
             if type(pre.katsuyo) is k.SaGyoHenkakuKatsuyo:
                 mizen_reru = pre.katsuyo.mizen_reru
                 return NonKatsuyoText(pre.gokan + mizen_reru) + self.zyodoushi
-            mizen = cast(k.DoushiKatsuyo, pre).mizen
+            mizen = cast(k.DoushiKatsuyo, pre.katsuyo).mizen
             return NonKatsuyoText(pre.gokan + mizen) + self.zyodoushi
 
         raise ValueError(
@@ -252,7 +252,7 @@ class Saseru(ZyodoushiKatsuyoText):
     def merge(self, pre: KatsuyoText) -> KatsuyoText:
         if issubclass(type(pre.katsuyo), k.DoushiKatsuyo):
             # サ変活用「〜ずる」には未然形「〜じ させる」を採用したため他と同一の未然形に
-            mizen = cast(k.DoushiKatsuyo, pre).mizen
+            mizen = cast(k.DoushiKatsuyo, pre.katsuyo).mizen
             return NonKatsuyoText(pre.gokan + mizen) + self.zyodoushi
 
         raise ValueError(
@@ -275,7 +275,7 @@ class Nai(ZyodoushiKatsuyoText):
 
     def merge(self, pre: KatsuyoText) -> KatsuyoText:
         if issubclass(type(pre.katsuyo), k.DoushiKatsuyo):
-            mizen = cast(k.DoushiKatsuyo, pre).mizen
+            mizen = cast(k.DoushiKatsuyo, pre.katsuyo).mizen
             return NonKatsuyoText(pre.gokan + mizen) + self.zyodoushi
 
         raise ValueError(
@@ -298,7 +298,7 @@ class Tai(ZyodoushiKatsuyoText):
 
     def merge(self, pre: KatsuyoText) -> KatsuyoText:
         if issubclass(type(pre.katsuyo), k.DoushiKatsuyo):
-            renyo = cast(k.DoushiKatsuyo, pre).renyo
+            renyo = cast(k.DoushiKatsuyo, pre.katsuyo).renyo
             return NonKatsuyoText(pre.gokan + renyo) + self.zyodoushi
 
         raise ValueError(
@@ -316,7 +316,7 @@ class Tagaru(ZyodoushiKatsuyoText):
 
     def merge(self, pre: KatsuyoText) -> KatsuyoText:
         if issubclass(type(pre.katsuyo), k.DoushiKatsuyo):
-            renyo = cast(k.DoushiKatsuyo, pre).renyo
+            renyo = cast(k.DoushiKatsuyo, pre.katsuyo).renyo
             return NonKatsuyoText(pre.gokan + renyo) + self.zyodoushi
 
         raise ValueError(

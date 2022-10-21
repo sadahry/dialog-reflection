@@ -71,14 +71,14 @@ class IKatsuyoTextAppendantsDetector(abc.ABC):
             if not issubclass(supported_helper, tuple(self.appendants_dict.keys())):
                 warnings.warn(f"this object doesn't have helper: {supported_helper}")
 
-    def try_append(self, type: type, appendants: List[KatsuyoText]) -> bool:
+    def try_append(self, type: type, appendants: List[IKatsuyoTextHelper]) -> bool:
         if type not in self.appendants_dict:
             return False
         appendants.append(self.appendants_dict[type])
         return True
 
     @abc.abstractmethod
-    def detect(self, src: Any) -> Tuple[List[KatsuyoText], bool]:
+    def detect(self, src: Any) -> Tuple[List[IKatsuyoTextHelper], bool]:
         """
         不適切な値が代入された際は、Noneを返却する。
         """
@@ -240,12 +240,12 @@ class SpacyKatsuyoTextDetector(IKatsuyoTextDetector):
 
 
 class SpacyKatsuyoTextAppendantsDetector(IKatsuyoTextAppendantsDetector):
-    def detect(self, src: spacy.tokens.Span) -> Tuple[List[KatsuyoText], bool]:
+    def detect(self, src: spacy.tokens.Span) -> Tuple[List[IKatsuyoTextHelper], bool]:
         sent = src
         # 現状はroot固定で処理
         root = sent.root
 
-        appendants: List[KatsuyoText] = []
+        appendants: List[IKatsuyoTextHelper] = []
         has_error = False
 
         # NOTE: rootに紐づくトークンを取得するのに、依存関係を見ずにrootトークンのindex以降のトークンを見る
