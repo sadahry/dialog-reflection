@@ -3,56 +3,56 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text import (
     IKatsuyoTextHelper,
     KatsuyoTextError,
 )
+import sys
 import spacy_dialog_reflection.lang.ja.katsuyo as k
 import spacy_dialog_reflection.lang.ja.katsuyo_text as kt
 
+# ==============================================================================
+# 助動詞::受身
+# ==============================================================================
 
-# TODO このクラスは、KatsuyoTextBuilder的な名前のクラスに変更する
-#      gokan等が必要なく、KatsuyoTextを返すだけのクラスにする
+
+def bridge_Ukemi_default(
+    pre: Union[kt.KatsuyoText, kt.NonKatsuyoText]
+) -> kt.KatsuyoText:
+    # デフォルトでは動詞「なる」でブリッジ
+    naru = kt.KatsuyoText(
+        gokan="な",
+        katsuyo=k.GODAN_RA_GYO,
+    )
+
+    if issubclass(
+        type(pre),
+        (kt.NonKatsuyoText),
+    ):
+        pre = cast(kt.NonKatsuyoText, pre)
+        ni = kt.NonKatsuyoText("に")
+        return cast(kt.KatsuyoText, pre + ni + naru + kt.Reru())
+
+    pre = cast(kt.KatsuyoText, pre)
+
+    if type(pre.katsuyo) is k.KeiyoushiKatsuyo:
+        return cast(
+            kt.KatsuyoText,
+            pre + naru + kt.Reru(),
+        )
+    elif type(pre.katsuyo) is k.KeiyoudoushiKatsuyo:
+        return cast(
+            kt.KatsuyoText,
+            pre + naru + kt.Reru(),
+        )
+
+    raise KatsuyoTextError(
+        f"Unsupported katsuyo_text in {sys._getframe().f_code.co_name}: {pre} "
+        f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
+    )
+
+
 class Ukemi(IKatsuyoTextHelper):
     def __init__(
         self,
-        bridge: Optional[IKatsuyoTextHelper.BridgeFunction] = None,
+        bridge: Optional[IKatsuyoTextHelper.BridgeFunction] = bridge_Ukemi_default,
     ) -> None:
-        if bridge is None:
-
-            def __default(
-                pre: Union[kt.KatsuyoText, kt.NonKatsuyoText]
-            ) -> kt.KatsuyoText:
-                # デフォルトでは動詞「なる」でブリッジ
-                naru = kt.KatsuyoText(
-                    gokan="な",
-                    katsuyo=k.GODAN_RA_GYO,
-                )
-
-                if issubclass(
-                    type(pre),
-                    (kt.NonKatsuyoText),
-                ):
-                    pre = cast(kt.NonKatsuyoText, pre)
-                    ni = kt.NonKatsuyoText("に")
-                    return cast(kt.KatsuyoText, pre + ni + naru + kt.Reru())
-
-                pre = cast(kt.KatsuyoText, pre)
-
-                if type(pre.katsuyo) is k.KeiyoushiKatsuyo:
-                    return cast(
-                        kt.KatsuyoText,
-                        pre + naru + kt.Reru(),
-                    )
-                elif type(pre.katsuyo) is k.KeiyoudoushiKatsuyo:
-                    return cast(
-                        kt.KatsuyoText,
-                        pre + naru + kt.Reru(),
-                    )
-
-                raise KatsuyoTextError(
-                    f"Unsupported katsuyo_text in {type(self)}: {pre} "
-                    f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
-                )
-
-            bridge = __default
-
         super().__init__(bridge)
 
     def try_merge(self, pre: kt.KatsuyoText) -> Optional[kt.KatsuyoText]:
@@ -75,48 +75,50 @@ class Ukemi(IKatsuyoTextHelper):
         return None
 
 
+# ==============================================================================
+# 助動詞::使役
+# ==============================================================================
+
+
+def bridge_Shieki_default(
+    pre: Union[kt.KatsuyoText, kt.NonKatsuyoText]
+) -> kt.KatsuyoText:
+    if issubclass(
+        type(pre),
+        (kt.NonKatsuyoText),
+    ):
+        pre = cast(kt.NonKatsuyoText, pre)
+        ni = kt.NonKatsuyoText("に")
+        return cast(kt.KatsuyoText, pre + ni + kt.Saseru())
+
+    pre = cast(kt.KatsuyoText, pre)
+
+    if type(pre.katsuyo) is k.KeiyoushiKatsuyo:
+        # 「させる」を動詞として扱い連用形でブリッジ
+        renyo = pre.katsuyo.renyo
+        return cast(
+            kt.KatsuyoText,
+            kt.NonKatsuyoText(pre.gokan + renyo) + kt.Saseru(),
+        )
+    elif type(pre.katsuyo) is k.KeiyoudoushiKatsuyo:
+        # 「させる」を動詞として扱い連用形でブリッジ
+        renyo = pre.katsuyo.renyo
+        return cast(
+            kt.KatsuyoText,
+            kt.NonKatsuyoText(pre.gokan + renyo) + kt.Saseru(),
+        )
+
+    raise KatsuyoTextError(
+        f"Unsupported katsuyo_text in {sys._getframe().f_code.co_name}: {pre} "
+        f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
+    )
+
+
 class Shieki(IKatsuyoTextHelper):
     def __init__(
         self,
-        bridge: Optional[IKatsuyoTextHelper.BridgeFunction] = None,
+        bridge: Optional[IKatsuyoTextHelper.BridgeFunction] = bridge_Shieki_default,
     ) -> None:
-        if bridge is None:
-
-            def __default(
-                pre: Union[kt.KatsuyoText, kt.NonKatsuyoText]
-            ) -> kt.KatsuyoText:
-                if issubclass(
-                    type(pre),
-                    (kt.NonKatsuyoText),
-                ):
-                    pre = cast(kt.NonKatsuyoText, pre)
-                    ni = kt.NonKatsuyoText("に")
-                    return cast(kt.KatsuyoText, pre + ni + kt.Saseru())
-
-                pre = cast(kt.KatsuyoText, pre)
-
-                if type(pre.katsuyo) is k.KeiyoushiKatsuyo:
-                    # 「させる」を動詞として扱い連用形でブリッジ
-                    renyo = pre.katsuyo.renyo
-                    return cast(
-                        kt.KatsuyoText,
-                        kt.NonKatsuyoText(pre.gokan + renyo) + kt.Saseru(),
-                    )
-                elif type(pre.katsuyo) is k.KeiyoudoushiKatsuyo:
-                    # 「させる」を動詞として扱い連用形でブリッジ
-                    renyo = pre.katsuyo.renyo
-                    return cast(
-                        kt.KatsuyoText,
-                        kt.NonKatsuyoText(pre.gokan + renyo) + kt.Saseru(),
-                    )
-
-                raise KatsuyoTextError(
-                    f"Unsupported katsuyo_text in {type(self)}: {pre} "
-                    f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
-                )
-
-            bridge = __default
-
         super().__init__(bridge)
 
     def try_merge(self, pre: kt.KatsuyoText) -> Optional[kt.KatsuyoText]:
@@ -139,54 +141,55 @@ class Shieki(IKatsuyoTextHelper):
         return None
 
 
-# 否定
+# ==============================================================================
+# 助動詞::否定
+# ==============================================================================
+
+
+def bridge_Hitei_default(
+    pre: Union[kt.KatsuyoText, kt.NonKatsuyoText]
+) -> kt.KatsuyoText:
+    if issubclass(
+        type(pre),
+        (kt.NonKatsuyoText),
+    ):
+        pre = cast(kt.NonKatsuyoText, pre)
+        # TODO 助詞のハンドリング
+        deha = kt.NonKatsuyoText("では")
+        return cast(kt.KatsuyoText, pre + deha + kt.Nai())
+
+    pre = cast(kt.KatsuyoText, pre)
+
+    if type(pre.katsuyo) is k.KeiyoushiKatsuyo:
+        # 「ない」を形容詞として扱い連用形でブリッジ
+        renyo = pre.katsuyo.renyo
+        return cast(
+            kt.KatsuyoText,
+            kt.NonKatsuyoText(pre.gokan + renyo) + kt.Nai(),
+        )
+    elif type(pre.katsuyo) is k.KeiyoudoushiKatsuyo:
+        # 「ない」を形容詞として扱い連用形でブリッジ
+        # 形容動詞は「ない」には特殊な形式で紐づく
+        renyo_nai = pre.katsuyo.renyo_nai
+        return cast(
+            kt.KatsuyoText,
+            kt.NonKatsuyoText(pre.gokan + renyo_nai) + kt.Nai(),
+        )
+
+    raise KatsuyoTextError(
+        f"Unsupported katsuyo_text in {sys._getframe().f_code.co_name}: {pre} "
+        f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
+    )
+
+
 class Hitei(IKatsuyoTextHelper):
     # 現状、出力文字列としては「ない」のみサポート
     # TODO オプションで「ぬ」を選択できるように
 
     def __init__(
         self,
-        bridge: Optional[IKatsuyoTextHelper.BridgeFunction] = None,
+        bridge: Optional[IKatsuyoTextHelper.BridgeFunction] = bridge_Hitei_default,
     ) -> None:
-        if bridge is None:
-
-            def __default(
-                pre: Union[kt.KatsuyoText, kt.NonKatsuyoText]
-            ) -> kt.KatsuyoText:
-                if issubclass(
-                    type(pre),
-                    (kt.NonKatsuyoText),
-                ):
-                    pre = cast(kt.NonKatsuyoText, pre)
-                    # TODO 助詞のハンドリング
-                    deha = kt.NonKatsuyoText("では")
-                    return cast(kt.KatsuyoText, pre + deha + kt.Nai())
-
-                pre = cast(kt.KatsuyoText, pre)
-
-                if type(pre.katsuyo) is k.KeiyoushiKatsuyo:
-                    # 「ない」を形容詞として扱い連用形でブリッジ
-                    renyo = pre.katsuyo.renyo
-                    return cast(
-                        kt.KatsuyoText,
-                        kt.NonKatsuyoText(pre.gokan + renyo) + kt.Nai(),
-                    )
-                elif type(pre.katsuyo) is k.KeiyoudoushiKatsuyo:
-                    # 「ない」を形容詞として扱い連用形でブリッジ
-                    # 形容動詞は「ない」には特殊な形式で紐づく
-                    renyo_nai = pre.katsuyo.renyo_nai
-                    return cast(
-                        kt.KatsuyoText,
-                        kt.NonKatsuyoText(pre.gokan + renyo_nai) + kt.Nai(),
-                    )
-
-                raise KatsuyoTextError(
-                    f"Unsupported katsuyo_text in {type(self)}: {pre} "
-                    f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
-                )
-
-            bridge = __default
-
         super().__init__(bridge)
 
     def try_merge(self, pre: kt.KatsuyoText) -> Optional[kt.KatsuyoText]:
@@ -196,7 +199,11 @@ class Hitei(IKatsuyoTextHelper):
         return None
 
 
-# 自分の希望
+# ==============================================================================
+# 助動詞::希望
+# ==============================================================================
+
+
 class KibouSelf(IKatsuyoTextHelper):
     def __init__(
         self,
@@ -227,34 +234,35 @@ class KibouOthers(IKatsuyoTextHelper):
         return None
 
 
-# 過去/完了/存続/確認
+# ==============================================================================
+# 助動詞::過去/完了/存続/確認
+# ==============================================================================
+
+
+def bridge_KakoKanryo_default(
+    pre: Union[kt.KatsuyoText, kt.NonKatsuyoText]
+) -> kt.KatsuyoText:
+    if issubclass(
+        type(pre),
+        (kt.NonKatsuyoText),
+    ):
+        pre = cast(kt.NonKatsuyoText, pre)
+        # TODO 助詞のハンドリング
+        dat = kt.NonKatsuyoText("だっ")
+        return cast(kt.KatsuyoText, pre + dat + kt.Ta())
+
+    pre = cast(kt.KatsuyoText, pre)
+    raise KatsuyoTextError(
+        f"Unsupported katsuyo_text in bridge_KakoKanryo_default: {pre} "
+        f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
+    )
+
+
 class KakoKanryo(IKatsuyoTextHelper):
     def __init__(
         self,
-        bridge: Optional[IKatsuyoTextHelper.BridgeFunction] = None,
+        bridge: Optional[IKatsuyoTextHelper.BridgeFunction] = bridge_KakoKanryo_default,
     ) -> None:
-        if bridge is None:
-
-            def __default(
-                pre: Union[kt.KatsuyoText, kt.NonKatsuyoText]
-            ) -> kt.KatsuyoText:
-                if issubclass(
-                    type(pre),
-                    (kt.NonKatsuyoText),
-                ):
-                    pre = cast(kt.NonKatsuyoText, pre)
-                    # TODO 助詞のハンドリング
-                    dat = kt.NonKatsuyoText("だっ")
-                    return cast(kt.KatsuyoText, pre + dat + kt.Ta())
-
-                pre = cast(kt.KatsuyoText, pre)
-                raise KatsuyoTextError(
-                    f"Unsupported katsuyo_text in {type(self)}: {pre} "
-                    f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
-                )
-
-            bridge = __default
-
         super().__init__(bridge)
 
     def try_merge(self, pre: kt.KatsuyoText) -> Optional[kt.KatsuyoText]:
