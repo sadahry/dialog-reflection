@@ -28,6 +28,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text import (
 
 from spacy_dialog_reflection.lang.ja.katsuyo_text_helper import (
     Hitei,
+    KakoKanryo,
     KibouSelf,
     Shieki,
     Ukemi,
@@ -72,10 +73,12 @@ class IKatsuyoTextAppendantsDetector(abc.ABC):
             if not issubclass(supported_helper, tuple(self.appendants_dict.keys())):
                 warnings.warn(f"this object doesn't have helper: {supported_helper}")
 
-    def try_append(self, type: type, appendants: List[IKatsuyoTextHelper]) -> bool:
-        if type not in self.appendants_dict:
+    def try_append(self, typ: type, appendants: List[IKatsuyoTextHelper]) -> bool:
+        if typ not in self.appendants_dict:
+            # TODO ignoreリストを追加してここからwarningを出さないようにする
+            warnings.warn(f"Unsupported type in try_append: {typ}")
             return False
-        appendants.append(self.appendants_dict[type])
+        appendants.append(self.appendants_dict[typ])
         return True
 
     @abc.abstractmethod
