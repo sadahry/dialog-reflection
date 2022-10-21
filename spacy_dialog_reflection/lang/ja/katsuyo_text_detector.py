@@ -254,42 +254,42 @@ class SpacyKatsuyoTextAppendantsDetector(IKatsuyoTextAppendantsDetector):
         candidate_tokens = dropwhile(lambda t: t.i > root.i, sent)
         for candidate_token in candidate_tokens:
             pos_tag = candidate_token.pos_
-            lemma = candidate_token.lemma_
+            norm = candidate_token.norm_
 
             if pos_tag == "AUX":
                 # ==================================================
                 # 助動詞の判定
                 # ==================================================
-                if lemma in ["れる", "られる"]:
+                if norm in ["れる", "られる"]:
                     is_succeeded = self.try_append(Ukemi, appendants)
                     has_error = has_error or not is_succeeded
                     continue
-                elif lemma in ["せる", "させる"]:
+                elif norm in ["せる", "させる"]:
                     is_succeeded = self.try_append(Shieki, appendants)
                     has_error = has_error or not is_succeeded
                     continue
-                elif lemma in ["ない", "ぬ"]:
-                    # 「ぬ」も「ない」として扱う
+                elif norm in ["ない", "ず"]:
+                    # 「ず」も「ない」として扱う
                     is_succeeded = self.try_append(Hitei, appendants)
                     has_error = has_error or not is_succeeded
                     continue
-                elif lemma in ["たい"]:
+                elif norm in ["たい"]:
                     is_succeeded = self.try_append(KibouSelf, appendants)
                     has_error = has_error or not is_succeeded
                     continue
-                elif lemma in ["たがる"]:
+                elif norm in ["たがる"]:
                     is_succeeded = self.try_append(KibouOthers, appendants)
                     has_error = has_error or not is_succeeded
                     continue
 
-                warnings.warn(f"Unsupported AUX: {lemma}", UserWarning)
+                warnings.warn(f"Unsupported AUX: {norm}", UserWarning)
                 has_error = True
                 continue
             elif pos_tag == "ADJ":
                 # 「ない」のみ対応
                 # NOTE: 必ずしも正確に否定表現を解析できるとは限らない
                 #       @see: https://github.com/sadahry/spacy-dialog-reflection/blob/17507db530da24c11816374d6caa4766e4614f69/tests/lang/ja/test_katsuyo_text_detector.py#L676-L693
-                if lemma in ["ない", "無い"]:
+                if norm in ["無い"]:
                     is_succeeded = self.try_append(Hitei, appendants)
                     has_error = has_error or not is_succeeded
                     continue

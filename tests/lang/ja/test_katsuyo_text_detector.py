@@ -28,6 +28,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text_detector import (
     SpacyKatsuyoTextAppendantsDetector,
 )
 from spacy_dialog_reflection.lang.ja.katsuyo_text_helper import (
+    KakoKanryo,
     KibouOthers,
     KibouSelf,
     Ukemi,
@@ -635,7 +636,7 @@ def test_spacy_katsuyo_text_detector(
 
 
 @pytest.mark.parametrize(
-    "text, lemma, pos, expected",
+    "text, norm, pos, expected",
     [
         (
             "あなたに愛される",
@@ -674,15 +675,22 @@ def test_spacy_katsuyo_text_detector(
             [Hitei],
         ),
         (
+            "宿題もせず",
+            "ず",
+            "AUX",
+            [Hitei],
+        ),
+        (
             "子供は産まぬ",
-            "ぬ",
+            # 「ぬ」のnormは「ず」になる
+            "ず",
             "AUX",
             [Hitei],
         ),
         (
             "子供は産まん",
-            # 「ん」のlemmaは「ぬ」になる
-            "ぬ",
+            # 「ん」のnormは「ず」になる
+            "ず",
             "AUX",
             [Hitei],
         ),
@@ -693,13 +701,13 @@ def test_spacy_katsuyo_text_detector(
         #       否定の意味を扱ううえでは問題となるため、改善の余地がある。
         (
             "それは仕方ない",
-            "仕方ない",
+            "仕方無い",
             "ADJ",
             [],
         ),
         (
             "それは仕方がない",
-            "ない",
+            "無い",
             "ADJ",
             # TODO 格助詞「が」も取得できるように
             [Hitei],
@@ -716,14 +724,54 @@ def test_spacy_katsuyo_text_detector(
             "AUX",
             [KibouOthers],
         ),
+        # (
+        #     "一生懸命に歩いた",
+        #     "た",
+        #     "AUX",
+        #     [KakoKanryo],
+        # ),
+        # (
+        #     "一生懸命に走った",
+        #     "た",
+        #     "AUX",
+        #     [KakoKanryo],
+        # ),
+        # (
+        #     "一生懸命に遊んだ",
+        #     "た",
+        #     "AUX",
+        #     [KakoKanryo],
+        # )
+        # TODO 複数ケースの追加
+        # (
+        #     # 「では」で「だ」が取れないように
+        #     "あんまり成功しなそう",
+        #     "無い",
+        #     "AUX",
+        #     [Hitei, 伝聞],
+        # ),
+        # (
+        #     # 「で」で「だ」が取れないように
+        #     "それは愛ではない",
+        #     "無い",
+        #     "AUX",
+        #     [Hitei],
+        # ),
+        # (
+        #     # 「て」で「た」が取れないように
+        #     "それは努力してない",
+        #     "ない",
+        #     "AUX",
+        #     [Hitei],
+        # ),
     ],
 )
 def test_spacy_katsuyo_text_appendants_detector(
-    nlp_ja, spacy_appendants_detector, text, lemma, pos, expected
+    nlp_ja, spacy_appendants_detector, text, norm, pos, expected
 ):
     sent = next(nlp_ja(text).sents)
     last_token = sent[-1]
-    assert last_token.lemma_ == lemma, "last token is not correct"
+    assert last_token.norm_ == norm, "last token is not correct"
     assert last_token.pos_ == pos, "last token is not correct"
     appendants, has_error = spacy_appendants_detector.detect(sent)
     assert not has_error, "has error in detection"
