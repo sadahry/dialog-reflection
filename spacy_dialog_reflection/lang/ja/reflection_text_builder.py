@@ -1,17 +1,19 @@
-from typing import Optional, Tuple
+from spacy_dialog_reflection.reflection_text_builder import (
+    ReflectionTextError,
+)
 from spacy_dialog_reflection.reflector import ISpacyReflectionTextBuilder
 from spacy_dialog_reflection.lang.ja.katsuyo_text_builder import (
     SpacyKatsuyoTextBuilder,
 )
-import warnings
 import spacy
 
 
 class JaSpacyReflectionTextBuilder(ISpacyReflectionTextBuilder):
     def __init__(self) -> None:
-        # TODO wordEndingもtext_builderに組み込む
+        # TODO 柔軟に設定できるようにする
         self.word_ending = "んですね。"
         self.word_ending_unpersed = "、ですか。"
+        self.message_when_not_valid_doc = "続けてください。"
         self.text_builder = SpacyKatsuyoTextBuilder()
 
     # restrict root pos tags to facilitate handling of suffixes in Japanese
@@ -19,26 +21,10 @@ class JaSpacyReflectionTextBuilder(ISpacyReflectionTextBuilder):
     # ref. https://universaldependencies.org/treebanks/ja_gsd/ja_gsd-dep-root.html
     ALLOWED_ROOT_POS_TAGS = {"VERB", "NOUN", "PROPN", "ADJ"}
 
-    def check_valid(
-        self,
-        doc: spacy.tokens.Doc,
-    ) -> Tuple[bool, Optional[str]]:
+    def build(self, doc: spacy.tokens.Doc) -> str:
         if doc.text.strip() == "":
-            message = "empty text"
-            warnings.warn(message, UserWarning)
-            return False, message
-        return True, None
-
-    def build_from_valid_doc(
-        self,
-        doc: spacy.tokens.Doc,
-    ) -> Optional[str]:
-        valid, _ = self.check_valid(doc)
-        if not valid:
-            return None
+            raise ReflectionTextError("EMPTY DOC")
         sent = self._select_sentence(doc)
-        if sent is None:
-            return None
 
         root = sent.root
         reflection_tokens = self._extract_tokens_with_nearest_root_heads(root)
@@ -47,7 +33,7 @@ class JaSpacyReflectionTextBuilder(ISpacyReflectionTextBuilder):
     def _select_sentence(
         self,
         doc: spacy.tokens.Doc,
-    ) -> Optional[spacy.tokens.Span]:
+    ) -> spacy.tokens.Span:
         """
         e.g. "私は彼女を愛している。私は幸せだ。" -> "私は幸せだ。"
         """
@@ -60,7 +46,11 @@ class JaSpacyReflectionTextBuilder(ISpacyReflectionTextBuilder):
             pass
 
         if sent is None:
-            warnings.warn(f"no valid sentenses doc: {doc}", UserWarning)
+            raise ReflectionTextError(
+                f"NO VALID SENTENSES IN DOC: '{doc}' "
+                f"ALLOWED_ROOT_POS_TAGS: {self.ALLOWED_ROOT_POS_TAGS}"
+            )
+
         return sent
 
     def _extract_tokens_with_nearest_root_heads(
@@ -118,7 +108,14 @@ class JaSpacyReflectionTextBuilder(ISpacyReflectionTextBuilder):
                 )
 
             return str(katsuyo_text) + self.word_ending
-        except Exception as e:
-            # 対話を進めることが優先なので、エラーはcatchしてwarningを出す
-            warnings.warn(f"unexpected error on _build_suffix: {e}", UserWarning)
-            return str(root) + self.word_ending_unpersed
+        except BaseException as e:
+            # ReflectionTextErrorでwrapしてinstant_reflection_textを残す
+            instant_reflection_text = str(root) + self.word_ending_unpersed
+            raise ReflectionTextError(
+                e, instant_reflection_text=instant_reflection_text
+            )
+
+    def build_instead_of_error(self, e: BaseException) -> str:
+        if type(e) is ReflectionTextError and e.instant_reflection_text is not None:
+            return e.instant_reflection_text
+        return self.message_when_not_valid_doc
