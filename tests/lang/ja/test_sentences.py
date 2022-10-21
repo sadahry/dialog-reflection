@@ -110,6 +110,11 @@ class TestReflectionBuilder:
         "text, expected, assert_message",
         [
             (
+                "今日は旅行へ行った。",
+                "旅行へ",
+                "sample sentence",
+            ),
+            (
                 "社員をする。",
                 "社員を",
                 "obj dependency",
@@ -147,6 +152,11 @@ class TestReflectionBuilder:
     @pytest.mark.parametrize(
         "text, expected, assert_message",
         [
+            (
+                "今日は旅行へ行った。",
+                "行ったんですね。",
+                "sample sentence",
+            ),
             (
                 "社員をする。",
                 "するんですね。",

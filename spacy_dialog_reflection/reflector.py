@@ -123,25 +123,19 @@ class ReflectionTextBuilder:
         self,
         root: spacy.tokens.Token,
     ) -> str:
-        # TODO 動詞の実装が終わったら消す。暫定実装
-        if root.pos_ == "VERB":
-            return root.lemma_ + self.word_ending
-        return ""
+        try:
+            # 現状rootのsuffixを構築するにはsentが必要
+            sent = root.sent
 
-        # TODO 動詞の実装が終わったら、以下のコメントアウトを外す
-        # try:
-        #     # 現状rootのsuffixを構築するにはsentが必要
-        #     sent = root.sent
+            katsuyo_text, _ = self.text_builder.build(sent)
 
-        #     katsuyo_text, _ = self.text_builder.build(sent)
+            if katsuyo_text is None:
+                raise Exception(
+                    f"unsupported parse. root: {root} sent: {sent}", UserWarning
+                )
 
-        #     if katsuyo_text is None:
-        #         raise Exception(
-        #             f"unsupported parse. root: {root} sent: {sent}", UserWarning
-        #         )
-
-        #     return str(katsuyo_text) + self.word_ending
-        # except Exception as e:
-        #     # 対話を進めることが優先なので、エラーはcatchしてwarningを出す
-        #     warnings.warn(f"unexpected error on _build_suffix: {e}", UserWarning)
-        #     return str(root) + self.word_ending_unpersed
+            return str(katsuyo_text) + self.word_ending
+        except Exception as e:
+            # 対話を進めることが優先なので、エラーはcatchしてwarningを出す
+            warnings.warn(f"unexpected error on _build_suffix: {e}", UserWarning)
+            return str(root) + self.word_ending_unpersed
