@@ -129,7 +129,6 @@ class SpacyKatsuyoTextDetector(IKatsuyoTextDetector):
 
     def detect(self, src: spacy.tokens.Token) -> Optional[KatsuyoText]:
         # spacy.tokens.Tokenから抽出される活用形の特徴を表す変数
-        pos_tag = src.pos_
         tag = src.tag_
         lemma = src.lemma_
         # sudachiの形態素解析結果(part_of_speech)5つ目以降(活用タイプ、活用形)が格納される
@@ -148,8 +147,7 @@ class SpacyKatsuyoTextDetector(IKatsuyoTextDetector):
         # ref. https://universaldependencies.org/treebanks/ja_gsd/index.html#pos-tags
         # if pos_tag == "VBD":
 
-        # TODO 動詞の実装
-        if pos_tag == "VERB":
+        if tag.startswith("動詞"):
             # ==================================================
             # 動詞の判定
             # ==================================================
@@ -161,83 +159,71 @@ class SpacyKatsuyoTextDetector(IKatsuyoTextDetector):
                 return KatsuyoText(gokan="い", katsuyo=GODAN_IKU)
 
             # 活用タイプを取得して判定に利用
-            conjugation_type = inflection[0] if len(inflection) > 0 else None
+            assert inflection, f"inflection is not empty: {src}"
+            conjugation_type = inflection[0]
 
-            if conjugation_type is None:
-                # 体言を含むサ変動詞の判定
-                # 名詞がVERBとして現れるため、conjugation_typeが取得できない
-                # # text = ウォーキングする
-                # 1       ウォーキング    ウォーキング    VERB    名詞-普通名詞-一般      _       0       root    _       SpaceAfter=No|BunsetuBILabel=B|BunsetuPositionType=ROOT|Reading=ウォーキング
-                # 2       する    する    AUX     動詞-非自立可能 _       1       aux     _       SpaceAfter=No|BunsetuBILabel=I|BunsetuPositionType=SYN_HEAD|Inf=サ行変格,終止形-一般|Reading=スル
+            # 活用形の判定
+            katsuyo = self.VERB_KATSUYOS_BY_CONJUGATION_TYPE.get(conjugation_type)
+            if katsuyo:
+                return KatsuyoText(gokan=lemma[:-1], katsuyo=katsuyo)
+
+            # 例外的な活用形の判定
+            if conjugation_type == "カ行変格":
+                # カ変「くる」「来る」を別途ハンドリング
+                if lemma == "来る":
+                    return KURU_KANJI
+                elif lemma == "くる":
+                    return KURU
+            elif conjugation_type == "サ行変格":
+                # サ変「する」「ずる」を別途ハンドリング
+                if lemma[-2:] == "する":
+                    return KatsuyoText(gokan=lemma[:-2], katsuyo=SA_GYO_HENKAKU_SURU)
+                elif lemma[-2:] == "ずる":
+                    return KatsuyoText(gokan=lemma[:-2], katsuyo=SA_GYO_HENKAKU_ZURU)
+
+            warnings.warn(
+                f"Unsupported conjugation_type of VERB: {conjugation_type}", UserWarning
+            )
+            return None
+        elif tag.startswith("形容詞"):
+            # ==================================================
+            # 形容詞の変形
+            # ==================================================
+            # e.g. 楽しい -> gokan=楽し + katsuyo=い
+            return KatsuyoText(gokan=src.lemma_[:-1], katsuyo=KEIYOUSHI)
+        elif tag.startswith("形状詞"):
+            # ==================================================
+            # 形容動詞の変形
+            # ==================================================
+            # 「形状詞」=「形容動詞の語幹」
+            # universaldependenciesの形容動詞に語幹は含まれない
+            # see: https://universaldependencies.org/treebanks/ja_gsd/ja_gsd-pos-ADJ.html
+            # e.g. 健康 -> gokan=健康 + katsuyo=だ
+            return KatsuyoText(gokan=src.lemma_, katsuyo=KEIYOUDOUSHI)
+        elif tag.startswith("名詞"):
+            # ==================================================
+            # 例外：サ変動詞の判定
+            # ==================================================
+            # 体言を含むサ変動詞の判定
+            # 名詞がVERBとして現れるため、conjugation_typeが取得できない
+            # # text = ウォーキングする
+            # 1       ウォーキング    ウォーキング    VERB    名詞-普通名詞-一般      _       0       root    _       SpaceAfter=No|BunsetuBILabel=B|BunsetuPositionType=ROOT|Reading=ウォーキング
+            # 2       する    する    AUX     動詞-非自立可能 _       1       aux     _       SpaceAfter=No|BunsetuBILabel=I|BunsetuPositionType=SYN_HEAD|Inf=サ行変格,終止形-一般|Reading=スル
+            if src.pos_ == "VERB":
                 right = next(src.rights)
                 if right.lemma_ == "する":
                     return KatsuyoText(gokan=lemma, katsuyo=SA_GYO_HENKAKU_SURU)
                 # このパターンは存在しない
                 # elif right.lemma_ == "ずる":
                 #     return KatsuyoText(gokan=lemma, katsuyo=SA_GYO_HENKAKU_ZURU)
-            else:
-                # 活用形の判定
-                katsuyo = self.VERB_KATSUYOS_BY_CONJUGATION_TYPE.get(conjugation_type)
-                if katsuyo:
-                    return KatsuyoText(gokan=lemma[:-1], katsuyo=katsuyo)
-
-                # 例外的な活用形の判定
-                if conjugation_type == "カ行変格":
-                    # カ変「くる」「来る」を別途ハンドリング
-                    if lemma == "来る":
-                        return KURU_KANJI
-                    elif lemma == "くる":
-                        return KURU
-                elif conjugation_type == "サ行変格":
-                    # サ変「する」「ずる」を別途ハンドリング
-                    if lemma[-2:] == "する":
-                        return KatsuyoText(
-                            gokan=lemma[:-2], katsuyo=SA_GYO_HENKAKU_SURU
-                        )
-                    elif lemma[-2:] == "ずる":
-                        return KatsuyoText(
-                            gokan=lemma[:-2], katsuyo=SA_GYO_HENKAKU_ZURU
-                        )
-
-            warnings.warn(
-                f"Unsupported conjugation_type of VERB: {conjugation_type}", UserWarning
-            )
-            return None
-        elif pos_tag == "ADJ":
             # ==================================================
-            # 形容動詞の判定
-            # ==================================================
-            # 「形状詞」=「形容動詞の語幹」
-            if "形状詞" in tag:
-                # universaldependenciesの形容動詞に語幹は含まれない
-                # see: https://universaldependencies.org/treebanks/ja_gsd/ja_gsd-pos-ADJ.html
-                # e.g. 健康 -> gokan=健康 + katsuyo=だ
-                return KatsuyoText(gokan=src.lemma_, katsuyo=KEIYOUDOUSHI)
-            # ==================================================
-            # 形容詞の判定
-            # ==================================================
-            if "形容詞" in tag:
-                # e.g. 楽しい -> gokan=楽し + katsuyo=い
-                return KatsuyoText(gokan=src.lemma_[:-1], katsuyo=KEIYOUSHI)
-
-            warnings.warn(f"Unsupported tag of ADJ: {tag}", UserWarning)
-            return None
-        elif pos_tag == "NOUN":
-            # ==================================================
-            # 名詞の変形
+            # 名詞/固有名詞の変形
             # ==================================================
             # 名詞は形容動詞的に扱う
             # e.g. 健康 -> gokan=健康 + katsuyo=だ
             return KatsuyoText(gokan=src.text, katsuyo=KEIYOUDOUSHI)
-        elif pos_tag == "PROPN":
-            # ==================================================
-            # 固有名詞の変形
-            # ==================================================
-            # 固有名詞は形容動詞的に扱う
-            # e.g. ジョニー -> gokan=ジョニー + katsuyo=だ
-            return KatsuyoText(gokan=src.text, katsuyo=KEIYOUDOUSHI)
         else:
-            warnings.warn(f"Unsupported POS Tag: {pos_tag}", UserWarning)
+            warnings.warn(f"Unsupported Tag: {tag}", UserWarning)
             return None
 
 
