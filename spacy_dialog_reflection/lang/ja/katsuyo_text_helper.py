@@ -1,4 +1,3 @@
-from collections.abc import Callable
 from typing import Optional, Union, cast
 from spacy_dialog_reflection.lang.ja.katsuyo_text import (
     IKatsuyoTextHelper,
@@ -10,12 +9,10 @@ import spacy_dialog_reflection.lang.ja.katsuyo_text as kt
 
 # TODO このクラスは、KatsuyoTextBuilder的な名前のクラスに変更する
 #      gokan等が必要なく、KatsuyoTextを返すだけのクラスにする
-class Ukemi(kt.IKatsuyoTextHelper):
+class Ukemi(IKatsuyoTextHelper):
     def __init__(
         self,
-        bridge: Optional[
-            Callable[[Union[kt.KatsuyoText, kt.NonKatsuyoText]], kt.KatsuyoText]
-        ] = None,
+        bridge: Optional[IKatsuyoTextHelper.BridgeFunction] = None,
     ) -> None:
         if bridge is None:
 
@@ -81,9 +78,7 @@ class Ukemi(kt.IKatsuyoTextHelper):
 class Shieki(IKatsuyoTextHelper):
     def __init__(
         self,
-        bridge: Optional[
-            Callable[[Union[kt.KatsuyoText, kt.NonKatsuyoText]], kt.KatsuyoText]
-        ] = None,
+        bridge: Optional[IKatsuyoTextHelper.BridgeFunction] = None,
     ) -> None:
         if bridge is None:
 
@@ -151,9 +146,7 @@ class Hitei(IKatsuyoTextHelper):
 
     def __init__(
         self,
-        bridge: Optional[
-            Callable[[Union[kt.KatsuyoText, kt.NonKatsuyoText]], kt.KatsuyoText]
-        ] = None,
+        bridge: Optional[IKatsuyoTextHelper.BridgeFunction] = None,
     ) -> None:
         if bridge is None:
 
@@ -207,23 +200,9 @@ class Hitei(IKatsuyoTextHelper):
 class KibouSelf(IKatsuyoTextHelper):
     def __init__(
         self,
-        bridge: Optional[
-            Callable[[Union[kt.KatsuyoText, kt.NonKatsuyoText]], kt.KatsuyoText]
-        ] = None,
+        # デフォルトでは特に何もbridgeしない
+        bridge: Optional[IKatsuyoTextHelper.BridgeFunction] = None,
     ) -> None:
-        if bridge is None:
-
-            def __default(
-                pre: Union[kt.KatsuyoText, kt.NonKatsuyoText]
-            ) -> kt.KatsuyoText:
-                # デフォルトでは特に何もしない
-                # 「なりたい」「ありたい」「したい」など多様な選択肢が考えられるため
-                raise KatsuyoTextError(
-                    f"Unsupported katsuyo_text in KibouSelf: {pre} type: {type(pre)}"
-                )
-
-            bridge = __default
-
         super().__init__(bridge)
 
     def try_merge(self, pre: kt.KatsuyoText) -> Optional[kt.KatsuyoText]:
@@ -236,23 +215,9 @@ class KibouSelf(IKatsuyoTextHelper):
 class KibouOthers(IKatsuyoTextHelper):
     def __init__(
         self,
-        bridge: Optional[
-            Callable[[Union[kt.KatsuyoText, kt.NonKatsuyoText]], kt.KatsuyoText]
-        ] = None,
+        # デフォルトでは特に何もbridgeしない
+        bridge: Optional[IKatsuyoTextHelper.BridgeFunction] = None,
     ) -> None:
-        if bridge is None:
-
-            def __default(
-                pre: Union[kt.KatsuyoText, kt.NonKatsuyoText]
-            ) -> kt.KatsuyoText:
-                # デフォルトでは特に何もしない
-                # 「なりたがる」「ありたがる」「したがる」など多様な選択肢が考えられるため
-                raise KatsuyoTextError(
-                    f"Unsupported katsuyo_text in KibouOthers: {pre} type: {type(pre)}"
-                )
-
-            bridge = __default
-
         super().__init__(bridge)
 
     def try_merge(self, pre: kt.KatsuyoText) -> Optional[kt.KatsuyoText]:
@@ -266,9 +231,7 @@ class KibouOthers(IKatsuyoTextHelper):
 class KakoKanryo(IKatsuyoTextHelper):
     def __init__(
         self,
-        bridge: Optional[
-            Callable[[Union[kt.KatsuyoText, kt.NonKatsuyoText]], kt.KatsuyoText]
-        ] = None,
+        bridge: Optional[IKatsuyoTextHelper.BridgeFunction] = None,
     ) -> None:
         if bridge is None:
 

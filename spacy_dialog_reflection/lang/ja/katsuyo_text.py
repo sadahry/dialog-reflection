@@ -102,7 +102,11 @@ class NonKatsuyoText:
             post = cast(IKatsuyoTextHelper, post)
             # 言語の特性上、活用形の前に接続される品詞の影響を受ける。
             # 値を調整できるようにbridgeとする
-            return post.bridge(self)
+            if post.bridge is not None:
+                return post.bridge(self)
+            raise KatsuyoTextError(
+                f"Unsupported IKatsuyoTextHelper which has no bridge in addition: {type(post)}"
+            )
 
         raise KatsuyoTextError(f"Invalid type in addition: {type(post)}")
 
@@ -115,9 +119,11 @@ class IKatsuyoTextHelper(abc.ABC):
     柔軟に活用系を変換するためのクラス
     """
 
+    BridgeFunction = Callable[[Union[KatsuyoText, NonKatsuyoText]], KatsuyoText]
+
     def __init__(
         self,
-        bridge: Callable[[Union[KatsuyoText, NonKatsuyoText]], KatsuyoText],
+        bridge: Optional[BridgeFunction] = None,
     ) -> None:
         # 文法的には不正な活用形の組み合わせを
         # 任意の活用形に変換して返せるようにするための関数
@@ -126,7 +132,12 @@ class IKatsuyoTextHelper(abc.ABC):
     def merge(self, pre: KatsuyoText) -> KatsuyoText:
         result = self.try_merge(pre)
         if result is None:
-            return self.bridge(pre)
+            if self.bridge is not None:
+                return self.bridge(pre)
+            raise KatsuyoTextError(
+                f"Unsupported katsuyo_text in merge of {type(self)}: {pre} "
+                f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
+            )
         return result
 
     @abc.abstractmethod
