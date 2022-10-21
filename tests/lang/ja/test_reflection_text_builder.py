@@ -34,8 +34,6 @@ class TestReflectionBuilder:
             ("名詞-普通名詞-一般", True),
             # PROPN
             ("名詞-固有名詞-人名-姓", True),
-            # NOUN
-            ("接尾辞-名詞的-一般", True),
             # ADJ
             ("形容詞-非自立可能", True),
             # ADJ
@@ -160,32 +158,37 @@ class TestReflectionBuilder:
         [
             (
                 "今日は旅行へ行った。",
-                "旅行へ",
+                "旅行へ行った。",
                 "sample sentence",
             ),
             (
                 "社員をする。",
-                "社員を",
+                "社員をする。",
                 "obj dependency",
             ),
             (
                 "民間の社員をする。",
-                "民間の社員を",
+                "民間の社員をする。",
                 "obj dependency multi-word",
             ),
             (
                 "今年から社員をする。",
-                "社員を",
+                "社員をする。",
                 "obj dependency does not extract distant dependencies",
             ),
             (
                 "旅行に行ってくる。",
-                "旅行に",
+                "旅行に行ってくる。",
                 "latest root(VARB) after root token(VERB)",
             ),
             (
+                "旅行に行ってくるか迷ったけど雨だったので今日は家で過ごすことにした。",
+                "過ごすことにした。",
+                "long sentence",
+            ),
+            (
                 "働く。",
-                "",
+                "働く。",
                 "no dependencies",
             ),
         ],
@@ -203,6 +206,69 @@ class TestReflectionBuilder:
         tokens = builder._extract_tokens_with_nearest_heads(root)
         result = "".join(map(lambda t: t.text, tokens))
         assert result == expected, assert_message
+
+    @pytest.mark.parametrize(
+        "text, expected, assert_message",
+        [
+            (
+                "今日は旅行へ行った。",
+                "行っ",
+                "sample sentence 動詞",
+            ),
+            (
+                "いくなら学校かな。",
+                "学校",
+                "sample sentence 名詞-普通名詞",
+            ),
+            (
+                "いくなら首里城かな。",
+                "首里",
+                "sample sentence 名詞-固有名詞",
+            ),
+            (
+                "今日は楽しかった。",
+                "楽しかっ",
+                "sample sentence 形容詞",
+            ),
+            (
+                "今日は充実だ。",
+                "充実",
+                "sample sentence 形状詞",
+            ),
+            (
+                "明日の休日はどうかな。",
+                "休日",
+                "ignore かな",
+            ),
+            (
+                "そんなの笑っちゃいますもの。",
+                "笑っ",
+                "ignore もの",
+            ),
+        ],
+    )
+    def test_extract_bottom_token(
+        self,
+        nlp_ja,
+        builder: JaSpacyReflectionTextBuilder,
+        text,
+        expected,
+        assert_message,
+    ):
+        doc = nlp_ja(text)
+        sent = next(doc.sents)
+        bottom = builder._extract_bottom_token(sent)
+        assert bottom.text == expected, assert_message
+
+    def test_extract_bottom_token_error(
+        self,
+        nlp_ja,
+        builder: JaSpacyReflectionTextBuilder,
+    ):
+        doc = nlp_ja("アレはどうかな。")
+        sent = next(doc.sents)
+        with pytest.raises(ReflectionTextError):
+            builder._extract_bottom_token(sent)
 
     @pytest.mark.parametrize(
         "text, expected, assert_message",
