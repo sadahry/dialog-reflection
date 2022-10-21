@@ -26,6 +26,8 @@ class KatsuyoText:
     def __add__(
         self, post: Union["KatsuyoText", "NonKatsuyoText", "IKatsuyoTextHelper"]
     ) -> Union["KatsuyoText", "NonKatsuyoText"]:  # IKatsuyoTextHelper は return しない
+        # NOTE: postを保持しておいて文字列化する際に再帰呼び出し的にしてもいいかもしれない
+        #       ただadd時のエラーがわかりにくくなるので現状は都度gokanに追記するようにしている
         if issubclass(type(post), NonKatsuyoText):
             post = cast(NonKatsuyoText, post)
             return self.append(post)
