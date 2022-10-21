@@ -58,6 +58,7 @@ class IKatsuyoTextAppendantsDetector(abc.ABC):
         Hitei,
         KibouSelf,
         KibouOthers,
+        KakoKanryo,
     )
 
     def __init__(self, helpers: Set[IKatsuyoTextHelper]) -> None:
@@ -282,6 +283,10 @@ class SpacyKatsuyoTextAppendantsDetector(IKatsuyoTextAppendantsDetector):
                     continue
                 elif norm in ["たがる"]:
                     is_succeeded = self.try_append(KibouOthers, appendants)
+                    has_error = has_error or not is_succeeded
+                    continue
+                elif norm in ["た"]:
+                    is_succeeded = self.try_append(KakoKanryo, appendants)
                     has_error = has_error or not is_succeeded
                     continue
 

@@ -724,24 +724,24 @@ def test_spacy_katsuyo_text_detector(
             "AUX",
             [KibouOthers],
         ),
-        # (
-        #     "一生懸命に歩いた",
-        #     "た",
-        #     "AUX",
-        #     [KakoKanryo],
-        # ),
-        # (
-        #     "一生懸命に走った",
-        #     "た",
-        #     "AUX",
-        #     [KakoKanryo],
-        # ),
-        # (
-        #     "一生懸命に遊んだ",
-        #     "た",
-        #     "AUX",
-        #     [KakoKanryo],
-        # )
+        (
+            "とても歩いた",
+            "た",
+            "AUX",
+            [KakoKanryo],
+        ),
+        (
+            "とても走った",
+            "た",
+            "AUX",
+            [KakoKanryo],
+        ),
+        (
+            "とても遊んだ",
+            "た",
+            "AUX",
+            [KakoKanryo],
+        ),
         # TODO 複数ケースの追加
         # (
         #     # 「では」で「だ」が取れないように
