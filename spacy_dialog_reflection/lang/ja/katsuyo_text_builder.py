@@ -3,6 +3,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text import (
     IKatsuyoTextHelper,
     KatsuyoText,
     NonKatsuyoText,
+    KatsuyoTextError,
 )
 from spacy_dialog_reflection.lang.ja.katsuyo_text_helper import (
     Hitei,
@@ -41,7 +42,7 @@ class IKatsuyoTextBuilder(abc.ABC):
         for appendant in appendants:
             try:
                 result += appendant
-            except (ValueError, AttributeError) as e:
+            except (KatsuyoTextError, AttributeError) as e:
                 warnings.warn(f"Error in append_multiple: {type(e)} {e}", UserWarning)
                 warnings.warn(
                     f"Skip invalid appendant:{type(appendant)} "

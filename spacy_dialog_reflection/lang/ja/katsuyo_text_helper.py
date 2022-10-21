@@ -2,6 +2,7 @@ from collections.abc import Callable
 from typing import Optional, Union, cast
 from spacy_dialog_reflection.lang.ja.katsuyo_text import (
     IKatsuyoTextHelper,
+    KatsuyoTextError,
 )
 import spacy_dialog_reflection.lang.ja.katsuyo as k
 import spacy_dialog_reflection.lang.ja.katsuyo_text as kt
@@ -48,7 +49,7 @@ class Ukemi(kt.IKatsuyoTextHelper):
                         pre + naru + kt.Reru(),
                     )
 
-                raise ValueError(
+                raise KatsuyoTextError(
                     f"Unsupported katsuyo_text in {type(self)}: {pre} "
                     f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
                 )
@@ -114,7 +115,7 @@ class Shieki(IKatsuyoTextHelper):
                         kt.NonKatsuyoText(pre.gokan + renyo) + kt.Saseru(),
                     )
 
-                raise ValueError(
+                raise KatsuyoTextError(
                     f"Unsupported katsuyo_text in {type(self)}: {pre} "
                     f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
                 )
@@ -186,7 +187,7 @@ class Hitei(IKatsuyoTextHelper):
                         kt.NonKatsuyoText(pre.gokan + renyo_nai) + kt.Nai(),
                     )
 
-                raise ValueError(
+                raise KatsuyoTextError(
                     f"Unsupported katsuyo_text in {type(self)}: {pre} "
                     f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
                 )
@@ -217,7 +218,7 @@ class KibouSelf(IKatsuyoTextHelper):
             ) -> kt.KatsuyoText:
                 # デフォルトでは特に何もしない
                 # 「なりたい」「ありたい」「したい」など多様な選択肢が考えられるため
-                raise ValueError(
+                raise KatsuyoTextError(
                     f"Unsupported katsuyo_text in KibouSelf: {pre} type: {type(pre)}"
                 )
 
@@ -246,7 +247,7 @@ class KibouOthers(IKatsuyoTextHelper):
             ) -> kt.KatsuyoText:
                 # デフォルトでは特に何もしない
                 # 「なりたがる」「ありたがる」「したがる」など多様な選択肢が考えられるため
-                raise ValueError(
+                raise KatsuyoTextError(
                     f"Unsupported katsuyo_text in KibouOthers: {pre} type: {type(pre)}"
                 )
 
@@ -284,7 +285,7 @@ class KakoKanryo(IKatsuyoTextHelper):
                     return cast(kt.KatsuyoText, pre + dat + kt.Ta())
 
                 pre = cast(kt.KatsuyoText, pre)
-                raise ValueError(
+                raise KatsuyoTextError(
                     f"Unsupported katsuyo_text in {type(self)}: {pre} "
                     f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
                 )

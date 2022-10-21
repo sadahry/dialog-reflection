@@ -5,6 +5,10 @@ import abc
 import spacy_dialog_reflection.lang.ja.katsuyo as k
 
 
+class KatsuyoTextError(ValueError):
+    pass
+
+
 @attrs.define(frozen=True, slots=True)
 class KatsuyoText:
     """
@@ -34,7 +38,7 @@ class KatsuyoText:
             # 言語の特性上、活用形の前に接続される品詞の影響を受ける。
             return post.merge(self)
 
-        raise ValueError(f"Invalid type in addition: {type(post)}")
+        raise KatsuyoTextError(f"Invalid type in addition: {type(post)}")
 
     def append(self, post: "NonKatsuyoText") -> "NonKatsuyoText":
         """
@@ -45,7 +49,7 @@ class KatsuyoText:
             renyo = cast(k.RenyoMixin, self.katsuyo).renyo
             return NonKatsuyoText(self.gokan + renyo + post.text)
 
-        raise ValueError(
+        raise KatsuyoTextError(
             f"Unsupported katsuyo_text in append of {type(self)}: {post} "
             f"type: {type(post)}"
         )
@@ -62,7 +66,7 @@ class KatsuyoText:
                 katsuyo=self.katsuyo,
             )
 
-        raise ValueError(
+        raise KatsuyoTextError(
             f"Unsupported katsuyo_text in merge of {type(self)}: {pre} "
             f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
         )
@@ -100,7 +104,7 @@ class NonKatsuyoText:
             # 値を調整できるようにbridgeとする
             return post.bridge(self)
 
-        raise ValueError(f"Invalid type in addition: {type(post)}")
+        raise KatsuyoTextError(f"Invalid type in addition: {type(post)}")
 
     def __str__(self):
         return self.text
@@ -189,7 +193,7 @@ class Reru(ZyodoushiKatsuyoText):
             mizen = cast(k.DoushiKatsuyo, pre.katsuyo).mizen
             return NonKatsuyoText(pre.gokan + mizen) + self.zyodoushi
 
-        raise ValueError(
+        raise KatsuyoTextError(
             f"Unsupported katsuyo_text in {type(self)}: {pre} "
             f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
         )
@@ -210,7 +214,7 @@ class Rareru(ZyodoushiKatsuyoText):
             mizen = cast(k.DoushiKatsuyo, pre.katsuyo).mizen
             return NonKatsuyoText(pre.gokan + mizen) + self.zyodoushi
 
-        raise ValueError(
+        raise KatsuyoTextError(
             f"Unsupported katsuyo_text in {type(self)}: {pre} "
             f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
         )
@@ -236,7 +240,7 @@ class Seru(ZyodoushiKatsuyoText):
             mizen = cast(k.DoushiKatsuyo, pre.katsuyo).mizen
             return NonKatsuyoText(pre.gokan + mizen) + self.zyodoushi
 
-        raise ValueError(
+        raise KatsuyoTextError(
             f"Unsupported katsuyo_text in {type(self)}: {pre} "
             f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
         )
@@ -255,7 +259,7 @@ class Saseru(ZyodoushiKatsuyoText):
             mizen = cast(k.DoushiKatsuyo, pre.katsuyo).mizen
             return NonKatsuyoText(pre.gokan + mizen) + self.zyodoushi
 
-        raise ValueError(
+        raise KatsuyoTextError(
             f"Unsupported katsuyo_text in {type(self)}: {pre} "
             f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
         )
@@ -278,7 +282,7 @@ class Nai(ZyodoushiKatsuyoText):
             mizen = cast(k.DoushiKatsuyo, pre.katsuyo).mizen
             return NonKatsuyoText(pre.gokan + mizen) + self.zyodoushi
 
-        raise ValueError(
+        raise KatsuyoTextError(
             f"Unsupported katsuyo_text in {type(self)}: {pre} "
             f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
         )
@@ -301,7 +305,7 @@ class Tai(ZyodoushiKatsuyoText):
             renyo = cast(k.DoushiKatsuyo, pre.katsuyo).renyo
             return NonKatsuyoText(pre.gokan + renyo) + self.zyodoushi
 
-        raise ValueError(
+        raise KatsuyoTextError(
             f"Unsupported katsuyo_text in {type(self)}: {pre} "
             f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
         )
@@ -319,7 +323,7 @@ class Tagaru(ZyodoushiKatsuyoText):
             renyo = cast(k.DoushiKatsuyo, pre.katsuyo).renyo
             return NonKatsuyoText(pre.gokan + renyo) + self.zyodoushi
 
-        raise ValueError(
+        raise KatsuyoTextError(
             f"Unsupported katsuyo_text in {type(self)}: {pre} "
             f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
         )
@@ -346,7 +350,7 @@ class Ta(ZyodoushiKatsuyoText):
             renyo = cast(k.RenyoMixin, pre.katsuyo).renyo
             return NonKatsuyoText(pre.gokan + renyo) + self.zyodoushi
 
-        raise ValueError(
+        raise KatsuyoTextError(
             f"Unsupported katsuyo_text in {type(self)}: {pre} "
             f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
         )
@@ -368,7 +372,7 @@ class Da(ZyodoushiKatsuyoText):
             renyo = cast(k.RenyoMixin, pre.katsuyo).renyo
             return NonKatsuyoText(pre.gokan + renyo) + self.zyodoushi
 
-        raise ValueError(
+        raise KatsuyoTextError(
             f"Unsupported katsuyo_text in {type(self)}: {pre} "
             f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
         )

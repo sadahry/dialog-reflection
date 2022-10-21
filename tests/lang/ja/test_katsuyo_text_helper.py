@@ -5,6 +5,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text import (
     IKatsuyoTextHelper,
     KatsuyoText,
     NonKatsuyoText,
+    KatsuyoTextError,
 )
 from spacy_dialog_reflection.lang.ja.katsuyo import (
     GODAN_BA_GYO,
@@ -146,7 +147,7 @@ def test_zyodoushi_ukemi(msg, katsuyo_text, expected):
 
 def test_zyodoushi_ukemi_value_error(unsupported_katsuyo_text):
     zyodoushi = Ukemi()
-    with pytest.raises(ValueError):
+    with pytest.raises(KatsuyoTextError):
         unsupported_katsuyo_text + zyodoushi
 
 
@@ -237,7 +238,7 @@ def test_zyodoushi_shieki(msg, katsuyo_text, expected):
 
 def test_zyodoushi_shieki_value_error(unsupported_katsuyo_text):
     zyodoushi = Shieki()
-    with pytest.raises(ValueError):
+    with pytest.raises(KatsuyoTextError):
         unsupported_katsuyo_text + zyodoushi
 
 
@@ -329,7 +330,7 @@ def test_zyodoushi_hiteii(msg, katsuyo_text, expected):
 
 def test_zyodoushi_hitei_value_error(unsupported_katsuyo_text):
     zyodoushi = Hitei()
-    with pytest.raises(ValueError):
+    with pytest.raises(KatsuyoTextError):
         unsupported_katsuyo_text + zyodoushi
 
 
@@ -422,7 +423,7 @@ def test_zyodoushi_kibou_self(msg, katsuyo_text, expected):
 )
 def test_zyodoushi_kibou_self_value_error(msg, katsuyo_text):
     zyodoushi = KibouSelf()
-    with pytest.raises(ValueError, match=re.compile(r"Unsupported.*")):
+    with pytest.raises(KatsuyoTextError, match=re.compile(r"Unsupported.*")):
         katsuyo_text + zyodoushi
         assert False, msg
 
@@ -516,7 +517,7 @@ def test_zyodoushi_kibou_others(msg, katsuyo_text, expected):
 )
 def test_zyodoushi_kibou_others_value_error(msg, katsuyo_text):
     zyodoushi = KibouOthers()
-    with pytest.raises(ValueError, match=re.compile(r"Unsupported.*")):
+    with pytest.raises(KatsuyoTextError, match=re.compile(r"Unsupported.*")):
         katsuyo_text + zyodoushi
         assert False, msg
 
@@ -679,19 +680,19 @@ def test_zyodoushi_kako_kanryo(msg, katsuyo_text, expected):
     assert str(result) == expected, msg
 
 
-@pytest.mark.filterwarnings(r"ignore:Error in append_multiple.*ValueError")
+@pytest.mark.filterwarnings(r"ignore:Error in append_multiple.*KatsuyoTextError")
 @pytest.mark.filterwarnings("ignore:Skip invalid appendant")
-def test_katsuyo_text_warning_ValueError(append_multiple):
-    class HelperRaiseValueError(IKatsuyoTextHelper):
+def test_katsuyo_text_warning_KatsuyoTextError(append_multiple):
+    class HelperRaiseKatsuyoTextError(IKatsuyoTextHelper):
         def __init__(self):
             super().__init__(bridge=lambda x: x)
 
         def try_merge(self, _):
-            raise ValueError("HOGE")
+            raise KatsuyoTextError("HOGE")
 
     katsuyo_text = KURU
     katsuyo_text_appendants = [
-        HelperRaiseValueError(),
+        HelperRaiseKatsuyoTextError(),
     ]
     result, has_error = append_multiple(
         katsuyo_text,
@@ -727,13 +728,13 @@ def test_katsuyo_text_warning_AttributeError(append_multiple):
     assert has_error, "has_error is True"
 
 
-@pytest.mark.filterwarnings(r"ignore:Error in append_multiple.*ValueError")
+@pytest.mark.filterwarnings(r"ignore:Error in append_multiple.*KatsuyoTextError")
 @pytest.mark.filterwarnings("ignore:Skip invalid appendant")
-def test_katsuyo_text_warning_ValueError_on_bridge(append_multiple):
-    class HelperRaiseValueError(IKatsuyoTextHelper):
+def test_katsuyo_text_warning_KatsuyoTextError_on_bridge(append_multiple):
+    class HelperRaiseKatsuyoTextError(IKatsuyoTextHelper):
         def __init__(self):
             def bridge(_):
-                raise ValueError("HOGE")
+                raise KatsuyoTextError("HOGE")
 
             super().__init__(bridge=bridge)
 
@@ -742,7 +743,7 @@ def test_katsuyo_text_warning_ValueError_on_bridge(append_multiple):
 
     katsuyo_text = KURU
     katsuyo_text_appendants = [
-        HelperRaiseValueError(),
+        HelperRaiseKatsuyoTextError(),
     ]
     result, has_error = append_multiple(
         katsuyo_text,

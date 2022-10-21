@@ -2,6 +2,7 @@ import pytest
 from spacy_dialog_reflection.lang.ja.katsuyo_text import (
     IKatsuyoTextHelper,
     KatsuyoText,
+    KatsuyoTextError,
 )
 from spacy_dialog_reflection.lang.ja.katsuyo import (
     GODAN_BA_GYO,
@@ -54,7 +55,7 @@ def katsuyo_texts_appendants_detector_init_validation_error():
         def try_merge(self, _):
             return None
 
-    with pytest.raises(ValueError):
+    with pytest.raises(KatsuyoTextError):
         SpacyKatsuyoTextAppendantsDetector((UnsupportedHelper()))
         assert False, "UnsupportedHelper should not be accepted."
 

@@ -23,6 +23,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text import (
     KURU_KANJI,
     IKatsuyoTextHelper,
     KatsuyoText,
+    KatsuyoTextError,
 )
 
 from spacy_dialog_reflection.lang.ja.katsuyo_text_helper import (
@@ -62,7 +63,7 @@ class IKatsuyoTextAppendantsDetector(abc.ABC):
         # validate helpers
         for helper in helpers:
             if not isinstance(helper, self.SUPPORTED_HELPERS):
-                raise ValueError(f"Unsupported appendant helper: {helper}")
+                raise KatsuyoTextError(f"Unsupported appendant helper: {helper}")
 
         self.appendants_dict = {type(helper): helper for helper in helpers}
 

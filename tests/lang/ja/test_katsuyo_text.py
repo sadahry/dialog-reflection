@@ -10,6 +10,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text import (
     KURU_KANJI,
     SURU,
     KatsuyoText,
+    KatsuyoTextError,
 )
 
 
@@ -84,7 +85,7 @@ def test_add(msg, katsuyo_text1, katsuyo_text2, expected):
 
 
 def test_error():
-    with pytest.raises(ValueError):
+    with pytest.raises(KatsuyoTextError):
         KURU_KANJI + 1
 
 
