@@ -238,7 +238,7 @@ class SpacyKatsuyoTextAppendantsDetector(IKatsuyoTextAppendantsDetector):
 
         # NOTE: rootに紐づくトークンを取得するのに、依存関係を見ずにrootトークンのindex以降のトークンを見る
         #       これは、rootの意味に関連する助動詞がroot位置以降に連続することと、rootに紐づかない助動詞も意味に影響することを前提としている
-        candidate_tokens = dropwhile(lambda t: t.i > src.i, sent)
+        candidate_tokens = dropwhile(lambda t: t.i <= src.i, sent)
         for candidate_token in candidate_tokens:
             pos_tag = candidate_token.pos_
             norm = candidate_token.norm_
