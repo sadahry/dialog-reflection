@@ -1,5 +1,5 @@
 from collections.abc import Callable
-from typing import Optional, Union
+from typing import Optional, Union, cast
 from spacy_dialog_reflection.lang.ja.katsuyo_text import (
     IKatsuyoTextHelper,
     NonKatsuyoText,
@@ -273,12 +273,12 @@ class KakoKanryo(IKatsuyoTextHelper):
         super().__init__(bridge)
 
     def try_merge(self, pre: kt.KatsuyoText) -> Optional[kt.KatsuyoText]:
-        if pre.katsuyo.renyo is not None:
+        if hasattr(pre.katsuyo, "renyo"):
             if issubclass(type(pre.katsuyo), k.GodanKatsuyo) and (
                 pre.katsuyo.shushi in ["ぐ", "ぬ", "ぶ", "む"]
             ):
-                return pre + kt.Da()
+                return cast(kt.KatsuyoText, pre + kt.Da())
 
-            return pre + kt.Ta()
+            return cast(kt.KatsuyoText, pre + kt.Ta())
 
         return None
