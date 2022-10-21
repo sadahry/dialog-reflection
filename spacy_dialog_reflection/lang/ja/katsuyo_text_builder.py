@@ -1,5 +1,9 @@
-from typing import Any, Optional, List, Tuple
-from spacy_dialog_reflection.lang.ja.katsuyo_text import KatsuyoText
+from typing import Any, Optional, List, Tuple, Union
+from spacy_dialog_reflection.lang.ja.katsuyo_text import (
+    IKatsuyoTextHelper,
+    KatsuyoText,
+    NonKatsuyoText,
+)
 from spacy_dialog_reflection.lang.ja.katsuyo_text_helper import (
     Hitei,
     Shieki,
@@ -28,36 +32,29 @@ class IKatsuyoTextBuilder(abc.ABC):
         self.appendants_detector = appendants_detector
 
     def append_multiple(
-        self, root: KatsuyoText, appendants: List[KatsuyoText]
-    ) -> Tuple[KatsuyoText, bool]:
+        self, root: KatsuyoText, appendants: List[IKatsuyoTextHelper]
+    ) -> Tuple[Union[KatsuyoText, NonKatsuyoText], bool]:
         # clone KatsuyoText
-        result = attrs.evolve(root)
+        result: Union[KatsuyoText, NonKatsuyoText] = attrs.evolve(root)
 
         has_error = False
         for appendant in appendants:
             try:
                 result += appendant
-            except ValueError as e:
-                warnings.warn(f"ValueError: {e}", UserWarning)
+            except (ValueError, AttributeError) as e:
+                warnings.warn(f"Error in append_multiple: {type(e)} {e}", UserWarning)
                 warnings.warn(
-                    f"Invalid appendant:{appendant}. katsuyo_text: {result}",
-                    UserWarning,
-                )
-                has_error = True
-            except TypeError as e:
-                # see: https://github.com/sadahry/spacy-dialog-reflection/issues/1
-                if "NoneType" not in str(e):
-                    raise e
-                warnings.warn(f"None value TypeError Detected: {e}", UserWarning)
-                warnings.warn(
-                    f"Invalid appendant:{appendant}. katsuyo_text: {result}",
+                    f"Skip invalid appendant:{type(appendant)} "
+                    f"katsuyo_text:{type(result)} value: {result}",
                     UserWarning,
                 )
                 has_error = True
 
         return result, has_error
 
-    def build(self, src: Any) -> Tuple[Optional[KatsuyoText], bool]:
+    def build(
+        self, src: Any
+    ) -> Tuple[Optional[Union[KatsuyoText, NonKatsuyoText]], bool]:
         """
         サポートされていないrootを検知した際は、Noneとhas_error=Trueを返却する。
         予期されたエラーを検知した場合は、UserWarningを発生させてKatsuyoTextとhas_error=Trueを返却する。
