@@ -288,7 +288,7 @@ class SpacyKatsuyoTextAppendantsDetector(IKatsuyoTextAppendantsDetector):
             elif pos_tag == "ADJ":
                 # 「ない」のみ対応
                 # NOTE: 必ずしも否定の形容詞とは限らない
-                # @see: https://github.com/sadahry/spacy-dialog-reflection/blob/29d6f62f4f7d28decff852581b052b1187187213/tests/lang/ja/test_katsuyo_text_detector.py#L676-L693
+                #       @see: https://github.com/sadahry/spacy-dialog-reflection/blob/17507db530da24c11816374d6caa4766e4614f69/tests/lang/ja/test_katsuyo_text_detector.py#L676-L693
                 if lemma in ["ない", "無い"]:
                     is_succeeded = self.try_append(Hitei, appendants)
                     has_error = has_error or not is_succeeded
