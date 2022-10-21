@@ -16,14 +16,10 @@ class JaSpacyReflectionTextBuilder(ISpacyReflectionTextBuilder):
         # NOTE: Will not use pos tags in Japanese
         #       extract source token with tag instead
         allowed_src_tags: Set[str] = {
-            # VERB
-            "動詞",
-            # NOUN & PROPN
-            "名詞",
-            # ADJ
-            "形容詞",
-            # ADJ
-            "形状詞",
+            "動詞",  # VERB
+            "名詞",  # NOUN & PROPN
+            "形容詞",  # ADJ
+            "形状詞",  # ADJ
         },
         # # restrict root pos tags to facilitate handling of suffixes in Japanese
         # # VERB (5100; 63% instances), -NOUN (2328; 29% instances), -ADJ (529; 7% instances), -PROPN (62; 1% instances) in UD_Japanese-GSD
