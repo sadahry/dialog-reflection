@@ -1,3 +1,4 @@
+from typing import Set
 from spacy_dialog_reflection.reflection_text_builder import (
     ReflectionTextError,
 )
@@ -5,53 +6,71 @@ from spacy_dialog_reflection.reflector import ISpacyReflectionTextBuilder
 from spacy_dialog_reflection.lang.ja.katsuyo_text_builder import (
     SpacyKatsuyoTextBuilder,
 )
+import re
 import spacy
 
 
 class JaSpacyReflectionTextBuilder(ISpacyReflectionTextBuilder):
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        # NOTE: Will not use pos tags in Japanese
+        #       extract source token with tag instead
+        allowed_src_tags: Set[str] = {
+            # VERB
+            "動詞",
+            # NOUN & PROPN
+            "名詞",
+            # ADJ
+            "形容詞",
+            # ADJ
+            "形状詞",
+        },
+        # # restrict root pos tags to facilitate handling of suffixes in Japanese
+        # # VERB (5100; 63% instances), -NOUN (2328; 29% instances), -ADJ (529; 7% instances), -PROPN (62; 1% instances) in UD_Japanese-GSD
+        # # ref. https://universaldependencies.org/treebanks/ja_gsd/ja_gsd-dep-root.html
+        # allowed_root_pos_tags: Set[str] = {"VERB", "NOUN", "PROPN", "ADJ"},
+    ) -> None:
         # TODO 柔軟に設定できるようにする
         self.word_ending = "んですね。"
         self.word_ending_unpersed = "、ですか。"
         self.message_when_not_valid_doc = "続けてください。"
         self.text_builder = SpacyKatsuyoTextBuilder()
+        self.allowed_tag_pattern = self._build_allowed_tag_pattern(allowed_src_tags)
 
-    # restrict root pos tags to facilitate handling of suffixes in Japanese
-    # VERB (5100; 63% instances), -NOUN (2328; 29% instances), -ADJ (529; 7% instances), -PROPN (62; 1% instances) in UD_Japanese-GSD
-    # ref. https://universaldependencies.org/treebanks/ja_gsd/ja_gsd-dep-root.html
-    ALLOWED_ROOT_POS_TAGS = {"VERB", "NOUN", "PROPN", "ADJ"}
+    def _build_allowed_tag_pattern(self, allowed_src_tags: Set[str]) -> re.Pattern:
+        # e.g. /^動詞.*|^名詞.*|^形容詞.*|^形容動詞.*/
+        return re.compile(r"^" + r".*|^".join(allowed_src_tags) + r".*")
 
     def build(self, doc: spacy.tokens.Doc) -> str:
         if doc.text.strip() == "":
             raise ReflectionTextError("EMPTY DOC")
-        sent = self._select_sentence(doc)
+        src = self._extract_source_token(doc)
+        reflection_tokens = self._extract_tokens_with_nearest_root_heads(src)
+        return self._build_text(reflection_tokens, src)
 
-        root = sent.root
-        reflection_tokens = self._extract_tokens_with_nearest_root_heads(root)
-        return self._build_text(reflection_tokens, root)
-
-    def _select_sentence(
+    def _extract_source_token(
         self,
         doc: spacy.tokens.Doc,
-    ) -> spacy.tokens.Span:
+    ) -> spacy.tokens.Token:
         """
-        e.g. "私は彼女を愛している。私は幸せだ。" -> "私は幸せだ。"
+        e.g. "私は彼女を愛している。私は幸せだ。" -> "幸せ"
         """
+        # extract last filtered token
         # ref. https://stackoverflow.com/a/2138894
-        sent = None
-        for sent in filter(
-            lambda sent: sent.root.pos_ in self.ALLOWED_ROOT_POS_TAGS,
-            doc.sents,
+        src = None
+        for src in filter(
+            lambda token: self.allowed_tag_pattern.search(token.tag_),
+            doc,
         ):
             pass
 
-        if sent is None:
+        if src is None:
             raise ReflectionTextError(
                 f"NO VALID SENTENSES IN DOC: '{doc}' "
-                f"ALLOWED_ROOT_POS_TAGS: {self.ALLOWED_ROOT_POS_TAGS}"
+                f"ALLOWED_ROOT_POS_TAGS: ({self.allowed_tag_pattern})"
             )
 
-        return sent
+        return src
 
     def _extract_tokens_with_nearest_root_heads(
         self,

@@ -26,6 +26,40 @@ class TestReflectionBuilder:
     """Test of ReflectionBuilder private methods"""
 
     @pytest.mark.parametrize(
+        "tag, will_be_allowed",
+        [
+            # VERB
+            ("動詞-一般", True),
+            # NOUN
+            ("名詞-普通名詞-一般", True),
+            # PROPN
+            ("名詞-固有名詞-人名-姓", True),
+            # ADJ
+            ("形容詞-非自立可能", True),
+            # ADJ
+            ("形状詞-一般", True),
+            # PRON
+            ("代名詞", False),
+            # AUX
+            ("助動詞", False),
+            # PART
+            ("助詞-終助詞", False),
+        ],
+    )
+    @pytest.mark.filterwarnings("ignore:empty text")
+    def test_default_allowed_tag_pattern(
+        self,
+        builder: JaSpacyReflectionTextBuilder,
+        tag,
+        will_be_allowed,
+    ):
+        ptn = builder.allowed_tag_pattern
+        if will_be_allowed:
+            assert ptn.search(tag)
+        else:
+            assert not ptn.search(tag)
+
+    @pytest.mark.parametrize(
         "text, assert_message",
         [
             ("", "empty text should be error"),
@@ -51,37 +85,37 @@ class TestReflectionBuilder:
         [
             (
                 "今日は旅行に行きました。",
-                "今日は旅行に行きました。",
+                "行き",
                 "extract sentence",
             ),
             (
                 "こんにちは。今日は旅行に行きました。",
-                "今日は旅行に行きました。",
+                "行き",
                 "extract last sentence VERB",
             ),
             (
                 "こんにちは。今日は旅行に行きました。最高でした。",
-                "最高でした。",
+                "最高",
                 "extract last sentence NOUN",
             ),
             (
-                "こんにちは。今日は旅行に行きました。田中さんとです。",
-                "田中さんとです。",
+                "こんにちは。今日は旅行に行きました。田中とです。",
+                "田中",
                 "extract last sentence PROUN",
             ),
             (
                 "こんにちは。今日は旅行に行きました。楽しかったです。",
-                "楽しかったです。",
+                "楽しかっ",
                 "extract last sentence ADJ",
             ),
             (
                 "こんにちは。今日は旅行に行きました。そこそこでした。",
-                "今日は旅行に行きました。",
+                "行き",
                 "not extract last sentence ADV",
             ),
         ],
     )
-    def test_select_sentence(
+    def test_extract_source_token(
         self,
         nlp_ja,
         builder: JaSpacyReflectionTextBuilder,
@@ -90,19 +124,18 @@ class TestReflectionBuilder:
         assert_message,
     ):
         doc = nlp_ja(text)
-        sentence = builder._select_sentence(doc)
-        assert sentence is not None
-        assert sentence.text == expected, assert_message
+        src = builder._extract_source_token(doc)
+        assert src.text == expected, assert_message
 
     @pytest.mark.parametrize(
         "text, assert_message",
         [
             (
-                "そういうのってどうなんですか。",
+                "どうなんでしょうね。",
                 "cannot extract one sentence not in ROOT_POS_SET",
             ),
             (
-                "そういうのってどうなんですか。ここはどこですか。まだですか。",
+                "あれはどうでしょうね。あれじゃどうにも。",
                 "cannot extract sentences not in ROOT_POS_SET",
             ),
         ],
@@ -117,7 +150,7 @@ class TestReflectionBuilder:
     ):
         doc = nlp_ja(text)
         with pytest.raises(ReflectionTextError):
-            builder._select_sentence(doc)
+            builder._extract_source_token(doc)
             assert False, assert_message
 
     @pytest.mark.parametrize(
