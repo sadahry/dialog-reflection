@@ -18,6 +18,7 @@ class JaSpacyReflectionTextBuilder(ISpacyReflectionTextBuilder):
         allowed_root_tags: Set[str] = {
             "動詞",  # VERB
             "名詞",  # NOUN & PROPN
+            "接尾辞-名詞的",  # NOUN
             "形容詞",  # ADJ
             "形状詞",  # ADJ
         },

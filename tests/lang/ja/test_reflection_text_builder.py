@@ -34,6 +34,8 @@ class TestReflectionBuilder:
             ("名詞-普通名詞-一般", True),
             # PROPN
             ("名詞-固有名詞-人名-姓", True),
+            # NOUN
+            ("接尾辞-名詞的-一般", True),
             # ADJ
             ("形容詞-非自立可能", True),
             # ADJ
