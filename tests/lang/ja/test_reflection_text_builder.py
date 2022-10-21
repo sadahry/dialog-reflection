@@ -113,14 +113,9 @@ class TestReflectionBuilder:
                 "行き",
                 "not extract last sentence ADV",
             ),
-            (
-                "もらってきてアレを。",
-                "き",
-                "latest src(VARB) before root token(PRON)",
-            ),
         ],
     )
-    def test_extract_source_token(
+    def test_extract_root_token(
         self,
         nlp_ja,
         builder: JaSpacyReflectionTextBuilder,
@@ -129,8 +124,8 @@ class TestReflectionBuilder:
         assert_message,
     ):
         doc = nlp_ja(text)
-        src = builder._extract_source_token(doc)
-        assert src.text == expected, assert_message
+        root = builder._extract_root_token(doc)
+        assert root.text == expected, assert_message
 
     @pytest.mark.parametrize(
         "text, assert_message",
@@ -155,51 +150,39 @@ class TestReflectionBuilder:
     ):
         doc = nlp_ja(text)
         with pytest.raises(ReflectionTextError):
-            builder._extract_source_token(doc)
+            builder._extract_root_token(doc)
             assert False, assert_message
 
     @pytest.mark.parametrize(
-        "text, src_text, expected, assert_message",
+        "text, expected, assert_message",
         [
             (
                 "今日は旅行へ行った。",
-                "行っ",
                 "旅行へ",
                 "sample sentence",
             ),
             (
                 "社員をする。",
-                "する",
                 "社員を",
                 "obj dependency",
             ),
             (
                 "民間の社員をする。",
-                "する",
                 "民間の社員を",
                 "obj dependency multi-word",
             ),
             (
                 "今年から社員をする。",
-                "する",
                 "社員を",
                 "obj dependency does not extract distant dependencies",
             ),
             (
                 "旅行に行ってくる。",
-                "くる",
-                "旅行に行って",
-                "latest src(VARB) after root token(VERB)",
-            ),
-            (
-                "もらってきてアレを。",
-                "き",
-                "もらって",
-                "latest src(VARB) before root token(PRON)",
+                "旅行に",
+                "latest root(VARB) after root token(VERB)",
             ),
             (
                 "働く。",
-                "働く",
                 "",
                 "no dependencies",
             ),
@@ -210,14 +193,12 @@ class TestReflectionBuilder:
         nlp_ja,
         builder: JaSpacyReflectionTextBuilder,
         text,
-        src_text,
         expected,
         assert_message,
     ):
         doc = nlp_ja(text)
-        src = builder._extract_source_token(doc)
-        assert src.text == src_text, "extracted source token is correct"
-        tokens = builder._extract_tokens_with_nearest_heads(src)
+        root = builder._extract_root_token(doc)
+        tokens = builder._extract_tokens_with_nearest_heads(root)
         result = "".join(map(lambda t: t.text, tokens))
         assert result == expected, assert_message
 

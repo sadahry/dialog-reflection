@@ -15,7 +15,7 @@ class JaSpacyReflectionTextBuilder(ISpacyReflectionTextBuilder):
         self,
         # NOTE: Will not use pos tags in Japanese
         #       extract source token with tag instead
-        allowed_src_tags: Set[str] = {
+        allowed_root_tags: Set[str] = {
             "動詞",  # VERB
             "名詞",  # NOUN & PROPN
             "形容詞",  # ADJ
@@ -31,46 +31,41 @@ class JaSpacyReflectionTextBuilder(ISpacyReflectionTextBuilder):
         self.word_ending_unpersed = "、ですか。"
         self.message_when_not_valid_doc = "続けてください。"
         self.text_builder = SpacyKatsuyoTextBuilder()
-        self.allowed_tag_pattern = self._build_allowed_tag_pattern(allowed_src_tags)
+        self.allowed_tag_pattern = self._build_allowed_tag_pattern(allowed_root_tags)
 
-    def _build_allowed_tag_pattern(self, allowed_src_tags: Set[str]) -> re.Pattern:
+    def _build_allowed_tag_pattern(self, allowed_root_tags: Set[str]) -> re.Pattern:
         # e.g. /^動詞.*|^名詞.*|^形容詞.*|^形状詞.*/
-        return re.compile(r"^" + r".*|^".join(allowed_src_tags) + r".*")
+        return re.compile(r"^" + r".*|^".join(allowed_root_tags) + r".*")
 
     def build(self, doc: spacy.tokens.Doc) -> str:
         if doc.text.strip() == "":
             raise ReflectionTextError("EMPTY DOC")
-        src = self._extract_source_token(doc)
-        reflection_tokens = self._extract_tokens_with_nearest_heads(src)
-        return self._build_text(reflection_tokens, src)
+        root = self._extract_root_token(doc)
+        reflection_tokens = self._extract_tokens_with_nearest_heads(root)
+        return self._build_text(reflection_tokens, root)
 
-    def _extract_source_token(
+    def _extract_root_token(
         self,
         doc: spacy.tokens.Doc,
     ) -> spacy.tokens.Token:
         """
+        extract the root token,
         e.g. "私は彼女を愛している。私は幸せだ。" -> "幸せ"
         """
-        # extract last filtered token
-        # ref. https://stackoverflow.com/a/2138894
-        src = None
-        for src in filter(
-            lambda token: self.allowed_tag_pattern.search(token.tag_),
-            doc,
-        ):
-            pass
+        # search from the latest sent in Japanese
+        sents = reversed(list(doc.sents))
+        for sent in sents:
+            if self.allowed_tag_pattern.match(sent.root.tag_):
+                return sent.root
 
-        if src is None:
-            raise ReflectionTextError(
-                f"NO VALID SENTENSES IN DOC: '{doc}' "
-                f"ALLOWED_ROOT_POS_TAGS: ({self.allowed_tag_pattern})"
-            )
-
-        return src
+        raise ReflectionTextError(
+            f"NO VALID SENTENSES IN DOC: '{doc}' "
+            f"ALLOWED_ROOT_POS_TAGS: ({self.allowed_tag_pattern})"
+        )
 
     def _extract_tokens_with_nearest_heads(
         self,
-        src: spacy.tokens.Token,
+        root: spacy.tokens.Token,
     ) -> spacy.tokens.Span:
         """
         e.g. "いる" from "私は彼女を愛している。" -> ["彼女", "を", "愛", "して"]
@@ -91,13 +86,8 @@ class JaSpacyReflectionTextBuilder(ISpacyReflectionTextBuilder):
 
             return token
 
-        # extract head_token from root when src is after root
-        # since dependencies will be gathered from root in Japanese
-        # e.g. "彼女を愛している。"
-        # src: "いる" root: "愛し" dep: "彼女" <-- "愛し" --> "いる"
-        extract_from = min([src, src.sent.root], key=lambda t: t.i)
-        head_token = _extract_head_token(extract_from)
-        return src.doc[head_token.i : src.i]
+        head_token = _extract_head_token(root)
+        return root.doc[head_token.i : root.i]
 
     def _build_text(
         self,
