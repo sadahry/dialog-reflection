@@ -1,10 +1,18 @@
 import pytest
-from spacy_dialog_reflection.reflector import Reflector
+from spacy_dialog_reflection.reflector import SpacyReflector
+from spacy_dialog_reflection.lang.ja.reflection_text_builder import (
+    JaSpacyReflectionTextBuilder,
+)
 
 
 @pytest.fixture(scope="session")
-def reflector(nlp_ja):
-    return Reflector(nlp_ja)
+def builder():
+    return JaSpacyReflectionTextBuilder()
+
+
+@pytest.fixture(scope="session")
+def reflector(nlp_ja, builder):
+    return SpacyReflector(nlp_ja, builder)
 
 
 def test_work_well(reflector):
@@ -27,12 +35,13 @@ class TestReflectionBuilder:
     @pytest.mark.filterwarnings("ignore:empty text")
     def test_no_sentence(
         self,
-        reflector: Reflector,
+        nlp_ja,
+        builder: JaSpacyReflectionTextBuilder,
         text,
         assert_message,
     ):
-        doc = reflector.nlp(text)
-        vaild, _ = reflector.builder.check_valid(doc)
+        doc = nlp_ja(text)
+        vaild, _ = builder.check_valid(doc)
         assert not vaild, assert_message
 
     @pytest.mark.parametrize(
@@ -72,13 +81,14 @@ class TestReflectionBuilder:
     )
     def test_select_sentence(
         self,
-        reflector: Reflector,
+        nlp_ja,
+        builder: JaSpacyReflectionTextBuilder,
         text,
         expected,
         assert_message,
     ):
-        doc = reflector.nlp(text)
-        sentence = reflector.builder._select_sentence(doc)
+        doc = nlp_ja(text)
+        sentence = builder._select_sentence(doc)
         assert sentence is not None
         assert sentence.text == expected, assert_message
 
@@ -98,12 +108,13 @@ class TestReflectionBuilder:
     @pytest.mark.filterwarnings("ignore:no valid sentenses")
     def test_select_no_sentence(
         self,
-        reflector: Reflector,
+        nlp_ja,
+        builder: JaSpacyReflectionTextBuilder,
         text,
         assert_message,
     ):
-        doc = reflector.nlp(text)
-        sentence = reflector.builder._select_sentence(doc)
+        doc = nlp_ja(text)
+        sentence = builder._select_sentence(doc)
         assert sentence is None, assert_message
 
     @pytest.mark.parametrize(
@@ -138,13 +149,14 @@ class TestReflectionBuilder:
     )
     def test_extract_tokens_with_nearest_root_heads(
         self,
-        reflector: Reflector,
+        nlp_ja,
+        builder: JaSpacyReflectionTextBuilder,
         text,
         expected,
         assert_message,
     ):
-        root = next(reflector.nlp(text).sents).root
-        func = reflector.builder._extract_tokens_with_nearest_root_heads
+        root = next(nlp_ja(text).sents).root
+        func = builder._extract_tokens_with_nearest_root_heads
         tokens = func(root)
         text = "".join(map(lambda t: t.text, tokens))
         assert text == expected, assert_message
@@ -181,12 +193,13 @@ class TestReflectionBuilder:
     )
     def test_build_suffix(
         self,
-        reflector: Reflector,
+        nlp_ja,
+        builder: JaSpacyReflectionTextBuilder,
         text,
         expected,
         assert_message,
     ):
-        root = next(reflector.nlp(text).sents).root
-        func = reflector.builder._build_suffix
+        root = next(nlp_ja(text).sents).root
+        func = builder._build_suffix
         text = func(root)
         assert text == expected, assert_message

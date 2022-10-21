@@ -5,12 +5,14 @@ import spacy
 import sys
 dir = sys.path[0]
 sys.path.append(dir + "/../")
-from spacy_dialog_reflection.reflector import Reflector # noqa: E402,E261
-# from spacy_dialog_reflection import Reflector
+from spacy_dialog_reflection.reflector import SpacyReflector # noqa: E402,E261
+from spacy_dialog_reflection.lang.ja.reflection_text_builder import JaSpacyReflectionTextBuilder # noqa: E402,E261
+# from spacy_dialog_reflection import SpacyReflector
 # fmt: on
 
 nlp = spacy.load("ja_ginza")
-refactor = Reflector(nlp)
+builder = JaSpacyReflectionTextBuilder()
+refactor = SpacyReflector(nlp, builder)
 
 print("Ctrl+C to exit")
 print()
