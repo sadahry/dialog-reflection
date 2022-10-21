@@ -127,7 +127,7 @@ class ReflectionTextBuilder:
             # 現状rootのsuffixを構築するにはsentが必要
             sent = root.sent
 
-            katsuyo_text, _ = self.text_builder.build(sent)
+            katsuyo_text, _ = self.text_builder.build(sent=sent, src=root)
 
             if katsuyo_text is None:
                 raise Exception(

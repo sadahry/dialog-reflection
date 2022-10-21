@@ -55,7 +55,7 @@ class IKatsuyoTextBuilder(abc.ABC):
         return result, has_error
 
     def build(
-        self, src: Any
+        self, sent: Any, src: Any
     ) -> Tuple[Optional[Union[KatsuyoText, NonKatsuyoText]], bool]:
         """
         サポートされていないrootを検知した際は、Noneとhas_error=Trueを返却する。
@@ -69,7 +69,7 @@ class IKatsuyoTextBuilder(abc.ABC):
             has_error = True
             return None, has_error
 
-        appendants, is_error = self.appendants_detector.detect(src)
+        appendants, is_error = self.appendants_detector.detect(sent, src)
         has_error = has_error or is_error
 
         result, is_error = self.append_multiple(katsuyo_text, appendants)

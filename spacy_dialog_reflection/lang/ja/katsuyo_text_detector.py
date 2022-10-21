@@ -83,7 +83,7 @@ class IKatsuyoTextAppendantsDetector(abc.ABC):
         return True
 
     @abc.abstractmethod
-    def detect(self, src: Any) -> Tuple[List[IKatsuyoTextHelper], bool]:
+    def detect(self, sent: Any, src: Any) -> Tuple[List[IKatsuyoTextHelper], bool]:
         """
         不適切な値が代入された際は、Noneを返却する。
         """
@@ -127,14 +127,11 @@ class SpacyKatsuyoTextDetector(IKatsuyoTextDetector):
         "下一段-ラ行": SHIMO_ICHIDAN,
     }
 
-    def detect(self, src: spacy.tokens.Span) -> Optional[KatsuyoText]:
-        sent = src
-        root = sent.root
-
+    def detect(self, src: spacy.tokens.Token) -> Optional[KatsuyoText]:
         # spacy.tokens.Tokenから抽出される活用形の特徴を表す変数
-        pos_tag = root.pos_
-        tag = root.tag_
-        lemma = root.lemma_
+        pos_tag = src.pos_
+        tag = src.tag_
+        lemma = src.lemma_
         # sudachiの形態素解析結果(part_of_speech)5つ目以降(活用タイプ、活用形)が格納される
         # 品詞によっては活用タイプ、活用形が存在しないため、ここでは配列の取得のみ行う
         # e.g. 動詞
@@ -143,7 +140,7 @@ class SpacyKatsuyoTextDetector(IKatsuyoTextDetector):
         # ref. https://github.com/WorksApplications/SudachiPy/blob/v0.5.4/README.md
         # > Returns the part of speech as a six-element tuple. Tuple elements are four POS levels, conjugation type and conjugation form.
         # ref. https://worksapplications.github.io/sudachi.rs/python/api/sudachipy.html#sudachipy.Morpheme.part_of_speech
-        inflection = root.morph.get("Inflection")
+        inflection = src.morph.get("Inflection")
         if len(inflection) > 0:
             inflection = inflection[0].split(";")
 
@@ -172,7 +169,7 @@ class SpacyKatsuyoTextDetector(IKatsuyoTextDetector):
                 # # text = ウォーキングする
                 # 1       ウォーキング    ウォーキング    VERB    名詞-普通名詞-一般      _       0       root    _       SpaceAfter=No|BunsetuBILabel=B|BunsetuPositionType=ROOT|Reading=ウォーキング
                 # 2       する    する    AUX     動詞-非自立可能 _       1       aux     _       SpaceAfter=No|BunsetuBILabel=I|BunsetuPositionType=SYN_HEAD|Inf=サ行変格,終止形-一般|Reading=スル
-                right = next(root.rights)
+                right = next(src.rights)
                 if right.lemma_ == "する":
                     return KatsuyoText(gokan=lemma, katsuyo=SA_GYO_HENKAKU_SURU)
                 # このパターンは存在しない
@@ -215,13 +212,13 @@ class SpacyKatsuyoTextDetector(IKatsuyoTextDetector):
                 # universaldependenciesの形容動詞に語幹は含まれない
                 # see: https://universaldependencies.org/treebanks/ja_gsd/ja_gsd-pos-ADJ.html
                 # e.g. 健康 -> gokan=健康 + katsuyo=だ
-                return KatsuyoText(gokan=root.lemma_, katsuyo=KEIYOUDOUSHI)
+                return KatsuyoText(gokan=src.lemma_, katsuyo=KEIYOUDOUSHI)
             # ==================================================
             # 形容詞の判定
             # ==================================================
             if "形容詞" in tag:
                 # e.g. 楽しい -> gokan=楽し + katsuyo=い
-                return KatsuyoText(gokan=root.lemma_[:-1], katsuyo=KEIYOUSHI)
+                return KatsuyoText(gokan=src.lemma_[:-1], katsuyo=KEIYOUSHI)
 
             warnings.warn(f"Unsupported tag of ADJ: {tag}", UserWarning)
             return None
@@ -231,31 +228,31 @@ class SpacyKatsuyoTextDetector(IKatsuyoTextDetector):
             # ==================================================
             # 名詞は形容動詞的に扱う
             # e.g. 健康 -> gokan=健康 + katsuyo=だ
-            return KatsuyoText(gokan=root.text, katsuyo=KEIYOUDOUSHI)
+            return KatsuyoText(gokan=src.text, katsuyo=KEIYOUDOUSHI)
         elif pos_tag == "PROPN":
             # ==================================================
             # 固有名詞の変形
             # ==================================================
             # 固有名詞は形容動詞的に扱う
             # e.g. ジョニー -> gokan=ジョニー + katsuyo=だ
-            return KatsuyoText(gokan=root.text, katsuyo=KEIYOUDOUSHI)
+            return KatsuyoText(gokan=src.text, katsuyo=KEIYOUDOUSHI)
         else:
             warnings.warn(f"Unsupported POS Tag: {pos_tag}", UserWarning)
             return None
 
 
 class SpacyKatsuyoTextAppendantsDetector(IKatsuyoTextAppendantsDetector):
-    def detect(self, src: spacy.tokens.Span) -> Tuple[List[IKatsuyoTextHelper], bool]:
-        sent = src
-        # 現状はroot固定で処理
-        root = sent.root
+    def detect(
+        self, sent: spacy.tokens.Span, src: spacy.tokens.Token
+    ) -> Tuple[List[IKatsuyoTextHelper], bool]:
+        assert src in sent
 
         appendants: List[IKatsuyoTextHelper] = []
         has_error = False
 
         # NOTE: rootに紐づくトークンを取得するのに、依存関係を見ずにrootトークンのindex以降のトークンを見る
         #       これは、rootの意味に関連する助動詞がroot位置以降に連続することと、rootに紐づかない助動詞も意味に影響することを前提としている
-        candidate_tokens = dropwhile(lambda t: t.i > root.i, sent)
+        candidate_tokens = dropwhile(lambda t: t.i > src.i, sent)
         for candidate_token in candidate_tokens:
             pos_tag = candidate_token.pos_
             norm = candidate_token.norm_
@@ -264,6 +261,8 @@ class SpacyKatsuyoTextAppendantsDetector(IKatsuyoTextAppendantsDetector):
                 # ==================================================
                 # 助動詞の判定
                 # ==================================================
+                # NOTE: inflectionの情報のみでは、助動詞の活用形を判定できない
+                #       e.g. せる -> Inf=下一段-サ行,終止形-一般 となる
                 if norm in ["れる", "られる"]:
                     is_succeeded = self.try_append(Ukemi, appendants)
                     has_error = has_error or not is_succeeded
@@ -290,7 +289,7 @@ class SpacyKatsuyoTextAppendantsDetector(IKatsuyoTextAppendantsDetector):
                     has_error = has_error or not is_succeeded
                     continue
 
-                warnings.warn(f"Unsupported AUX: {norm}", UserWarning)
+                warnings.warn(f"Unsupported AUX: {norm} src: {src}", UserWarning)
                 has_error = True
                 continue
             elif pos_tag == "ADJ":

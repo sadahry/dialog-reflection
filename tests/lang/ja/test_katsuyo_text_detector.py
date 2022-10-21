@@ -631,7 +631,7 @@ def test_spacy_katsuyo_text_detector(
     root_token = sent.root
     assert root_token.text == root_text, "root token is not correct"
     assert root_token.pos_ == pos, "root token is not correct"
-    result = spacy_detector.detect(sent)
+    result = spacy_detector.detect(root_token)
     assert result == expected, msg
 
 
@@ -773,7 +773,7 @@ def test_spacy_katsuyo_text_appendants_detector(
     last_token = sent[-1]
     assert last_token.norm_ == norm, "last token is not correct"
     assert last_token.pos_ == pos, "last token is not correct"
-    appendants, has_error = spacy_appendants_detector.detect(sent)
+    appendants, has_error = spacy_appendants_detector.detect(sent, last_token)
     assert not has_error, "has error in detection"
     appendant_types = [type(appendant) for appendant in appendants]
     assert appendant_types == expected
