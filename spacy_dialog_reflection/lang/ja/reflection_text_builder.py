@@ -1,5 +1,7 @@
 from itertools import takewhile
-from typing import Set
+from typing import Callable, Set, Union
+from spacy_dialog_reflection.lang.ja.katsuyo import KeiyoudoushiKatsuyo
+from spacy_dialog_reflection.lang.ja.katsuyo_text import KatsuyoText, NonKatsuyoText
 from spacy_dialog_reflection.reflection_text_builder import (
     ReflectionTextError,
 )
@@ -9,6 +11,17 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text_builder import (
 )
 import re
 import spacy
+
+
+def finalize_build_suffix_default(
+    katsuyo_text: Union[KatsuyoText, NonKatsuyoText]
+) -> str:
+    if isinstance(katsuyo_text, KatsuyoText) and (
+        type(katsuyo_text.katsuyo) is KeiyoudoushiKatsuyo
+    ):
+        return katsuyo_text.gokan + "なんですね。"
+
+    return str(katsuyo_text) + "んですね。"
 
 
 class JaSpacyReflectionTextBuilder(ISpacyReflectionTextBuilder):
@@ -26,6 +39,9 @@ class JaSpacyReflectionTextBuilder(ISpacyReflectionTextBuilder):
             "形容詞",  # ADJ
             "形状詞",  # ADJ
         },
+        finalize_build_suffix: Callable[
+            [Union[KatsuyoText, NonKatsuyoText]], str
+        ] = finalize_build_suffix_default,
     ) -> None:
         # TODO 柔軟に設定できるようにする
         self.word_ending = "んですね。"
@@ -36,6 +52,7 @@ class JaSpacyReflectionTextBuilder(ISpacyReflectionTextBuilder):
         self.allowed_tag_pattern = self._build_allowed_tag_pattern(
             allowed_bottom_token_tags
         )
+        self.finalize_build_suffix = finalize_build_suffix
 
     def _build_allowed_tag_pattern(self, allowed_root_tags: Set[str]) -> re.Pattern:
         # e.g. /^動詞.*|^名詞.*|^形容詞.*|^形状詞.*/
@@ -137,7 +154,7 @@ class JaSpacyReflectionTextBuilder(ISpacyReflectionTextBuilder):
                     UserWarning,
                 )
 
-            return str(katsuyo_text) + self.word_ending
+            return self.finalize_build_suffix(katsuyo_text)
         except BaseException as e:
             # ReflectionTextErrorでwrapしてinstant_reflection_textを残す
             instant_reflection_text = str(sent.root) + self.word_ending_unpersed
