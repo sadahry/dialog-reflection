@@ -28,6 +28,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text_detector import (
     SpacyKatsuyoTextAppendantsDetector,
 )
 from spacy_dialog_reflection.lang.ja.katsuyo_text_helper import (
+    Denbun,
     KakoKanryo,
     KibouOthers,
     KibouSelf,
@@ -743,12 +744,122 @@ def test_spacy_katsuyo_text_detector(
             "AUX",
             [KakoKanryo],
         ),
+        # 「そう」は「様態」「伝聞」の意味を持つためテスト追加
         (
             "とても遊びそう",
             "そう",
             "AUX",
             [Youtai],
         ),
+        (
+            "とてもきそう",
+            "そう",
+            "AUX",
+            [Youtai],
+        ),
+        (
+            "とてもしそう",
+            "そう",
+            "AUX",
+            [Youtai],
+        ),
+        (
+            "とても重そう",
+            "そう",
+            "AUX",
+            [Youtai],
+        ),
+        # っぽい  PART    接尾辞-形容詞的
+        (
+            "とても保守的っぽそう",
+            "そう",
+            "AUX",
+            [Youtai],
+        ),
+        (
+            "とても困難そう",
+            "そう",
+            "AUX",
+            [Youtai],
+        ),
+        # 辞書にある「〜的」
+        (
+            "その発想は保守的そう",
+            "そう",
+            "AUX",
+            [Youtai],
+        ),
+        # 辞書にない「〜的」
+        (
+            "その発想はパリピ的そう",
+            "そう",
+            # ja_ginzaだとこうなっただけ。モデルに応じて変わるかも。
+            "ADV",
+            [Youtai],
+        ),
+        (
+            "とても遊ぶそう",
+            "そう",
+            "AUX",
+            [Denbun],
+        ),
+        (
+            "とてもくるそう",
+            "そう",
+            "AUX",
+            [Denbun],
+        ),
+        (
+            "とてもするそう",
+            "そう",
+            "AUX",
+            [Denbun],
+        ),
+        (
+            "とても重いそう",
+            "そう",
+            "AUX",
+            [Denbun],
+        ),
+        (
+            "とても保守的っぽいそう",
+            "そう",
+            "AUX",
+            [Denbun],
+        ),
+        (
+            "とても困難だそう",
+            "そう",
+            "AUX",
+            [Denbun],
+        ),
+        # 辞書にある「〜的」
+        (
+            "その発想は保守的だそう",
+            "そう",
+            "AUX",
+            [Denbun],
+        ),
+        # 辞書にない「〜的」
+        (
+            "パリピ的だそう",
+            "そう",
+            "AUX",
+            [Denbun],
+        ),
+        # NOTE: 明確に意味を判別できないケースが存在するが、テストケースには追加しない
+        #       たとえば「ご飯を食べたそう」において、
+        #       「すでにご飯を食べてきたそうだ（過去の「た」＋伝聞の「そうだ」）」か
+        #       「食べたいと思っていそうだ（希望の「たい」＋様態の「そうだ」）」の区別がつかない
+        #
+        #       文章全体の意味を成立させるうえで問題は発生しないためBugとはしないが、
+        #       意味を扱ううえでは問題となるため、改善の余地がある。
+        # (
+        #     "ご飯を食べたそう",
+        #     "そう",
+        #     "AUX",
+        #     [Union[Denbun, Youtai]],
+        # ),
         # TODO 複数ケースの追加
         # (
         #     # 「では」で「だ」が取れないように

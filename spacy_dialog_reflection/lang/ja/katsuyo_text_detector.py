@@ -27,6 +27,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text import (
 )
 
 from spacy_dialog_reflection.lang.ja.katsuyo_text_helper import (
+    Denbun,
     Hitei,
     KakoKanryo,
     KibouSelf,
@@ -61,6 +62,7 @@ class IKatsuyoTextAppendantsDetector(abc.ABC):
         KibouOthers,
         KakoKanryo,
         Youtai,
+        Denbun,
     )
 
     def __init__(self, helpers: Set[IKatsuyoTextHelper]) -> None:
@@ -265,6 +267,11 @@ class SpacyKatsuyoTextAppendantsDetector(IKatsuyoTextAppendantsDetector):
             # ==================================================
             # NOTE: inflectionの情報のみでは、助動詞の活用形を判定できない
             #       e.g. せる -> Inf=下一段-サ行,終止形-一般 となる
+
+            # TODO 無視する助動詞のリスト化
+            if norm in {"だ"}:
+                return None, None
+
             if norm in ["れる", "られる"]:
                 return Ukemi, None
             elif norm in ["せる", "させる"]:
@@ -279,8 +286,7 @@ class SpacyKatsuyoTextAppendantsDetector(IKatsuyoTextAppendantsDetector):
             elif norm in ["た"]:
                 return KakoKanryo, None
             elif norm in ["そう"]:
-                # TODO 伝聞の実装
-                return Youtai, None
+                return self._detect_appendant_sou(candidate_token)
 
             return None, f"Unsupported AUX: {norm}"
         elif pos_tag == "ADJ":
@@ -289,5 +295,47 @@ class SpacyKatsuyoTextAppendantsDetector(IKatsuyoTextAppendantsDetector):
             #       @see: https://github.com/sadahry/spacy-dialog-reflection/blob/17507db530da24c11816374d6caa4766e4614f69/tests/lang/ja/test_katsuyo_text_detector.py#L676-L693
             if norm in ["無い"]:
                 return Hitei, None
+        elif pos_tag == "ADV":
+            # 「ない」のみ対応
+            if norm in ["そう"]:
+                return self._detect_appendant_sou(candidate_token)
 
         return None, None
+
+    def _detect_appendant_sou(
+        self, candidate_token: spacy.tokens.Token
+    ) -> Tuple[Optional[Type[IKatsuyoTextHelper]], Optional[str]]:
+        # 「様態」「伝聞」の判別
+        left = candidate_token.doc[candidate_token.i - 1]
+        # 動詞判定
+        if left.tag_.startswith("動詞"):
+            # @ref: https://github.com/sadahry/spacy-dialog-reflection/blob/6a56bd3378daee41a30bc7bb50b8de6c063a8437/spacy_dialog_reflection/lang/ja/katsuyo_text_detector.py#L136-L144
+            inflection = left.morph.get("Inflection")[0].split(";")
+            katsuyo_type = inflection[1]
+            if "連用形" in katsuyo_type:
+                return Youtai, None
+            elif "終止形" in katsuyo_type or "連体形" in katsuyo_type:
+                return Denbun, None
+        # 形容詞判定
+        if "形容詞" in left.tag_:
+            # @ref: https://github.com/sadahry/spacy-dialog-reflection/blob/6a56bd3378daee41a30bc7bb50b8de6c063a8437/spacy_dialog_reflection/lang/ja/katsuyo_text_detector.py#L136-L144
+            inflection = left.morph.get("Inflection")[0].split(";")
+            katsuyo_type = inflection[1]
+            if "語幹" in katsuyo_type:
+                return Youtai, None
+            elif "終止形" in katsuyo_type or "連体形" in katsuyo_type:
+                return Denbun, None
+        # 形容動詞判定
+        if left.pos_ == "AUX" and left.text == "だ":
+            # 形容動詞の基本形(終止or連体)が取れていると判断する
+            return Denbun, None
+        elif "形状詞" in left.tag_:
+            # e.g.,
+            # 困難    ADJ     名詞-普通名詞-形状詞可能
+            # 的      PART    接尾辞-形状詞的
+            return Youtai, None
+        elif left.pos_ == "ADJ" and left.tag_.startswith("名詞"):
+            # 形状詞可能ではない形容動詞の語幹が取れていると判断する
+            return Youtai, None
+
+        return None, f"Unexpected {candidate_token.norm_} no matched"
