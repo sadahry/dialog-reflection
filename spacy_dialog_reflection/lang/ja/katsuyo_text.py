@@ -427,7 +427,7 @@ class Rashii(ZyodoushiKatsuyoText):
     def __init__(self):
         super().__init__(
             gokan="らし",
-            # NOTE: 本来「伝聞」の活用系は形容詞とは異なる(e.g., 未然形が存在しない)
+            # NOTE: 本来の活用系は形容詞とは異なる(e.g., 未然形が存在しない)
             #       現状の意味を厳密に扱わない状態においては、形容詞の活用系を使う
             katsuyo=k.KEIYOUSHI,
         )
@@ -436,6 +436,30 @@ class Rashii(ZyodoushiKatsuyoText):
         if isinstance(pre.katsuyo, k.KeiyoudoushiKatsuyo):
             return NonKatsuyoText(pre.gokan) + self.zyodoushi
         elif isinstance(pre.katsuyo, k.ShushiMixin):
+            return NonKatsuyoText(pre.gokan + pre.katsuyo.shushi) + self.zyodoushi
+
+        raise KatsuyoTextError(
+            f"Unsupported katsuyo_text in {type(self)}: {pre} "
+            f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
+        )
+
+
+# ==============================================================================
+# 助動詞::当然
+# ==============================================================================
+
+
+class Bekida(ZyodoushiKatsuyoText):
+    def __init__(self):
+        super().__init__(
+            gokan="べき",
+            # NOTE: 本来の活用系は形容動詞とは異なる(e.g., 命令形が存在しない)
+            #       現状の意味を厳密に扱わない状態においては、形容動詞の活用系を使う
+            katsuyo=k.KEIYOUDOUSHI,
+        )
+
+    def merge(self, pre: KatsuyoText) -> KatsuyoText:
+        if isinstance(pre.katsuyo, k.IDoushiKatsuyo):
             return NonKatsuyoText(pre.gokan + pre.katsuyo.shushi) + self.zyodoushi
 
         raise KatsuyoTextError(

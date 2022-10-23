@@ -33,6 +33,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text_helper import (
     KibouOthers,
     KibouSelf,
     Suitei,
+    Touzen,
     Ukemi,
     Shieki,
     Hitei,
@@ -872,6 +873,18 @@ def test_spacy_katsuyo_text_detector(
             "らしい",
             "AUX",
             [Suitei],
+        ),
+        (
+            "表彰するべき",
+            "べし",
+            "AUX",
+            [Touzen],
+        ),
+        (
+            "つくるべし",
+            "べし",
+            "AUX",
+            [Touzen],
         ),
         # TODO 複数ケースの追加
         # (

@@ -11,6 +11,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text_helper import (
     KakoKanryo,
     Shieki,
     Suitei,
+    Touzen,
     Ukemi,
     KibouSelf,
     KibouOthers,
@@ -100,6 +101,7 @@ class SpacyKatsuyoTextBuilder(IKatsuyoTextBuilder):
                     Youtai(),
                     Denbun(),
                     Suitei(),
+                    Touzen(),
                 ),
             ),
         )

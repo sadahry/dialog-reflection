@@ -326,6 +326,8 @@ class Denbun(IKatsuyoTextHelper):
 def bridge_Suitei_default(
     pre: Union[kt.KatsuyoText, kt.NonKatsuyoText]
 ) -> kt.KatsuyoText:
+    # TODO 文法的にも体言に紐づけることができるため
+    #      try_mergeにこのロジックを移植できるようにする
     if isinstance(pre, kt.NonKatsuyoText):
         return cast(kt.KatsuyoText, pre + kt.Rashii())
 
@@ -345,5 +347,53 @@ class Suitei(IKatsuyoTextHelper):
     def try_merge(self, pre: kt.KatsuyoText) -> Optional[kt.KatsuyoText]:
         if isinstance(pre.katsuyo, k.ShushiMixin):
             return cast(kt.KatsuyoText, pre + kt.Rashii())
+
+        return None
+
+
+# ==============================================================================
+# 助動詞::当然
+# ==============================================================================
+
+
+def bridge_Touzen_default(
+    pre: Union[kt.KatsuyoText, kt.NonKatsuyoText]
+) -> kt.KatsuyoText:
+    # デフォルトでは動詞「ある」でブリッジ
+    aru = kt.KatsuyoText(
+        gokan="あ",
+        katsuyo=k.GODAN_RA_GYO,
+    )
+
+    if isinstance(pre, kt.NonKatsuyoText):
+        de = kt.NonKatsuyoText("で")
+        return cast(kt.KatsuyoText, pre + de + aru + kt.Bekida())
+
+    if type(pre.katsuyo) is k.KeiyoushiKatsuyo:
+        return cast(kt.KatsuyoText, pre + aru + kt.Bekida())
+    elif type(pre.katsuyo) is k.KeiyoudoushiKatsuyo:
+        # 形容動詞は「ある」には特殊な形式で紐づく
+        renyo_nai = pre.katsuyo.renyo_nai
+        return cast(
+            kt.KatsuyoText,
+            kt.NonKatsuyoText(pre.gokan + renyo_nai) + aru + kt.Bekida(),
+        )
+
+    raise KatsuyoTextError(
+        f"Unsupported katsuyo_text in {sys._getframe().f_code.co_name}: {pre} "
+        f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
+    )
+
+
+class Touzen(IKatsuyoTextHelper):
+    def __init__(
+        self,
+        bridge: Optional[IKatsuyoTextHelper.BridgeFunction] = bridge_Touzen_default,
+    ) -> None:
+        super().__init__(bridge)
+
+    def try_merge(self, pre: kt.KatsuyoText) -> Optional[kt.KatsuyoText]:
+        if isinstance(pre.katsuyo, k.IDoushiKatsuyo):
+            return cast(kt.KatsuyoText, pre + kt.Bekida())
 
         return None
