@@ -895,3 +895,51 @@ def test_spacy_katsuyo_text_appendants_detector(
     assert not has_error, "has error in detection"
     appendant_types = [type(appendant) for appendant in appendants]
     assert appendant_types == expected
+
+
+@pytest.mark.parametrize(
+    "text, norm, pos",
+    [
+        (
+            "最高だ",
+            "だ",
+            "AUX",
+        ),
+        (
+            "最高です",
+            "です",
+            "AUX",
+        ),
+        (
+            "悲しみます",
+            "ます",
+            "AUX",
+        ),
+        (
+            "嫉妬しちゃう",
+            "ちゃう",
+            "AUX",
+        ),
+        (
+            "悲しんじゃう",
+            # 「ちゃう」になる
+            "ちゃう",
+            "AUX",
+        ),
+        (
+            "嫉妬しやがる",
+            "やがる",
+            "AUX",
+        ),
+    ],
+)
+def test_spacy_katsuyo_text_appendants_detector_ignore(
+    nlp_ja, spacy_appendants_detector, text, norm, pos
+):
+    sent = next(nlp_ja(text).sents)
+    last_token = sent[-1]
+    assert last_token.norm_ == norm, "last token is not correct"
+    assert last_token.pos_ == pos, "last token is not correct"
+    appendants, has_error = spacy_appendants_detector.detect(sent, sent.root)
+    assert not has_error, "has error in detection"
+    assert appendants == [], f"{norm} will be ignored"

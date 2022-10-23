@@ -269,7 +269,16 @@ class SpacyKatsuyoTextAppendantsDetector(IKatsuyoTextAppendantsDetector):
             #       e.g. せる -> Inf=下一段-サ行,終止形-一般 となる
 
             # TODO 無視する助動詞のリスト化
-            if norm in {"だ"}:
+            if norm in {
+                "だ",
+                "です",
+                "ます",
+                "ちゃう",
+                "やがる",
+                # 「する」の助動詞はSpacyKatsuyoTextDetectorで対処されるので
+                # ここでは無視する
+                "為る",
+            }:
                 return None, None
 
             if norm in ["れる", "られる"]:
