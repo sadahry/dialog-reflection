@@ -1,5 +1,5 @@
 from collections.abc import Callable
-from typing import Union, Optional, cast
+from typing import Union, Optional
 import attrs
 import abc
 import spacy_dialog_reflection.lang.ja.katsuyo as k
@@ -28,15 +28,12 @@ class KatsuyoText:
     ) -> Union["KatsuyoText", "NonKatsuyoText"]:  # IKatsuyoTextHelper は return しない
         # NOTE: postを保持しておいて文字列化する際に再帰呼び出し的にしてもいいかもしれない
         #       ただadd時のエラーがわかりにくくなるので現状は都度gokanに追記するようにしている
-        if issubclass(type(post), NonKatsuyoText):
-            post = cast(NonKatsuyoText, post)
+        if isinstance(post, NonKatsuyoText):
             return self.append(post)
-        elif issubclass(type(post), KatsuyoText):
-            post = cast(KatsuyoText, post)
+        elif isinstance(post, KatsuyoText):
             # 言語の特性上、活用形の前に接続される品詞の影響を受ける。
             return post.merge(self)
-        elif issubclass(type(post), IKatsuyoTextHelper):
-            post = cast(IKatsuyoTextHelper, post)
+        elif isinstance(post, IKatsuyoTextHelper):
             # 言語の特性上、活用形の前に接続される品詞の影響を受ける。
             return post.merge(self)
 
@@ -47,9 +44,8 @@ class KatsuyoText:
         基本的には連体形で受けるが、下位クラスで上書きすることで
         任意の活用形に変換して返すことがある。
         """
-        if issubclass(type(self.katsuyo), k.RenyoMixin):
-            renyo = cast(k.RenyoMixin, self.katsuyo).renyo
-            return NonKatsuyoText(self.gokan + renyo + post.text)
+        if isinstance(self.katsuyo, k.RentaiMixin):
+            return NonKatsuyoText(self.gokan + self.katsuyo.rentai + post.text)
 
         raise KatsuyoTextError(
             f"Unsupported katsuyo_text in append of {type(self)}: {post} "
@@ -61,10 +57,9 @@ class KatsuyoText:
         基本的には連用形で受けるが、下位クラスで上書きすることで
         任意の活用形に変換して返すことがある。
         """
-        if issubclass(type(pre.katsuyo), k.RenyoMixin):
-            renyo = cast(k.RenyoMixin, pre.katsuyo).renyo
+        if isinstance(pre.katsuyo, k.RenyoMixin):
             return KatsuyoText(
-                gokan=pre.gokan + renyo + self.gokan,
+                gokan=pre.gokan + pre.katsuyo.renyo + self.gokan,
                 katsuyo=self.katsuyo,
             )
 
@@ -91,17 +86,14 @@ class NonKatsuyoText:
     def __add__(
         self, post: Union["KatsuyoText", "NonKatsuyoText", "IKatsuyoTextHelper"]
     ) -> Union["KatsuyoText", "NonKatsuyoText"]:  # IKatsuyoTextHelper は return しない
-        if issubclass(type(post), NonKatsuyoText):
-            post = cast(NonKatsuyoText, post)
+        if isinstance(post, NonKatsuyoText):
             return NonKatsuyoText(text=self.text + post.text)
-        elif issubclass(type(post), KatsuyoText):
-            post = cast(KatsuyoText, post)
+        elif isinstance(post, KatsuyoText):
             return KatsuyoText(
                 gokan=self.text + post.gokan,
                 katsuyo=post.katsuyo,
             )
-        elif issubclass(type(post), IKatsuyoTextHelper):
-            post = cast(IKatsuyoTextHelper, post)
+        elif isinstance(post, IKatsuyoTextHelper):
             # 言語の特性上、活用形の前に接続される品詞の影響を受ける。
             # 値を調整できるようにbridgeとする
             if post.bridge is not None:
@@ -199,12 +191,11 @@ class Reru(ZyodoushiKatsuyoText):
         )
 
     def merge(self, pre: KatsuyoText) -> KatsuyoText:
-        if issubclass(type(pre.katsuyo), k.IDoushiKatsuyo):
+        if isinstance(pre.katsuyo, k.IDoushiKatsuyo):
             if type(pre.katsuyo) is k.SaGyoHenkakuKatsuyo:
                 mizen_reru = pre.katsuyo.mizen_reru
                 return NonKatsuyoText(pre.gokan + mizen_reru) + self.zyodoushi
-            mizen = cast(k.IDoushiKatsuyo, pre.katsuyo).mizen
-            return NonKatsuyoText(pre.gokan + mizen) + self.zyodoushi
+            return NonKatsuyoText(pre.gokan + pre.katsuyo.mizen) + self.zyodoushi
 
         raise KatsuyoTextError(
             f"Unsupported katsuyo_text in {type(self)}: {pre} "
@@ -220,12 +211,11 @@ class Rareru(ZyodoushiKatsuyoText):
         )
 
     def merge(self, pre: KatsuyoText) -> KatsuyoText:
-        if issubclass(type(pre.katsuyo), k.IDoushiKatsuyo):
+        if isinstance(pre.katsuyo, k.IDoushiKatsuyo):
             if type(pre.katsuyo) is k.SaGyoHenkakuKatsuyo:
                 mizen_rareru = pre.katsuyo.mizen_rareru
                 return NonKatsuyoText(pre.gokan + mizen_rareru) + self.zyodoushi
-            mizen = cast(k.IDoushiKatsuyo, pre.katsuyo).mizen
-            return NonKatsuyoText(pre.gokan + mizen) + self.zyodoushi
+            return NonKatsuyoText(pre.gokan + pre.katsuyo.mizen) + self.zyodoushi
 
         raise KatsuyoTextError(
             f"Unsupported katsuyo_text in {type(self)}: {pre} "
@@ -246,12 +236,11 @@ class Seru(ZyodoushiKatsuyoText):
         )
 
     def merge(self, pre: KatsuyoText) -> KatsuyoText:
-        if issubclass(type(pre.katsuyo), k.IDoushiKatsuyo):
+        if isinstance(pre.katsuyo, k.IDoushiKatsuyo):
             if type(pre.katsuyo) is k.SaGyoHenkakuKatsuyo:
                 mizen_reru = pre.katsuyo.mizen_reru
                 return NonKatsuyoText(pre.gokan + mizen_reru) + self.zyodoushi
-            mizen = cast(k.IDoushiKatsuyo, pre.katsuyo).mizen
-            return NonKatsuyoText(pre.gokan + mizen) + self.zyodoushi
+            return NonKatsuyoText(pre.gokan + pre.katsuyo.mizen) + self.zyodoushi
 
         raise KatsuyoTextError(
             f"Unsupported katsuyo_text in {type(self)}: {pre} "
@@ -267,10 +256,9 @@ class Saseru(ZyodoushiKatsuyoText):
         )
 
     def merge(self, pre: KatsuyoText) -> KatsuyoText:
-        if issubclass(type(pre.katsuyo), k.IDoushiKatsuyo):
+        if isinstance(pre.katsuyo, k.IDoushiKatsuyo):
             # サ変活用「〜ずる」には未然形「〜じ させる」を採用したため他と同一の未然形に
-            mizen = cast(k.IDoushiKatsuyo, pre.katsuyo).mizen
-            return NonKatsuyoText(pre.gokan + mizen) + self.zyodoushi
+            return NonKatsuyoText(pre.gokan + pre.katsuyo.mizen) + self.zyodoushi
 
         raise KatsuyoTextError(
             f"Unsupported katsuyo_text in {type(self)}: {pre} "
@@ -291,9 +279,8 @@ class Nai(ZyodoushiKatsuyoText):
         )
 
     def merge(self, pre: KatsuyoText) -> KatsuyoText:
-        if issubclass(type(pre.katsuyo), k.IDoushiKatsuyo):
-            mizen = cast(k.IDoushiKatsuyo, pre.katsuyo).mizen
-            return NonKatsuyoText(pre.gokan + mizen) + self.zyodoushi
+        if isinstance(pre.katsuyo, k.IDoushiKatsuyo):
+            return NonKatsuyoText(pre.gokan + pre.katsuyo.mizen) + self.zyodoushi
 
         raise KatsuyoTextError(
             f"Unsupported katsuyo_text in {type(self)}: {pre} "
@@ -314,9 +301,8 @@ class Tai(ZyodoushiKatsuyoText):
         )
 
     def merge(self, pre: KatsuyoText) -> KatsuyoText:
-        if issubclass(type(pre.katsuyo), k.IDoushiKatsuyo):
-            renyo = cast(k.IDoushiKatsuyo, pre.katsuyo).renyo
-            return NonKatsuyoText(pre.gokan + renyo) + self.zyodoushi
+        if isinstance(pre.katsuyo, k.IDoushiKatsuyo):
+            return NonKatsuyoText(pre.gokan + pre.katsuyo.renyo) + self.zyodoushi
 
         raise KatsuyoTextError(
             f"Unsupported katsuyo_text in {type(self)}: {pre} "
@@ -332,9 +318,8 @@ class Tagaru(ZyodoushiKatsuyoText):
         )
 
     def merge(self, pre: KatsuyoText) -> KatsuyoText:
-        if issubclass(type(pre.katsuyo), k.IDoushiKatsuyo):
-            renyo = cast(k.IDoushiKatsuyo, pre.katsuyo).renyo
-            return NonKatsuyoText(pre.gokan + renyo) + self.zyodoushi
+        if isinstance(pre.katsuyo, k.IDoushiKatsuyo):
+            return NonKatsuyoText(pre.gokan + pre.katsuyo.renyo) + self.zyodoushi
 
         raise KatsuyoTextError(
             f"Unsupported katsuyo_text in {type(self)}: {pre} "
@@ -355,13 +340,10 @@ class Ta(ZyodoushiKatsuyoText):
         )
 
     def merge(self, pre: KatsuyoText) -> KatsuyoText:
-        if issubclass(type(pre.katsuyo), k.RenyoMixin):
-            if issubclass(type(pre.katsuyo), k.RenyoTaMixin):
-                renyo_ta = cast(k.RenyoTaMixin, pre.katsuyo).renyo_ta
-                return NonKatsuyoText(pre.gokan + renyo_ta) + self.zyodoushi
-
-            renyo = cast(k.RenyoMixin, pre.katsuyo).renyo
-            return NonKatsuyoText(pre.gokan + renyo) + self.zyodoushi
+        if isinstance(pre.katsuyo, k.RenyoMixin):
+            if isinstance(pre.katsuyo, k.RenyoTaMixin):
+                return NonKatsuyoText(pre.gokan + pre.katsuyo.renyo_ta) + self.zyodoushi
+            return NonKatsuyoText(pre.gokan + pre.katsuyo.renyo) + self.zyodoushi
 
         raise KatsuyoTextError(
             f"Unsupported katsuyo_text in {type(self)}: {pre} "
@@ -377,13 +359,10 @@ class Da(ZyodoushiKatsuyoText):
         )
 
     def merge(self, pre: KatsuyoText) -> KatsuyoText:
-        if issubclass(type(pre.katsuyo), k.RenyoMixin):
-            if issubclass(type(pre.katsuyo), k.RenyoTaMixin):
-                renyo_ta = cast(k.RenyoTaMixin, pre.katsuyo).renyo_ta
-                return NonKatsuyoText(pre.gokan + renyo_ta) + self.zyodoushi
-
-            renyo = cast(k.RenyoMixin, pre.katsuyo).renyo
-            return NonKatsuyoText(pre.gokan + renyo) + self.zyodoushi
+        if isinstance(pre.katsuyo, k.RenyoMixin):
+            if isinstance(pre.katsuyo, k.RenyoTaMixin):
+                return NonKatsuyoText(pre.gokan + pre.katsuyo.renyo_ta) + self.zyodoushi
+            return NonKatsuyoText(pre.gokan + pre.katsuyo.renyo) + self.zyodoushi
 
         raise KatsuyoTextError(
             f"Unsupported katsuyo_text in {type(self)}: {pre} "

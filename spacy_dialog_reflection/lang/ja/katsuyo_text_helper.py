@@ -21,15 +21,9 @@ def bridge_Ukemi_default(
         katsuyo=k.GODAN_RA_GYO,
     )
 
-    if issubclass(
-        type(pre),
-        (kt.NonKatsuyoText),
-    ):
-        pre = cast(kt.NonKatsuyoText, pre)
+    if isinstance(pre, (kt.NonKatsuyoText)):
         ni = kt.NonKatsuyoText("に")
         return cast(kt.KatsuyoText, pre + ni + naru + kt.Reru())
-
-    pre = cast(kt.KatsuyoText, pre)
 
     if type(pre.katsuyo) is k.KeiyoushiKatsuyo:
         return cast(
@@ -56,7 +50,7 @@ class Ukemi(IKatsuyoTextHelper):
         super().__init__(bridge)
 
     def try_merge(self, pre: kt.KatsuyoText) -> Optional[kt.KatsuyoText]:
-        if issubclass(type(pre.katsuyo), k.IDoushiKatsuyo):
+        if isinstance(pre.katsuyo, k.IDoushiKatsuyo):
             # サ行変格活用のみ特殊
             if type(pre.katsuyo) is k.SaGyoHenkakuKatsuyo:
                 # 用法的に「〜する」は「れる/られる」どちらでもよいため固定
@@ -66,8 +60,8 @@ class Ukemi(IKatsuyoTextHelper):
                 elif pre.katsuyo.shushi == "ずる":
                     return cast(kt.KatsuyoText, pre + kt.Rareru())
 
-            mizen = cast(k.IDoushiKatsuyo, pre.katsuyo).mizen
-            if mizen and mizen in k.DAN["あ"]:
+            mizen = pre.katsuyo.mizen
+            if mizen and mizen[-1] in k.DAN["あ"]:
                 return cast(kt.KatsuyoText, pre + kt.Reru())
             else:
                 return cast(kt.KatsuyoText, pre + kt.Rareru())
@@ -83,15 +77,9 @@ class Ukemi(IKatsuyoTextHelper):
 def bridge_Shieki_default(
     pre: Union[kt.KatsuyoText, kt.NonKatsuyoText]
 ) -> kt.KatsuyoText:
-    if issubclass(
-        type(pre),
-        (kt.NonKatsuyoText),
-    ):
-        pre = cast(kt.NonKatsuyoText, pre)
+    if isinstance(pre, kt.NonKatsuyoText):
         ni = kt.NonKatsuyoText("に")
         return cast(kt.KatsuyoText, pre + ni + kt.Saseru())
-
-    pre = cast(kt.KatsuyoText, pre)
 
     if type(pre.katsuyo) is k.KeiyoushiKatsuyo:
         # 「させる」を動詞として扱い連用形でブリッジ
@@ -122,7 +110,7 @@ class Shieki(IKatsuyoTextHelper):
         super().__init__(bridge)
 
     def try_merge(self, pre: kt.KatsuyoText) -> Optional[kt.KatsuyoText]:
-        if issubclass(type(pre.katsuyo), k.IDoushiKatsuyo):
+        if isinstance(pre.katsuyo, k.IDoushiKatsuyo):
             # サ行変格活用のみ特殊
             if type(pre.katsuyo) is k.SaGyoHenkakuKatsuyo:
                 # 用法的に「〜する」は「せる/させる」どちらでもよいため固定
@@ -132,8 +120,8 @@ class Shieki(IKatsuyoTextHelper):
                 elif pre.katsuyo.shushi == "ずる":
                     return cast(kt.KatsuyoText, pre + kt.Saseru())
 
-            mizen = cast(k.IDoushiKatsuyo, pre.katsuyo).mizen
-            if mizen and mizen in k.DAN["あ"]:
+            mizen = pre.katsuyo.mizen
+            if mizen and mizen[-1] in k.DAN["あ"]:
                 return cast(kt.KatsuyoText, pre + kt.Seru())
             else:
                 return cast(kt.KatsuyoText, pre + kt.Saseru())
@@ -149,16 +137,11 @@ class Shieki(IKatsuyoTextHelper):
 def bridge_Hitei_default(
     pre: Union[kt.KatsuyoText, kt.NonKatsuyoText]
 ) -> kt.KatsuyoText:
-    if issubclass(
-        type(pre),
-        (kt.NonKatsuyoText),
-    ):
+    if isinstance(pre, kt.NonKatsuyoText):
         pre = cast(kt.NonKatsuyoText, pre)
         # TODO 助詞のハンドリング
         deha = kt.NonKatsuyoText("では")
         return cast(kt.KatsuyoText, pre + deha + kt.Nai())
-
-    pre = cast(kt.KatsuyoText, pre)
 
     if type(pre.katsuyo) is k.KeiyoushiKatsuyo:
         # 「ない」を形容詞として扱い連用形でブリッジ
@@ -193,7 +176,7 @@ class Hitei(IKatsuyoTextHelper):
         super().__init__(bridge)
 
     def try_merge(self, pre: kt.KatsuyoText) -> Optional[kt.KatsuyoText]:
-        if issubclass(type(pre.katsuyo), k.IDoushiKatsuyo):
+        if isinstance(pre.katsuyo, k.IDoushiKatsuyo):
             return cast(kt.KatsuyoText, pre + kt.Nai())
 
         return None
@@ -213,7 +196,7 @@ class KibouSelf(IKatsuyoTextHelper):
         super().__init__(bridge)
 
     def try_merge(self, pre: kt.KatsuyoText) -> Optional[kt.KatsuyoText]:
-        if issubclass(type(pre.katsuyo), k.IDoushiKatsuyo):
+        if isinstance(pre.katsuyo, k.IDoushiKatsuyo):
             return cast(kt.KatsuyoText, pre + kt.Tai())
 
         return None
@@ -228,7 +211,7 @@ class KibouOthers(IKatsuyoTextHelper):
         super().__init__(bridge)
 
     def try_merge(self, pre: kt.KatsuyoText) -> Optional[kt.KatsuyoText]:
-        if issubclass(type(pre.katsuyo), k.IDoushiKatsuyo):
+        if isinstance(pre.katsuyo, k.IDoushiKatsuyo):
             return cast(kt.KatsuyoText, pre + kt.Tagaru())
 
         return None
@@ -242,16 +225,11 @@ class KibouOthers(IKatsuyoTextHelper):
 def bridge_KakoKanryo_default(
     pre: Union[kt.KatsuyoText, kt.NonKatsuyoText]
 ) -> kt.KatsuyoText:
-    if issubclass(
-        type(pre),
-        (kt.NonKatsuyoText),
-    ):
-        pre = cast(kt.NonKatsuyoText, pre)
+    if isinstance(pre, kt.NonKatsuyoText):
         # TODO 助詞のハンドリング
         dat = kt.NonKatsuyoText("だっ")
         return cast(kt.KatsuyoText, pre + dat + kt.Ta())
 
-    pre = cast(kt.KatsuyoText, pre)
     raise KatsuyoTextError(
         f"Unsupported katsuyo_text in bridge_KakoKanryo_default: {pre} "
         f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
@@ -266,8 +244,8 @@ class KakoKanryo(IKatsuyoTextHelper):
         super().__init__(bridge)
 
     def try_merge(self, pre: kt.KatsuyoText) -> Optional[kt.KatsuyoText]:
-        if issubclass(type(pre.katsuyo), k.RenyoMixin):
-            if type(pre.katsuyo) is k.GodanKatsuyo and (
+        if isinstance(pre.katsuyo, k.RenyoMixin):
+            if isinstance(pre.katsuyo, k.GodanKatsuyo) and (
                 pre.katsuyo.shushi in ["ぐ", "ぬ", "ぶ", "む"]
             ):
                 return cast(kt.KatsuyoText, pre + kt.Da())
