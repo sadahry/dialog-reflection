@@ -26,7 +26,6 @@ from spacy_dialog_reflection.lang.ja.katsuyo import (
     SA_GYO_HENKAKU_SURU,
     SA_GYO_HENKAKU_ZURU,
     SHIMO_ICHIDAN,
-    ShushiMixin,
 )
 
 from spacy_dialog_reflection.lang.ja.katsuyo_text_helper import (
