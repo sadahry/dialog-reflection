@@ -34,6 +34,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text_helper import (
     Ukemi,
     Shieki,
     Hitei,
+    Youtai,
 )
 from spacy_dialog_reflection.lang.ja.katsuyo_text_builder import SpacyKatsuyoTextBuilder
 
@@ -741,6 +742,12 @@ def test_spacy_katsuyo_text_detector(
             "た",
             "AUX",
             [KakoKanryo],
+        ),
+        (
+            "とても遊びそう",
+            "そう",
+            "AUX",
+            [Youtai],
         ),
         # TODO 複数ケースの追加
         # (

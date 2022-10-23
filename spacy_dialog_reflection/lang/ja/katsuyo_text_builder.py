@@ -12,6 +12,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text_helper import (
     Ukemi,
     KibouSelf,
     KibouOthers,
+    Youtai,
 )
 from spacy_dialog_reflection.lang.ja.katsuyo_text_detector import (
     IKatsuyoTextDetector,
@@ -94,6 +95,7 @@ class SpacyKatsuyoTextBuilder(IKatsuyoTextBuilder):
                     KibouSelf(),
                     KibouOthers(),
                     KakoKanryo(),
+                    Youtai(),
                 ),
             ),
         )

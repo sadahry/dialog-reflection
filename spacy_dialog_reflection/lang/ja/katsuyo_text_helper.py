@@ -138,7 +138,6 @@ def bridge_Hitei_default(
     pre: Union[kt.KatsuyoText, kt.NonKatsuyoText]
 ) -> kt.KatsuyoText:
     if isinstance(pre, kt.NonKatsuyoText):
-        pre = cast(kt.NonKatsuyoText, pre)
         # TODO 助詞のハンドリング
         deha = kt.NonKatsuyoText("では")
         return cast(kt.KatsuyoText, pre + deha + kt.Nai())
@@ -251,5 +250,37 @@ class KakoKanryo(IKatsuyoTextHelper):
                 return cast(kt.KatsuyoText, pre + kt.Da())
 
             return cast(kt.KatsuyoText, pre + kt.Ta())
+
+        return None
+
+
+# ==============================================================================
+# 助動詞::様態
+# ==============================================================================
+
+
+def bridge_Youtai_default(
+    pre: Union[kt.KatsuyoText, kt.NonKatsuyoText]
+) -> kt.KatsuyoText:
+    if isinstance(pre, kt.NonKatsuyoText):
+        # TODO 助詞のハンドリング(体言のみ許容し助詞はエラー)
+        return cast(kt.KatsuyoText, pre + kt.SoudaYoutai())
+
+    raise KatsuyoTextError(
+        f"Unsupported katsuyo_text in bridge_KakoKanryo_default: {pre} "
+        f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
+    )
+
+
+class Youtai(IKatsuyoTextHelper):
+    def __init__(
+        self,
+        bridge: Optional[IKatsuyoTextHelper.BridgeFunction] = bridge_Youtai_default,
+    ) -> None:
+        super().__init__(bridge)
+
+    def try_merge(self, pre: kt.KatsuyoText) -> Optional[kt.KatsuyoText]:
+        if isinstance(pre.katsuyo, k.RenyoMixin):
+            return cast(kt.KatsuyoText, pre + kt.SoudaYoutai())
 
         return None

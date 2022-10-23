@@ -368,3 +368,27 @@ class Da(ZyodoushiKatsuyoText):
             f"Unsupported katsuyo_text in {type(self)}: {pre} "
             f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
         )
+
+
+# ==============================================================================
+# 助動詞::様態
+# ==============================================================================
+
+
+class SoudaYoutai(ZyodoushiKatsuyoText):
+    def __init__(self):
+        super().__init__(
+            gokan="そう",
+            katsuyo=k.KEIYOUDOUSHI,
+        )
+
+    def merge(self, pre: KatsuyoText) -> KatsuyoText:
+        if isinstance(pre.katsuyo, (k.KeiyoushiKatsuyo, k.KeiyoudoushiKatsuyo)):
+            return NonKatsuyoText(pre.gokan) + self.zyodoushi
+        elif isinstance(pre.katsuyo, k.RenyoMixin):
+            return NonKatsuyoText(pre.gokan + pre.katsuyo.renyo) + self.zyodoushi
+
+        raise KatsuyoTextError(
+            f"Unsupported katsuyo_text in {type(self)}: {pre} "
+            f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
+        )

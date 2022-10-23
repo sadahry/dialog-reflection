@@ -33,6 +33,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text_helper import (
     Shieki,
     Ukemi,
     KibouOthers,
+    Youtai,
 )
 import abc
 import warnings
@@ -59,6 +60,7 @@ class IKatsuyoTextAppendantsDetector(abc.ABC):
         KibouSelf,
         KibouOthers,
         KakoKanryo,
+        Youtai,
     )
 
     def __init__(self, helpers: Set[IKatsuyoTextHelper]) -> None:
@@ -272,6 +274,11 @@ class SpacyKatsuyoTextAppendantsDetector(IKatsuyoTextAppendantsDetector):
                     continue
                 elif norm in ["た"]:
                     is_succeeded = self.try_append(KakoKanryo, appendants)
+                    has_error = has_error or not is_succeeded
+                    continue
+                elif norm in ["そう"]:
+                    # TODO 伝聞の実装
+                    is_succeeded = self.try_append(Youtai, appendants)
                     has_error = has_error or not is_succeeded
                     continue
 

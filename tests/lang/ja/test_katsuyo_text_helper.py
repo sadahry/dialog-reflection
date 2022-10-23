@@ -36,6 +36,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text_helper import (
     Ukemi,
     KibouSelf,
     KakoKanryo,
+    Youtai,
 )
 from spacy_dialog_reflection.lang.ja.katsuyo_text_builder import (
     SpacyKatsuyoTextBuilder,
@@ -678,6 +679,98 @@ def test_zyodoushi_kako_kanryo(msg, katsuyo_text, expected):
     zyodoushi = KakoKanryo()
     result = katsuyo_text + zyodoushi
     assert str(result) == expected, msg
+
+
+@pytest.mark.parametrize(
+    "msg, katsuyo_text, expected",
+    [
+        (
+            "五段活用",
+            KatsuyoText(
+                gokan="遊",
+                katsuyo=GODAN_BA_GYO,
+            ),
+            "遊びそうだ",
+        ),
+        (
+            "上一段活用",
+            KatsuyoText(
+                gokan="見",
+                katsuyo=KAMI_ICHIDAN,
+            ),
+            "見そうだ",
+        ),
+        (
+            "下一段活用",
+            KatsuyoText(
+                gokan="求め",
+                katsuyo=SHIMO_ICHIDAN,
+            ),
+            "求めそうだ",
+        ),
+        (
+            "カ変活用",
+            KURU,
+            "きそうだ",
+        ),
+        (
+            "サ変活用",
+            KatsuyoText(
+                gokan="ウォーキング",
+                katsuyo=SA_GYO_HENKAKU_SURU,
+            ),
+            "ウォーキングしそうだ",
+        ),
+        (
+            "サ変活用(する)",
+            KatsuyoText(
+                gokan="尊重",
+                katsuyo=SA_GYO_HENKAKU_SURU,
+            ),
+            "尊重しそうだ",
+        ),
+        (
+            "サ変活用(ずる)",
+            KatsuyoText(
+                gokan="重ん",
+                katsuyo=SA_GYO_HENKAKU_ZURU,
+            ),
+            "重んじそうだ",
+        ),
+        (
+            "形容詞",
+            KatsuyoText(
+                gokan="美し",
+                katsuyo=KEIYOUSHI,
+            ),
+            "美しそうだ",
+        ),
+        (
+            "形容動詞",
+            KatsuyoText(
+                gokan="綺麗",
+                katsuyo=KEIYOUDOUSHI,
+            ),
+            "綺麗そうだ",
+        ),
+        # TODO 助詞のハンドリング
+        (
+            "NonKatsuyoText",
+            NonKatsuyoText("状態"),
+            "状態そうだ",
+        ),
+    ],
+)
+def test_zyodoushi_youtaii(msg, katsuyo_text, expected):
+    zyodoushi = Youtai()
+    result = katsuyo_text + zyodoushi
+    assert str(result) == expected, msg
+
+
+def test_zyodoushi_youtai_value_error(unsupported_katsuyo_text):
+    zyodoushi = Youtai()
+    with pytest.raises(KatsuyoTextError):
+        unsupported_katsuyo_text + zyodoushi
 
 
 @pytest.mark.filterwarnings(r"ignore:Error in append_multiple.*KatsuyoTextError")
