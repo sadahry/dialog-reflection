@@ -32,6 +32,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text_helper import (
     KakoKanryo,
     KibouSelf,
     Shieki,
+    Suitei,
     Ukemi,
     KibouOthers,
     Youtai,
@@ -63,6 +64,7 @@ class IKatsuyoTextAppendantsDetector(abc.ABC):
         KakoKanryo,
         Youtai,
         Denbun,
+        Suitei,
     )
 
     def __init__(self, helpers: Set[IKatsuyoTextHelper]) -> None:
@@ -296,6 +298,8 @@ class SpacyKatsuyoTextAppendantsDetector(IKatsuyoTextAppendantsDetector):
                 return KakoKanryo, None
             elif norm in ["そう"]:
                 return self._detect_appendant_sou(candidate_token)
+            elif norm in ["らしい"]:
+                return Suitei, None
 
             return None, f"Unsupported AUX: {norm}"
         elif pos_tag == "ADJ":

@@ -316,3 +316,34 @@ class Denbun(IKatsuyoTextHelper):
             return cast(kt.KatsuyoText, pre + kt.SoudaDenbun())
 
         return None
+
+
+# ==============================================================================
+# 助動詞::伝聞
+# ==============================================================================
+
+
+def bridge_Suitei_default(
+    pre: Union[kt.KatsuyoText, kt.NonKatsuyoText]
+) -> kt.KatsuyoText:
+    if isinstance(pre, kt.NonKatsuyoText):
+        return cast(kt.KatsuyoText, pre + kt.Rashii())
+
+    raise KatsuyoTextError(
+        f"Unsupported katsuyo_text in {sys._getframe().f_code.co_name}: {pre} "
+        f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
+    )
+
+
+class Suitei(IKatsuyoTextHelper):
+    def __init__(
+        self,
+        bridge: Optional[IKatsuyoTextHelper.BridgeFunction] = bridge_Suitei_default,
+    ) -> None:
+        super().__init__(bridge)
+
+    def try_merge(self, pre: kt.KatsuyoText) -> Optional[kt.KatsuyoText]:
+        if isinstance(pre.katsuyo, k.ShushiMixin):
+            return cast(kt.KatsuyoText, pre + kt.Rashii())
+
+        return None

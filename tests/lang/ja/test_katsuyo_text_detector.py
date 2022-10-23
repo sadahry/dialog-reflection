@@ -32,6 +32,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text_helper import (
     KakoKanryo,
     KibouOthers,
     KibouSelf,
+    Suitei,
     Ukemi,
     Shieki,
     Hitei,
@@ -860,6 +861,18 @@ def test_spacy_katsuyo_text_detector(
         #     "AUX",
         #     [Union[Denbun, Youtai]],
         # ),
+        (
+            "とても良いらしい",
+            "らしい",
+            "AUX",
+            [Suitei],
+        ),
+        (
+            "とても困難らしい",
+            "らしい",
+            "AUX",
+            [Suitei],
+        ),
         # TODO 複数ケースの追加
         # (
         #     # 「では」で「だ」が取れないように

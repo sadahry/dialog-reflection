@@ -33,6 +33,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text_helper import (
     Hitei,
     KibouOthers,
     Shieki,
+    Suitei,
     Ukemi,
     KibouSelf,
     KakoKanryo,
@@ -859,6 +860,98 @@ def test_zyodoushi_denbun(msg, katsuyo_text, expected):
 
 def test_zyodoushi_denbun_value_error(unsupported_katsuyo_text):
     zyodoushi = Denbun()
+    with pytest.raises(KatsuyoTextError):
+        unsupported_katsuyo_text + zyodoushi
+
+
+@pytest.mark.parametrize(
+    "msg, katsuyo_text, expected",
+    [
+        (
+            "五段活用",
+            KatsuyoText(
+                gokan="遊",
+                katsuyo=GODAN_BA_GYO,
+            ),
+            "遊ぶらしい",
+        ),
+        (
+            "上一段活用",
+            KatsuyoText(
+                gokan="見",
+                katsuyo=KAMI_ICHIDAN,
+            ),
+            "見るらしい",
+        ),
+        (
+            "下一段活用",
+            KatsuyoText(
+                gokan="求め",
+                katsuyo=SHIMO_ICHIDAN,
+            ),
+            "求めるらしい",
+        ),
+        (
+            "カ変活用",
+            KURU,
+            "くるらしい",
+        ),
+        (
+            "サ変活用",
+            KatsuyoText(
+                gokan="ウォーキング",
+                katsuyo=SA_GYO_HENKAKU_SURU,
+            ),
+            "ウォーキングするらしい",
+        ),
+        (
+            "サ変活用(する)",
+            KatsuyoText(
+                gokan="尊重",
+                katsuyo=SA_GYO_HENKAKU_SURU,
+            ),
+            "尊重するらしい",
+        ),
+        (
+            "サ変活用(ずる)",
+            KatsuyoText(
+                gokan="重ん",
+                katsuyo=SA_GYO_HENKAKU_ZURU,
+            ),
+            "重んずるらしい",
+        ),
+        (
+            "形容詞",
+            KatsuyoText(
+                gokan="美し",
+                katsuyo=KEIYOUSHI,
+            ),
+            "美しいらしい",
+        ),
+        (
+            "形容動詞",
+            KatsuyoText(
+                gokan="綺麗",
+                katsuyo=KEIYOUDOUSHI,
+            ),
+            "綺麗らしい",
+        ),
+        # TODO 助詞のハンドリング
+        (
+            "NonKatsuyoText",
+            NonKatsuyoText("状態"),
+            "状態らしい",
+        ),
+    ],
+)
+def test_zyodoushi_suitei(msg, katsuyo_text, expected):
+    zyodoushi = Suitei()
+    result = katsuyo_text + zyodoushi
+    assert str(result) == expected, msg
+
+
+def test_zyodoushi_suitei_value_error(unsupported_katsuyo_text):
+    zyodoushi = Suitei()
     with pytest.raises(KatsuyoTextError):
         unsupported_katsuyo_text + zyodoushi
 
