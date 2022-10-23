@@ -230,7 +230,7 @@ def bridge_KakoKanryo_default(
         return cast(kt.KatsuyoText, pre + dat + kt.Ta())
 
     raise KatsuyoTextError(
-        f"Unsupported katsuyo_text in bridge_KakoKanryo_default: {pre} "
+        f"Unsupported katsuyo_text in {sys._getframe().f_code.co_name}: {pre} "
         f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
     )
 
@@ -267,7 +267,7 @@ def bridge_Youtai_default(
         return cast(kt.KatsuyoText, pre + kt.SoudaYoutai())
 
     raise KatsuyoTextError(
-        f"Unsupported katsuyo_text in bridge_KakoKanryo_default: {pre} "
+        f"Unsupported katsuyo_text in {sys._getframe().f_code.co_name}: {pre} "
         f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
     )
 
@@ -299,7 +299,7 @@ def bridge_Denbun_default(
         return cast(kt.KatsuyoText, pre + dearu + kt.SoudaDenbun())
 
     raise KatsuyoTextError(
-        f"Unsupported katsuyo_text in bridge_Denbun_default: {pre} "
+        f"Unsupported katsuyo_text in {sys._getframe().f_code.co_name}: {pre} "
         f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
     )
 
