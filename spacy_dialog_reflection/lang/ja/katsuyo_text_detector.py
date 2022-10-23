@@ -1,4 +1,4 @@
-from typing import Any, Optional, List, Set, Tuple
+from typing import Any, Optional, List, Set, Tuple, Type
 from itertools import dropwhile
 from spacy_dialog_reflection.lang.ja.katsuyo import (
     GODAN_BA_GYO,
@@ -242,56 +242,52 @@ class SpacyKatsuyoTextAppendantsDetector(IKatsuyoTextAppendantsDetector):
         #       これは、srcがrootとなるとは限らないことと、sentをあらかじめ必要な長さに分割していることを前提としている
         candidate_tokens = dropwhile(lambda t: t.i <= src.i, sent)
         for candidate_token in candidate_tokens:
-            pos_tag = candidate_token.pos_
-            norm = candidate_token.norm_
-
-            if pos_tag == "AUX":
-                # ==================================================
-                # 助動詞の判定
-                # ==================================================
-                # NOTE: inflectionの情報のみでは、助動詞の活用形を判定できない
-                #       e.g. せる -> Inf=下一段-サ行,終止形-一般 となる
-                if norm in ["れる", "られる"]:
-                    is_succeeded = self.try_append(Ukemi, appendants)
-                    has_error = has_error or not is_succeeded
-                    continue
-                elif norm in ["せる", "させる"]:
-                    is_succeeded = self.try_append(Shieki, appendants)
-                    has_error = has_error or not is_succeeded
-                    continue
-                elif norm in ["ない", "ず"]:
-                    # 「ず」も「ない」として扱う
-                    is_succeeded = self.try_append(Hitei, appendants)
-                    has_error = has_error or not is_succeeded
-                    continue
-                elif norm in ["たい"]:
-                    is_succeeded = self.try_append(KibouSelf, appendants)
-                    has_error = has_error or not is_succeeded
-                    continue
-                elif norm in ["たがる"]:
-                    is_succeeded = self.try_append(KibouOthers, appendants)
-                    has_error = has_error or not is_succeeded
-                    continue
-                elif norm in ["た"]:
-                    is_succeeded = self.try_append(KakoKanryo, appendants)
-                    has_error = has_error or not is_succeeded
-                    continue
-                elif norm in ["そう"]:
-                    # TODO 伝聞の実装
-                    is_succeeded = self.try_append(Youtai, appendants)
-                    has_error = has_error or not is_succeeded
-                    continue
-
-                warnings.warn(f"Unsupported AUX: {norm} src: {src}", UserWarning)
+            helper, warning_msg = self._detect_appendant(candidate_token)
+            if warning_msg:
                 has_error = True
+                warnings.warn(f"{warning_msg} src: {src} sent: {sent}", UserWarning)
+            if helper is None:
                 continue
-            elif pos_tag == "ADJ":
-                # 「ない」のみ対応
-                # NOTE: 必ずしも正確に否定表現を解析できるとは限らない
-                #       @see: https://github.com/sadahry/spacy-dialog-reflection/blob/17507db530da24c11816374d6caa4766e4614f69/tests/lang/ja/test_katsuyo_text_detector.py#L676-L693
-                if norm in ["無い"]:
-                    is_succeeded = self.try_append(Hitei, appendants)
-                    has_error = has_error or not is_succeeded
-                    continue
+            is_succeeded = self.try_append(helper, appendants)
+            has_error = has_error or not is_succeeded
 
         return appendants, has_error
+
+    def _detect_appendant(
+        self, candidate_token: spacy.tokens.Token
+    ) -> Tuple[Optional[Type[IKatsuyoTextHelper]], Optional[str]]:
+        pos_tag = candidate_token.pos_
+        norm = candidate_token.norm_
+
+        if pos_tag == "AUX":
+            # ==================================================
+            # 助動詞の判定
+            # ==================================================
+            # NOTE: inflectionの情報のみでは、助動詞の活用形を判定できない
+            #       e.g. せる -> Inf=下一段-サ行,終止形-一般 となる
+            if norm in ["れる", "られる"]:
+                return Ukemi, None
+            elif norm in ["せる", "させる"]:
+                return Shieki, None
+            elif norm in ["ない", "ず"]:
+                # 「ず」も「ない」として扱う
+                return Hitei, None
+            elif norm in ["たい"]:
+                return KibouSelf, None
+            elif norm in ["たがる"]:
+                return KibouOthers, None
+            elif norm in ["た"]:
+                return KakoKanryo, None
+            elif norm in ["そう"]:
+                # TODO 伝聞の実装
+                return Youtai, None
+
+            return None, f"Unsupported AUX: {norm}"
+        elif pos_tag == "ADJ":
+            # 「ない」のみ対応
+            # NOTE: 必ずしも正確に否定表現を解析できるとは限らない
+            #       @see: https://github.com/sadahry/spacy-dialog-reflection/blob/17507db530da24c11816374d6caa4766e4614f69/tests/lang/ja/test_katsuyo_text_detector.py#L676-L693
+            if norm in ["無い"]:
+                return Hitei, None
+
+        return None, None
