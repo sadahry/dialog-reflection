@@ -284,3 +284,35 @@ class Youtai(IKatsuyoTextHelper):
             return cast(kt.KatsuyoText, pre + kt.SoudaYoutai())
 
         return None
+
+
+# ==============================================================================
+# 助動詞::伝聞
+# ==============================================================================
+
+
+def bridge_Denbun_default(
+    pre: Union[kt.KatsuyoText, kt.NonKatsuyoText]
+) -> kt.KatsuyoText:
+    if isinstance(pre, kt.NonKatsuyoText):
+        dearu = kt.NonKatsuyoText("だ")
+        return cast(kt.KatsuyoText, pre + dearu + kt.SoudaDenbun())
+
+    raise KatsuyoTextError(
+        f"Unsupported katsuyo_text in bridge_Denbun_default: {pre} "
+        f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
+    )
+
+
+class Denbun(IKatsuyoTextHelper):
+    def __init__(
+        self,
+        bridge: Optional[IKatsuyoTextHelper.BridgeFunction] = bridge_Denbun_default,
+    ) -> None:
+        super().__init__(bridge)
+
+    def try_merge(self, pre: kt.KatsuyoText) -> Optional[kt.KatsuyoText]:
+        if isinstance(pre.katsuyo, k.ShushiMixin):
+            return cast(kt.KatsuyoText, pre + kt.SoudaDenbun())
+
+        return None

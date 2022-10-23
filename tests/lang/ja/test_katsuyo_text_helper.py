@@ -30,6 +30,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo import (
 )
 
 from spacy_dialog_reflection.lang.ja.katsuyo_text_helper import (
+    Denbun,
     Hitei,
     KibouOthers,
     Shieki,
@@ -50,14 +51,12 @@ def append_multiple():
 
 @pytest.fixture(scope="session")
 def unsupported_katsuyo_text():
-    class UnsupportedKatsuyo(IKatsuyo, ShushiMixin):
+    class UnsupportedKatsuyo(IKatsuyo):
         pass
 
     return KatsuyoText(
         gokan="{{gokan}}",
-        katsuyo=UnsupportedKatsuyo(
-            shushi="{{shushi}}",
-        ),
+        katsuyo=UnsupportedKatsuyo(),
     )
 
 
@@ -769,6 +768,98 @@ def test_zyodoushi_youtaii(msg, katsuyo_text, expected):
 
 def test_zyodoushi_youtai_value_error(unsupported_katsuyo_text):
     zyodoushi = Youtai()
+    with pytest.raises(KatsuyoTextError):
+        unsupported_katsuyo_text + zyodoushi
+
+
+@pytest.mark.parametrize(
+    "msg, katsuyo_text, expected",
+    [
+        (
+            "五段活用",
+            KatsuyoText(
+                gokan="遊",
+                katsuyo=GODAN_BA_GYO,
+            ),
+            "遊ぶそうだ",
+        ),
+        (
+            "上一段活用",
+            KatsuyoText(
+                gokan="見",
+                katsuyo=KAMI_ICHIDAN,
+            ),
+            "見るそうだ",
+        ),
+        (
+            "下一段活用",
+            KatsuyoText(
+                gokan="求め",
+                katsuyo=SHIMO_ICHIDAN,
+            ),
+            "求めるそうだ",
+        ),
+        (
+            "カ変活用",
+            KURU,
+            "くるそうだ",
+        ),
+        (
+            "サ変活用",
+            KatsuyoText(
+                gokan="ウォーキング",
+                katsuyo=SA_GYO_HENKAKU_SURU,
+            ),
+            "ウォーキングするそうだ",
+        ),
+        (
+            "サ変活用(する)",
+            KatsuyoText(
+                gokan="尊重",
+                katsuyo=SA_GYO_HENKAKU_SURU,
+            ),
+            "尊重するそうだ",
+        ),
+        (
+            "サ変活用(ずる)",
+            KatsuyoText(
+                gokan="重ん",
+                katsuyo=SA_GYO_HENKAKU_ZURU,
+            ),
+            "重んずるそうだ",
+        ),
+        (
+            "形容詞",
+            KatsuyoText(
+                gokan="美し",
+                katsuyo=KEIYOUSHI,
+            ),
+            "美しいそうだ",
+        ),
+        (
+            "形容動詞",
+            KatsuyoText(
+                gokan="綺麗",
+                katsuyo=KEIYOUDOUSHI,
+            ),
+            "綺麗だそうだ",
+        ),
+        # TODO 助詞のハンドリング
+        (
+            "NonKatsuyoText",
+            NonKatsuyoText("状態"),
+            "状態だそうだ",
+        ),
+    ],
+)
+def test_zyodoushi_denbun(msg, katsuyo_text, expected):
+    zyodoushi = Denbun()
+    result = katsuyo_text + zyodoushi
+    assert str(result) == expected, msg
+
+
+def test_zyodoushi_denbun_value_error(unsupported_katsuyo_text):
+    zyodoushi = Denbun()
     with pytest.raises(KatsuyoTextError):
         unsupported_katsuyo_text + zyodoushi
 

@@ -392,3 +392,27 @@ class SoudaYoutai(ZyodoushiKatsuyoText):
             f"Unsupported katsuyo_text in {type(self)}: {pre} "
             f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
         )
+
+
+# ==============================================================================
+# 助動詞::伝聞
+# ==============================================================================
+
+
+class SoudaDenbun(ZyodoushiKatsuyoText):
+    def __init__(self):
+        super().__init__(
+            gokan="そう",
+            # NOTE: 本来「伝聞」の活用系は形容動詞とは異なる(e.g., 未然形が存在しない)
+            #       現状の意味を厳密に扱わない状態においては、形容動詞の活用系を使う
+            katsuyo=k.KEIYOUDOUSHI,
+        )
+
+    def merge(self, pre: KatsuyoText) -> KatsuyoText:
+        if isinstance(pre.katsuyo, k.ShushiMixin):
+            return NonKatsuyoText(pre.gokan + pre.katsuyo.shushi) + self.zyodoushi
+
+        raise KatsuyoTextError(
+            f"Unsupported katsuyo_text in {type(self)}: {pre} "
+            f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
+        )
