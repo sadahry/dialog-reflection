@@ -397,3 +397,39 @@ class Touzen(IKatsuyoTextHelper):
             return cast(kt.KatsuyoText, pre + kt.Bekida())
 
         return None
+
+
+# ==============================================================================
+# 助動詞::比況 例示 推定
+# ==============================================================================
+
+
+def bridge_HikyoReizi_default(
+    pre: Union[kt.KatsuyoText, kt.NonKatsuyoText]
+) -> kt.KatsuyoText:
+    if isinstance(pre, kt.NonKatsuyoText):
+        no = kt.NonKatsuyoText("の")
+        return cast(kt.KatsuyoText, pre + no + kt.Youda())
+
+    raise KatsuyoTextError(
+        f"Unsupported katsuyo_text in {sys._getframe().f_code.co_name}: {pre} "
+        f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
+    )
+
+
+# NOTE: 文法的には連体詞「この」等に紐づけることができるが
+#       文末表現として「このようだ」となる際はrootに「よう」がつくため
+#       文末の品詞を分解する機能として扱ううえでは
+#       「比況」にて連体詞を扱うロジックはIKatsuyoTextHelperに含めない
+class HikyoReizi(IKatsuyoTextHelper):
+    def __init__(
+        self,
+        bridge: Optional[IKatsuyoTextHelper.BridgeFunction] = bridge_HikyoReizi_default,
+    ) -> None:
+        super().__init__(bridge)
+
+    def try_merge(self, pre: kt.KatsuyoText) -> Optional[kt.KatsuyoText]:
+        if isinstance(pre.katsuyo, k.RentaiMixin):
+            return cast(kt.KatsuyoText, pre + kt.Youda())
+
+        return None

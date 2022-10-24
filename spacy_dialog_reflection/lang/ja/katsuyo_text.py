@@ -464,3 +464,25 @@ class Bekida(ZyodoushiKatsuyoText):
             f"Unsupported katsuyo_text in {type(self)}: {pre} "
             f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
         )
+
+
+# ==============================================================================
+# 助動詞::比況 例示 推定
+# ==============================================================================
+
+
+class Youda(ZyodoushiKatsuyoText):
+    def __init__(self):
+        super().__init__(
+            gokan="よう",
+            katsuyo=k.KEIYOUDOUSHI,
+        )
+
+    def merge(self, pre: KatsuyoText) -> KatsuyoText:
+        if isinstance(pre.katsuyo, k.RentaiMixin):
+            return NonKatsuyoText(pre.gokan + pre.katsuyo.rentai) + self.zyodoushi
+
+        raise KatsuyoTextError(
+            f"Unsupported katsuyo_text in {type(self)}: {pre} "
+            f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
+        )

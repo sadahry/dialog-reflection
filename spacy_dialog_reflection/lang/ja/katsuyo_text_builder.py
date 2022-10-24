@@ -7,6 +7,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text import (
 )
 from spacy_dialog_reflection.lang.ja.katsuyo_text_helper import (
     Denbun,
+    HikyoReizi,
     Hitei,
     KakoKanryo,
     Shieki,
@@ -102,6 +103,7 @@ class SpacyKatsuyoTextBuilder(IKatsuyoTextBuilder):
                     Denbun(),
                     Suitei(),
                     Touzen(),
+                    HikyoReizi(),
                 ),
             ),
         )

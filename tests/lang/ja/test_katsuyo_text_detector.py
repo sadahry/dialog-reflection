@@ -29,6 +29,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text_detector import (
 )
 from spacy_dialog_reflection.lang.ja.katsuyo_text_helper import (
     Denbun,
+    HikyoReizi,
     KakoKanryo,
     KibouOthers,
     KibouSelf,
@@ -885,6 +886,32 @@ def test_spacy_katsuyo_text_detector(
             "べし",
             "AUX",
             [Touzen],
+        ),
+        (
+            "遊ぶよう",
+            "よう",
+            "AUX",
+            [HikyoReizi],
+        ),
+        (
+            "とても良いよう",
+            "よう",
+            "AUX",
+            [HikyoReizi],
+        ),
+        (
+            "とても困難なよう",
+            "よう",
+            "AUX",
+            [HikyoReizi],
+        ),
+        # NOTE: 名詞として扱われる場合、「よう」がrootとなりappendantとしては
+        #       何も抽出されない
+        (
+            "まるで宝石のよう",
+            "よう",
+            "NOUN",
+            [],
         ),
         # TODO 複数ケースの追加
         # (
