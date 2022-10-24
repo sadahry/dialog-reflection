@@ -486,3 +486,48 @@ class Youda(ZyodoushiKatsuyoText):
             f"Unsupported katsuyo_text in {type(self)}: {pre} "
             f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
         )
+
+
+# ==============================================================================
+# 助動詞::継続
+# 助動詞の参照リンクには含まれないが、口語では頻出されるため追記
+# ref. https://ja.wiktionary.org/wiki/てる#助動詞
+# ==============================================================================
+
+
+class Teiru(ZyodoushiKatsuyoText):
+    def __init__(self):
+        super().__init__(
+            gokan="てい",
+            katsuyo=k.KAMI_ICHIDAN,
+        )
+
+    def merge(self, pre: KatsuyoText) -> KatsuyoText:
+        if isinstance(pre.katsuyo, k.RenyoMixin):
+            if isinstance(pre.katsuyo, k.RenyoTaMixin):
+                return NonKatsuyoText(pre.gokan + pre.katsuyo.renyo_ta) + self.zyodoushi
+            return NonKatsuyoText(pre.gokan + pre.katsuyo.renyo) + self.zyodoushi
+
+        raise KatsuyoTextError(
+            f"Unsupported katsuyo_text in {type(self)}: {pre} "
+            f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
+        )
+
+
+class Deiru(ZyodoushiKatsuyoText):
+    def __init__(self):
+        super().__init__(
+            gokan="でい",
+            katsuyo=k.KAMI_ICHIDAN,
+        )
+
+    def merge(self, pre: KatsuyoText) -> KatsuyoText:
+        if isinstance(pre.katsuyo, k.RenyoMixin):
+            if isinstance(pre.katsuyo, k.RenyoTaMixin):
+                return NonKatsuyoText(pre.gokan + pre.katsuyo.renyo_ta) + self.zyodoushi
+            return NonKatsuyoText(pre.gokan + pre.katsuyo.renyo) + self.zyodoushi
+
+        raise KatsuyoTextError(
+            f"Unsupported katsuyo_text in {type(self)}: {pre} "
+            f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
+        )

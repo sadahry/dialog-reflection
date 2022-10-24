@@ -31,6 +31,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text_helper import (
     Denbun,
     HikyoReizi,
     KakoKanryo,
+    Keizoku,
     KibouOthers,
     KibouSelf,
     Suitei,
@@ -912,6 +913,18 @@ def test_spacy_katsuyo_text_detector(
             "よう",
             "NOUN",
             [],
+        ),
+        (
+            "遊んでる",
+            "てる",
+            "AUX",
+            [Keizoku],
+        ),
+        (
+            "笑ってる",
+            "てる",
+            "AUX",
+            [Keizoku],
         ),
         # TODO 複数ケースの追加
         # (

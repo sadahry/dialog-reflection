@@ -32,6 +32,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text_helper import (
     Denbun,
     HikyoReizi,
     Hitei,
+    Keizoku,
     KibouOthers,
     Shieki,
     Suitei,
@@ -1248,3 +1249,167 @@ def test_katsuyo_text_warning_AttributeErrorr_on_bridge(append_multiple):
     )
     assert result == katsuyo_text, "No changes"
     assert has_error, "has_error is True"
+
+
+@pytest.mark.parametrize(
+    "msg, katsuyo_text, expected",
+    [
+        # 五段活用を念入りにテスト
+        (
+            "五段活用",
+            KatsuyoText(
+                gokan="歩",
+                katsuyo=GODAN_KA_GYO,
+            ),
+            "歩いている",
+        ),
+        (
+            "五段活用",
+            KatsuyoText(
+                gokan="稼",
+                katsuyo=GODAN_GA_GYO,
+            ),
+            "稼いでいる",
+        ),
+        (
+            "五段活用",
+            KatsuyoText(
+                gokan="話",
+                katsuyo=GODAN_SA_GYO,
+            ),
+            "話している",
+        ),
+        (
+            "五段活用",
+            KatsuyoText(
+                gokan="待",
+                katsuyo=GODAN_TA_GYO,
+            ),
+            "待っている",
+        ),
+        (
+            "五段活用",
+            KatsuyoText(
+                gokan="死",
+                katsuyo=GODAN_NA_GYO,
+            ),
+            "死んでいる",
+        ),
+        (
+            "五段活用",
+            KatsuyoText(
+                gokan="遊",
+                katsuyo=GODAN_BA_GYO,
+            ),
+            "遊んでいる",
+        ),
+        (
+            "五段活用",
+            KatsuyoText(
+                gokan="読",
+                katsuyo=GODAN_MA_GYO,
+            ),
+            "読んでいる",
+        ),
+        (
+            "五段活用",
+            KatsuyoText(
+                gokan="帰",
+                katsuyo=GODAN_RA_GYO,
+            ),
+            "帰っている",
+        ),
+        (
+            "五段活用",
+            KatsuyoText(
+                gokan="買",
+                katsuyo=GODAN_WAA_GYO,
+            ),
+            "買っている",
+        ),
+        (
+            "五段活用",
+            KatsuyoText(
+                gokan="行",
+                katsuyo=GODAN_IKU,
+            ),
+            "行っている",
+        ),
+        (
+            "上一段活用",
+            KatsuyoText(
+                gokan="見",
+                katsuyo=KAMI_ICHIDAN,
+            ),
+            "見ている",
+        ),
+        (
+            "下一段活用",
+            KatsuyoText(
+                gokan="求め",
+                katsuyo=SHIMO_ICHIDAN,
+            ),
+            "求めている",
+        ),
+        (
+            "カ変活用",
+            KURU,
+            "きている",
+        ),
+        (
+            "サ変活用",
+            KatsuyoText(
+                gokan="ウォーキング",
+                katsuyo=SA_GYO_HENKAKU_SURU,
+            ),
+            "ウォーキングしている",
+        ),
+        (
+            "サ変活用(する)",
+            KatsuyoText(
+                gokan="尊重",
+                katsuyo=SA_GYO_HENKAKU_SURU,
+            ),
+            "尊重している",
+        ),
+        (
+            "サ変活用(ずる)",
+            KatsuyoText(
+                gokan="重ん",
+                katsuyo=SA_GYO_HENKAKU_ZURU,
+            ),
+            "重んじている",
+        ),
+        (
+            "形容詞",
+            KatsuyoText(
+                gokan="美し",
+                katsuyo=KEIYOUSHI,
+            ),
+            "美しくいる",
+        ),
+        (
+            "形容動詞",
+            KatsuyoText(
+                gokan="綺麗",
+                katsuyo=KEIYOUDOUSHI,
+            ),
+            "綺麗でいる",
+        ),
+        (
+            "NonKatsuyoText",
+            NonKatsuyoText("状態"),
+            "状態でいる",
+        ),
+    ],
+)
+def test_zyodoushi_keizoku(msg, katsuyo_text, expected):
+    zyodoushi = Keizoku()
+    result = katsuyo_text + zyodoushi
+    assert str(result) == expected, msg
+
+
+def test_zyodoushi_keizoku_value_error(unsupported_katsuyo_text):
+    zyodoushi = Keizoku()
+    with pytest.raises(KatsuyoTextError):
+        unsupported_katsuyo_text + zyodoushi

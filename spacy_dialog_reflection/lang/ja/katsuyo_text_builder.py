@@ -10,6 +10,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text_helper import (
     HikyoReizi,
     Hitei,
     KakoKanryo,
+    Keizoku,
     Shieki,
     Suitei,
     Touzen,
@@ -104,6 +105,7 @@ class SpacyKatsuyoTextBuilder(IKatsuyoTextBuilder):
                     Suitei(),
                     Touzen(),
                     HikyoReizi(),
+                    Keizoku(),
                 ),
             ),
         )

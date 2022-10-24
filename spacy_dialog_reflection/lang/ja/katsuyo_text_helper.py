@@ -433,3 +433,55 @@ class HikyoReizi(IKatsuyoTextHelper):
             return cast(kt.KatsuyoText, pre + kt.Youda())
 
         return None
+
+
+# ==============================================================================
+# 助動詞::継続
+# ==============================================================================
+
+
+def bridge_Keizoku_default(
+    pre: Union[kt.KatsuyoText, kt.NonKatsuyoText]
+) -> kt.KatsuyoText:
+    if isinstance(pre, kt.NonKatsuyoText):
+        return cast(kt.KatsuyoText, pre + kt.Deiru())
+
+    if type(pre.katsuyo) is k.KeiyoushiKatsuyo:
+        # 形容詞では「いる」でブリッジ
+        iru = kt.KatsuyoText(
+            gokan="い",
+            katsuyo=k.KAMI_ICHIDAN,
+        )
+        return cast(kt.KatsuyoText, pre + iru)
+    elif type(pre.katsuyo) is k.KeiyoudoushiKatsuyo:
+        return cast(
+            kt.KatsuyoText,
+            kt.NonKatsuyoText(pre.gokan) + kt.Deiru(),
+        )
+
+    raise KatsuyoTextError(
+        f"Unsupported katsuyo_text in {sys._getframe().f_code.co_name}: {pre} "
+        f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
+    )
+
+
+class Keizoku(IKatsuyoTextHelper):
+    # 現状、出力文字列としては「ている」「でいる」のみサポート
+    # TODO オプションで「てる」「でる」を選択できるように
+
+    def __init__(
+        self,
+        bridge: Optional[IKatsuyoTextHelper.BridgeFunction] = bridge_Keizoku_default,
+    ) -> None:
+        super().__init__(bridge)
+
+    def try_merge(self, pre: kt.KatsuyoText) -> Optional[kt.KatsuyoText]:
+        if isinstance(pre.katsuyo, k.IDoushiKatsuyo):
+            if isinstance(pre.katsuyo, k.GodanKatsuyo) and (
+                pre.katsuyo.shushi in ["ぐ", "ぬ", "ぶ", "む"]
+            ):
+                return cast(kt.KatsuyoText, pre + kt.Deiru())
+
+            return cast(kt.KatsuyoText, pre + kt.Teiru())
+
+        return None
