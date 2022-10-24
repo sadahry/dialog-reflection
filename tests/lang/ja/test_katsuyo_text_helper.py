@@ -682,6 +682,12 @@ def test_zyodoushi_kako_kanryo(msg, katsuyo_text, expected):
     assert str(result) == expected, msg
 
 
+def test_zyodoushi_kako_kanryo_value_error(unsupported_katsuyo_text):
+    zyodoushi = KakoKanryo()
+    with pytest.raises(KatsuyoTextError):
+        unsupported_katsuyo_text + zyodoushi
+
+
 @pytest.mark.parametrize(
     "msg, katsuyo_text, expected",
     [
