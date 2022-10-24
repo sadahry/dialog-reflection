@@ -453,8 +453,6 @@ class Bekida(ZyodoushiKatsuyoText):
     def __init__(self):
         super().__init__(
             gokan="べき",
-            # NOTE: 本来の活用系は形容動詞とは異なる(e.g., 命令形が存在しない)
-            #       現状の意味を厳密に扱わない状態においては、形容動詞の活用系を使う
             katsuyo=k.KEIYOUDOUSHI,
         )
 
