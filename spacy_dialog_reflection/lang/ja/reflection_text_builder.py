@@ -1,7 +1,10 @@
 from itertools import takewhile
-from typing import Callable, Set, Union
+from typing import Callable, Set
 from spacy_dialog_reflection.lang.ja.katsuyo import KeiyoudoushiKatsuyo
-from spacy_dialog_reflection.lang.ja.katsuyo_text import KatsuyoText, NonKatsuyoText
+from spacy_dialog_reflection.lang.ja.katsuyo_text import (
+    IKatsuyoTextSource,
+    KatsuyoText,
+)
 from spacy_dialog_reflection.reflection_text_builder import (
     ReflectionTextError,
 )
@@ -13,9 +16,7 @@ import re
 import spacy
 
 
-def finalize_build_suffix_default(
-    katsuyo_text: Union[KatsuyoText, NonKatsuyoText]
-) -> str:
+def finalize_build_suffix_default(katsuyo_text: IKatsuyoTextSource) -> str:
     if isinstance(katsuyo_text, KatsuyoText) and (
         type(katsuyo_text.katsuyo) is KeiyoudoushiKatsuyo
     ):
@@ -40,7 +41,7 @@ class JaSpacyReflectionTextBuilder(ISpacyReflectionTextBuilder):
             "形状詞",  # ADJ
         },
         finalize_build_suffix: Callable[
-            [Union[KatsuyoText, NonKatsuyoText]], str
+            [IKatsuyoTextSource], str
         ] = finalize_build_suffix_default,
     ) -> None:
         # TODO 柔軟に設定できるようにする

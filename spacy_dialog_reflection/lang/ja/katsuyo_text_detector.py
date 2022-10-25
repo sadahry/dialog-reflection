@@ -21,12 +21,11 @@ from spacy_dialog_reflection.lang.ja.katsuyo import (
 from spacy_dialog_reflection.lang.ja.katsuyo_text import (
     KURU,
     KURU_KANJI,
-    IKatsuyoTextHelper,
     KatsuyoText,
     KatsuyoTextError,
 )
-
 from spacy_dialog_reflection.lang.ja.katsuyo_text_helper import (
+    IKatsuyoTextHelper,
     Denbun,
     HikyoReizi,
     Hitei,

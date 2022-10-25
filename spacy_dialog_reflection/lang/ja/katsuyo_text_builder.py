@@ -1,11 +1,11 @@
 from typing import Any, Optional, List, Tuple, Union
 from spacy_dialog_reflection.lang.ja.katsuyo_text import (
-    IKatsuyoTextHelper,
     KatsuyoText,
-    NonKatsuyoText,
+    INonKatsuyoText,
     KatsuyoTextError,
 )
 from spacy_dialog_reflection.lang.ja.katsuyo_text_helper import (
+    IKatsuyoTextHelper,
     Denbun,
     HikyoReizi,
     Hitei,
@@ -41,9 +41,9 @@ class IKatsuyoTextBuilder(abc.ABC):
 
     def append_multiple(
         self, root: KatsuyoText, appendants: List[IKatsuyoTextHelper]
-    ) -> Tuple[Union[KatsuyoText, NonKatsuyoText], bool]:
+    ) -> Tuple[Union[KatsuyoText, INonKatsuyoText], bool]:
         # clone KatsuyoText
-        result: Union[KatsuyoText, NonKatsuyoText] = attrs.evolve(root)
+        result: Union[KatsuyoText, INonKatsuyoText] = attrs.evolve(root)
 
         has_error = False
         for appendant in appendants:
@@ -62,7 +62,7 @@ class IKatsuyoTextBuilder(abc.ABC):
 
     def build(
         self, sent: Any, src: Any
-    ) -> Tuple[Optional[Union[KatsuyoText, NonKatsuyoText]], bool]:
+    ) -> Tuple[Optional[Union[KatsuyoText, INonKatsuyoText]], bool]:
         """
         サポートされていないrootを検知した際は、Noneとhas_error=Trueを返却する。
         予期されたエラーを検知した場合は、UserWarningを発生させてKatsuyoTextとhas_error=Trueを返却する。

@@ -1,6 +1,5 @@
 import pytest
 from spacy_dialog_reflection.lang.ja.katsuyo_text import (
-    IKatsuyoTextHelper,
     KatsuyoText,
     KatsuyoTextError,
 )
@@ -28,6 +27,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text_detector import (
     SpacyKatsuyoTextAppendantsDetector,
 )
 from spacy_dialog_reflection.lang.ja.katsuyo_text_helper import (
+    IKatsuyoTextHelper,
     Denbun,
     HikyoReizi,
     KakoKanryo,
