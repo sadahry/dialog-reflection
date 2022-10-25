@@ -168,8 +168,14 @@ class HozyoKatsuyoText(KatsuyoText):
             if isinstance(pre.katsuyo, k.GodanKatsuyo) and (
                 pre.katsuyo.shushi in ["ぐ", "ぬ", "ぶ", "む"]
             ):
-                return cast(KatsuyoText, pre + Da() + self)
-            return cast(KatsuyoText, pre + Ta() + self)
+                return cast(
+                    KatsuyoText,
+                    pre + Da() + self,
+                )
+            return cast(
+                KatsuyoText,
+                pre + Ta() + self,
+            )
         elif type(pre.katsuyo) is k.KeiyoushiKatsuyo:
             renyo = pre.gokan + pre.katsuyo.renyo
             return cast(
