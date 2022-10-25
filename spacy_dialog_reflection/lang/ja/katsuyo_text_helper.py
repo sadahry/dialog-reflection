@@ -63,12 +63,10 @@ def bridge_Ukemi_default(pre: IKatsuyoTextSource) -> kt.KatsuyoText:
         ni = kt.INonKatsuyoText("に")
         return cast(kt.KatsuyoText, pre + ni + naru + kt.Reru())
 
-    if type(pre.katsuyo) is k.KeiyoushiKatsuyo:
-        return cast(
-            kt.KatsuyoText,
-            pre + naru + kt.Reru(),
-        )
-    elif type(pre.katsuyo) is k.KeiyoudoushiKatsuyo:
+    if isinstance(
+        pre.katsuyo,
+        (k.KeiyoushiKatsuyo, k.KeiyoudoushiKatsuyo),
+    ):
         return cast(
             kt.KatsuyoText,
             pre + naru + kt.Reru(),
@@ -117,22 +115,14 @@ class Ukemi(IKatsuyoTextHelper):
 def bridge_Shieki_default(pre: IKatsuyoTextSource) -> kt.KatsuyoText:
     if isinstance(pre, kt.INonKatsuyoText):
         ni = kt.INonKatsuyoText("に")
-        return cast(kt.KatsuyoText, pre + ni + kt.Saseru())
+        return cast(kt.KatsuyoText, pre + ni + kt.Saseru().katsuyo_text)
 
-    if type(pre.katsuyo) is k.KeiyoushiKatsuyo:
+    if isinstance(
+        pre.katsuyo,
+        (k.KeiyoushiKatsuyo, k.KeiyoudoushiKatsuyo),
+    ):
         # 「させる」を動詞として扱い連用形でブリッジ
-        renyo = pre.katsuyo.renyo
-        return cast(
-            kt.KatsuyoText,
-            kt.INonKatsuyoText(pre.gokan + renyo) + kt.Saseru(),
-        )
-    elif type(pre.katsuyo) is k.KeiyoudoushiKatsuyo:
-        # 「させる」を動詞として扱い連用形でブリッジ
-        renyo = pre.katsuyo.renyo
-        return cast(
-            kt.KatsuyoText,
-            kt.INonKatsuyoText(pre.gokan + renyo) + kt.Saseru(),
-        )
+        return cast(kt.KatsuyoText, pre + kt.Saseru().katsuyo_text)
 
     raise KatsuyoTextError(
         f"Unsupported katsuyo_text in {sys._getframe().f_code.co_name}: {pre} "
@@ -177,24 +167,16 @@ class Shieki(IKatsuyoTextHelper):
 def bridge_Hitei_default(pre: IKatsuyoTextSource) -> kt.KatsuyoText:
     if isinstance(pre, kt.INonKatsuyoText):
         # TODO 助詞のハンドリング
+        # TODO 「で」にも切り替えられるように
         deha = kt.INonKatsuyoText("では")
         return cast(kt.KatsuyoText, pre + deha + kt.Nai())
 
-    if type(pre.katsuyo) is k.KeiyoushiKatsuyo:
-        # 「ない」を形容詞として扱い連用形でブリッジ
-        renyo = pre.katsuyo.renyo
-        return cast(
-            kt.KatsuyoText,
-            kt.INonKatsuyoText(pre.gokan + renyo) + kt.Nai(),
-        )
-    elif type(pre.katsuyo) is k.KeiyoudoushiKatsuyo:
-        # 「ない」を形容詞として扱い連用形でブリッジ
-        # 形容動詞は「ない」には特殊な形式で紐づく
-        renyo_nai = pre.katsuyo.renyo_nai
-        return cast(
-            kt.KatsuyoText,
-            kt.INonKatsuyoText(pre.gokan + renyo_nai) + kt.Nai(),
-        )
+    if isinstance(
+        pre.katsuyo,
+        (k.KeiyoushiKatsuyo, k.KeiyoudoushiKatsuyo),
+    ):
+        # 「ない」を補助形容詞としてブリッジ
+        return cast(kt.KatsuyoText, pre + kt.HOZYO_NAI)
 
     raise KatsuyoTextError(
         f"Unsupported katsuyo_text in {sys._getframe().f_code.co_name}: {pre} "
@@ -401,7 +383,6 @@ class Suitei(IKatsuyoTextHelper):
 
 
 def bridge_Touzen_default(pre: IKatsuyoTextSource) -> kt.KatsuyoText:
-    # デフォルトでは動詞「ある」でブリッジ
     aru = kt.KatsuyoText(
         gokan="あ",
         katsuyo=k.GODAN_RA_GYO,
@@ -411,15 +392,12 @@ def bridge_Touzen_default(pre: IKatsuyoTextSource) -> kt.KatsuyoText:
         de = kt.INonKatsuyoText("で")
         return cast(kt.KatsuyoText, pre + de + aru + kt.Bekida())
 
-    if type(pre.katsuyo) is k.KeiyoushiKatsuyo:
-        return cast(kt.KatsuyoText, pre + aru + kt.Bekida())
-    elif type(pre.katsuyo) is k.KeiyoudoushiKatsuyo:
-        # 形容動詞は「ある」には特殊な形式で紐づく
-        renyo_nai = pre.katsuyo.renyo_nai
-        return cast(
-            kt.KatsuyoText,
-            kt.INonKatsuyoText(pre.gokan + renyo_nai) + aru + kt.Bekida(),
-        )
+    if isinstance(
+        pre.katsuyo,
+        (k.KeiyoushiKatsuyo, k.KeiyoudoushiKatsuyo),
+    ):
+        # 補助動詞「ある」でブリッジ
+        return cast(kt.KatsuyoText, pre + kt.HOZYO_ARU + kt.Bekida())
 
     raise KatsuyoTextError(
         f"Unsupported katsuyo_text in {sys._getframe().f_code.co_name}: {pre} "
@@ -488,18 +466,12 @@ def bridge_Keizoku_default(pre: IKatsuyoTextSource) -> kt.KatsuyoText:
     if isinstance(pre, kt.INonKatsuyoText):
         return cast(kt.KatsuyoText, pre + kt.Deiru())
 
-    if type(pre.katsuyo) is k.KeiyoushiKatsuyo:
-        # 形容詞では「いる」でブリッジ
-        iru = kt.KatsuyoText(
-            gokan="い",
-            katsuyo=k.KAMI_ICHIDAN,
-        )
-        return cast(kt.KatsuyoText, pre + iru)
-    elif type(pre.katsuyo) is k.KeiyoudoushiKatsuyo:
-        return cast(
-            kt.KatsuyoText,
-            kt.INonKatsuyoText(pre.gokan) + kt.Deiru(),
-        )
+    if isinstance(
+        pre.katsuyo,
+        (k.KeiyoushiKatsuyo, k.KeiyoudoushiKatsuyo),
+    ):
+        # 形容詞/形容動詞では「いる」でブリッジ
+        return cast(kt.KatsuyoText, pre + kt.HOZYO_IRU)
 
     raise KatsuyoTextError(
         f"Unsupported katsuyo_text in {sys._getframe().f_code.co_name}: {pre} "
