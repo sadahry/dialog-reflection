@@ -1,38 +1,35 @@
-from typing import Union, cast, get_args
+from typing import Optional, Union, TypeVar, Generic
 import attrs
 import abc
 import spacy_dialog_reflection.lang.ja.katsuyo as k
+
+A = TypeVar("A", "KatsuyoText", "FixedKatsuyoText", "INonKatsuyoText")
+M = TypeVar("M", "KatsuyoText", "FixedKatsuyoText", "INonKatsuyoText")
 
 
 class KatsuyoTextError(ValueError):
     pass
 
 
-class IKatsuyoTextAddition(abc.ABC):
-    """
-    IKatsuyoTextSource + IKatsuyoTextAppendant = IKatsuyoTextSource の演算が
-    できるようにするためのインターフェース
-    """
+@attrs.define(frozen=True, slots=False)
+class IKatsuyoTextSource(abc.ABC):
+    """活用系テキスト"""
 
-    def __add__(self, post: "IKatsuyoTextAppendant") -> "IKatsuyoTextSource":
-        # NOTE: postを保持しておいて文字列化する際に再帰呼び出し的にしてもいいかもしれない
-        #       ただadd時のエラーがわかりにくくなるので現状は都度gokanに追記するようにしている
-
-        # NOTE: IKatsuyoTextSourceしか許可しない
-        assert isinstance(
-            self, get_args(IKatsuyoTextSource)
-        ), "self must be IKatsuyoTextSource"
-        self = cast(IKatsuyoTextSource, self)
-
-        # 言語の特性上、活用形の前に接続される品詞の影響を受ける。
-        return post.merge(self)
+    gokan: str
+    katsuyo: Union[
+        k.IKatsuyo,  # KatsuyoText
+        k.FixedKatsuyo,  # FixedKatsuyoText
+        None,  # INonKatsuyoText
+    ]
 
     @abc.abstractmethod
-    def __str__(self):
+    def __add__(self, post: "IKatsuyoTextAppendant[A]") -> A:
+        # NOTE: postを保持しておいて文字列化する際に再帰呼び出し的にしてもいいかもしれない
+        #       ただadd時のエラーがわかりにくくなるので現状は都度gokanに追記するようにしている
         raise NotImplementedError()
 
 
-class IKatsuyoTextAppendant(abc.ABC):
+class IKatsuyoTextAppendant(abc.ABC, Generic[M]):
     """
     IKatsuyoTextSourceに追加する要素を表す。
     あくまでIKatsuyoTextSourceへaddするためのインターフェースであり、
@@ -40,87 +37,259 @@ class IKatsuyoTextAppendant(abc.ABC):
     """
 
     @abc.abstractmethod
-    def merge(self, pre: "IKatsuyoTextSource") -> "IKatsuyoTextSource":
+    def merge(self, pre: IKatsuyoTextSource) -> M:
         raise NotImplementedError()
 
 
 @attrs.define(frozen=True, slots=True)
-class KatsuyoText(IKatsuyoTextAddition, IKatsuyoTextAppendant):
+class KatsuyoText(IKatsuyoTextSource, IKatsuyoTextAppendant["KatsuyoText"]):
     """
     活用形を含む動詞,形容詞,形容動詞,副詞の表現を表すクラス。用言を表す。
     """
 
     gokan: str
-    """
-    文字列のうち活用されない部分。
-    接続される品詞の情報を含むことがある。
-    e.g. こられるそうだ -> gokan=こられる
-    """
     katsuyo: k.IKatsuyo
 
-    def merge(self, pre: "IKatsuyoTextSource") -> "KatsuyoText":
+    def merge(self, pre: IKatsuyoTextSource) -> "KatsuyoText":
         """
         基本的には連用形で受けるが、下位クラスで上書きすることで
         任意の活用形に変換して返すことがある。
         """
-        if isinstance(pre, INonKatsuyoText):
-            # TODO 許可したクラス以外はエラーするように変更
-            return KatsuyoText(
-                gokan=pre.text + self.gokan,
-                katsuyo=self.katsuyo,
+        if isinstance(pre, FixedKatsuyoText):
+            return pre + self
+        elif isinstance(pre, INonKatsuyoText):
+            # 簡単のため、INonKatsuyoTextはすべて許容とする
+            # 助詞「だ」など不適切なものもあるが現状管理しない
+            return pre + self
+        else:
+            assert isinstance(pre, KatsuyoText)
+            if (fkt := pre.as_fkt_renyo) is not None:
+                return fkt + self
+
+            raise KatsuyoTextError(
+                f"Unsupported katsuyo_text in merge of {type(self)}: {pre} "
+                f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
             )
 
-        if isinstance(pre.katsuyo, k.RenyoMixin):
-            return KatsuyoText(
-                gokan=pre.gokan + pre.katsuyo.renyo + self.gokan,
-                katsuyo=self.katsuyo,
-            )
+    def __add__(self, post: IKatsuyoTextAppendant[A]) -> A:
+        # 日本語の特性上、KatsuyoTextの活用形は前に接続される品詞の影響を受ける。
+        return post.merge(self)
 
-        raise KatsuyoTextError(
-            f"Unsupported katsuyo_text in merge of {type(self)}: {pre} "
-            f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
-        )
+    @property
+    def as_fkt_gokan(self) -> Optional["FixedKatsuyoText"]:
+        if isinstance(self.katsuyo, k.MizenMixin):
+            return FixedKatsuyoText(
+                gokan=self.gokan,
+                katsuyo=k.NO_KATSUYO,
+            )
+        return None
+
+    @property
+    def as_fkt_mizen(self) -> Optional["FixedKatsuyoText"]:
+        if isinstance(self.katsuyo, k.MizenMixin):
+            return FixedKatsuyoText(
+                gokan=self.gokan,
+                katsuyo=self.katsuyo.mizen,
+            )
+        return None
+
+    @property
+    def as_fkt_renyo(self) -> Optional["FixedKatsuyoText"]:
+        if isinstance(self.katsuyo, k.RenyoMixin):
+            return FixedKatsuyoText(
+                gokan=self.gokan,
+                katsuyo=self.katsuyo.renyo,
+            )
+        return None
+
+    @property
+    def as_fkt_shushi(self) -> Optional["FixedKatsuyoText"]:
+        if isinstance(self.katsuyo, k.ShushiMixin):
+            return FixedKatsuyoText(
+                gokan=self.gokan,
+                katsuyo=self.katsuyo.shushi,
+            )
+        return None
+
+    @property
+    def as_fkt_rentai(self) -> Optional["FixedKatsuyoText"]:
+        if isinstance(self.katsuyo, k.RentaiMixin):
+            return FixedKatsuyoText(
+                gokan=self.gokan,
+                katsuyo=self.katsuyo.rentai,
+            )
+        return None
+
+    @property
+    def as_fkt_katei(self) -> Optional["FixedKatsuyoText"]:
+        if isinstance(self.katsuyo, k.KateiMixin):
+            return FixedKatsuyoText(
+                gokan=self.gokan,
+                katsuyo=self.katsuyo.katei,
+            )
+        return None
+
+    @property
+    def as_fkt_meirei(self) -> Optional["FixedKatsuyoText"]:
+        if isinstance(self.katsuyo, k.MeireiMixin):
+            return FixedKatsuyoText(
+                gokan=self.gokan,
+                katsuyo=self.katsuyo.meirei,
+            )
+        return None
+
+    @property
+    def as_fkt_mizen_u(self) -> Optional["FixedKatsuyoText"]:
+        if isinstance(self.katsuyo, k.MizenUMixin):
+            return FixedKatsuyoText(
+                gokan=self.gokan,
+                katsuyo=self.katsuyo.mizen_u,
+            )
+        return None
+
+    @property
+    def as_fkt_mizen_reru(self) -> Optional["FixedKatsuyoText"]:
+        if isinstance(self.katsuyo, k.MizenReruMixin):
+            return FixedKatsuyoText(
+                gokan=self.gokan,
+                katsuyo=self.katsuyo.mizen_reru,
+            )
+        return None
+
+    @property
+    def as_fkt_mizen_rareru(self) -> Optional["FixedKatsuyoText"]:
+        if isinstance(self.katsuyo, k.MizenRareruMixin):
+            return FixedKatsuyoText(
+                gokan=self.gokan,
+                katsuyo=self.katsuyo.mizen_rareru,
+            )
+        return None
+
+    @property
+    def as_fkt_renyo_ta(self) -> Optional["FixedKatsuyoText"]:
+        if isinstance(self.katsuyo, k.RenyoTaMixin):
+            return FixedKatsuyoText(
+                gokan=self.gokan,
+                katsuyo=self.katsuyo.renyo_ta,
+            )
+        return None
+
+    @property
+    def as_fkt_renyo_nai(self) -> Optional["FixedKatsuyoText"]:
+        if isinstance(self.katsuyo, k.RenyoNaiMixin):
+            return FixedKatsuyoText(
+                gokan=self.gokan,
+                katsuyo=self.katsuyo.renyo_nai,
+            )
+        return None
 
     def __str__(self):
         return f"{self.gokan}{self.katsuyo}"
 
 
 @attrs.define(frozen=True, slots=True)
-class INonKatsuyoText(IKatsuyoTextAddition, IKatsuyoTextAppendant):
+class FixedKatsuyoText(IKatsuyoTextSource, IKatsuyoTextAppendant["FixedKatsuyoText"]):
+    """
+    活用変形されたKatsuyoTextを格納するクラス。用言を表す。
+    """
+
+    gokan: str
+    katsuyo: k.FixedKatsuyo
+
+    def merge(self, pre: IKatsuyoTextSource) -> "FixedKatsuyoText":
+        """
+        基本的には連用形で受けるが、下位クラスで上書きすることで
+        任意の活用形に変換して返すことがある。
+        """
+        # 現状あまり使われないため簡易的な実装
+        if isinstance(pre, (FixedKatsuyoText, INonKatsuyoText)):
+            return pre + self
+        else:
+            assert isinstance(pre, KatsuyoText)
+
+            if (fkt := pre.as_fkt_renyo) is not None:
+                return fkt + self
+
+            raise KatsuyoTextError(
+                f"Unsupported katsuyo_text in merge of {type(self)}: {pre} "
+                f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
+            )
+
+    def __add__(self, post: IKatsuyoTextAppendant[A]) -> A:
+        # 基本はそのまま引っ付ける
+        if isinstance(post, FixedKatsuyoText):
+            return FixedKatsuyoText(
+                gokan=str(self) + post.gokan,
+                katsuyo=post.katsuyo,
+            )
+        elif isinstance(post, INonKatsuyoText):
+            return INonKatsuyoText(
+                gokan=str(self) + post.gokan,
+            )
+        elif isinstance(post, KatsuyoText):
+            return KatsuyoText(
+                gokan=str(self) + post.gokan,
+                katsuyo=post.katsuyo,
+            )
+        else:
+            # gokanやkatsuyoを持たないクラスを想定(e.g., IKatsuyoHelper)
+            return post.merge(self)
+
+    def __str__(self):
+        return f"{self.gokan}{self.katsuyo}"
+
+
+@attrs.define(frozen=True, slots=True)
+class INonKatsuyoText(IKatsuyoTextSource, IKatsuyoTextAppendant["INonKatsuyoText"]):
     """
     活用形を含まない文字列を表すクラス。
     名詞,助詞,接続詞,感動詞,記号,連体詞,接頭辞,接尾辞,補助記号,フィラー,
-    その他,そのままKatsuyoTextにaddする文字列を想定。
-    基本的には体言。活用された用言を含むこともあるため、下位クラスで定義する。
+    その他,そのままKatsuyoTextにaddする品詞を想定。
     """
 
-    text: str
+    gokan: str
+    katsuyo: None = None
 
-    def merge(self, pre: "IKatsuyoTextSource") -> "INonKatsuyoText":
+    def merge(self, pre: IKatsuyoTextSource) -> "INonKatsuyoText":
         """
         基本的には連体形で受けるが、下位クラスで上書きすることで
         任意の活用形に変換して返すことがある。
         """
-        if isinstance(pre, INonKatsuyoText):
-            return INonKatsuyoText(text=pre.text + self.text)
+        if isinstance(pre, (FixedKatsuyoText, INonKatsuyoText)):
+            return pre + self
+        else:
+            assert isinstance(pre, KatsuyoText)
 
-        if isinstance(pre.katsuyo, k.RentaiMixin):
-            return INonKatsuyoText(
-                text=pre.gokan + pre.katsuyo.rentai + self.text,
+            if (fkt := pre.as_fkt_rentai) is not None:
+                return fkt + self
+
+            raise KatsuyoTextError(
+                f"Unsupported katsuyo_text in merge of {type(self)}: {pre} "
+                f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
             )
 
-        raise KatsuyoTextError(
-            f"Unsupported katsuyo_text in merge of {type(self)}: {pre} "
-            f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
-        )
+    def __add__(self, post: IKatsuyoTextAppendant[A]) -> A:
+        # 基本はそのまま引っ付ける
+        if isinstance(post, FixedKatsuyoText):
+            return FixedKatsuyoText(
+                gokan=str(self) + post.gokan,
+                katsuyo=post.katsuyo,
+            )
+        elif isinstance(post, INonKatsuyoText):
+            return INonKatsuyoText(
+                gokan=str(self) + post.gokan,
+            )
+        elif isinstance(post, KatsuyoText):
+            return KatsuyoText(
+                gokan=str(self) + post.gokan,
+                katsuyo=post.katsuyo,
+            )
+        else:
+            # gokanやkatsuyoを持たないクラスを想定(e.g., IKatsuyoHelper)
+            return post.merge(self)
 
     def __str__(self):
-        return self.text
-
-
-# 文字列で定義するとget_argsの参照先が変わってしまうため下部に定義
-# IKatsuyoTextSource = Union["KatsuyoText", "INonKatsuyoText"] # NG
-IKatsuyoTextSource = Union[KatsuyoText, INonKatsuyoText]
+        return self.gokan
 
 
 # ==============================================================================
@@ -161,38 +330,37 @@ ZURU = KatsuyoText(
 
 class HozyoKatsuyoText(KatsuyoText):
     def merge(self, pre: IKatsuyoTextSource) -> KatsuyoText:
-        if isinstance(pre, INonKatsuyoText):
-            # TODO エラー出す
-            return super().merge(pre)
-        if isinstance(pre.katsuyo, k.IDoushiKatsuyo):
-            if isinstance(pre.katsuyo, k.GodanKatsuyo) and (
-                pre.katsuyo.shushi in ["ぐ", "ぬ", "ぶ", "む"]
-            ):
-                return cast(
-                    KatsuyoText,
-                    pre + Da() + self,
-                )
-            return cast(
-                KatsuyoText,
-                pre + Ta() + self,
-            )
-        elif type(pre.katsuyo) is k.KeiyoushiKatsuyo:
-            renyo = pre.gokan + pre.katsuyo.renyo
-            return cast(
-                KatsuyoText,
-                INonKatsuyoText(renyo) + self,
-            )
-        elif type(pre.katsuyo) is k.KeiyoudoushiKatsuyo:
-            renyo_nai = pre.gokan + pre.katsuyo.renyo_nai
-            return cast(
-                KatsuyoText,
-                INonKatsuyoText(renyo_nai) + self,
-            )
+        if isinstance(pre, FixedKatsuyoText):
+            return pre + self
+        elif isinstance(pre, INonKatsuyoText):
+            if isinstance(pre, ZyoshiText):
+                # TODO 助詞の精査
+                return pre + self
 
-        raise KatsuyoTextError(
-            f"Unsupported katsuyo_text in {type(self)}: {pre} "
-            f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
-        )
+            raise KatsuyoTextError(
+                f"Unsupported katsuyo_text in merge of {type(self)}: "
+                f"{pre} type: {type(pre)}"
+            )
+        else:
+            assert isinstance(pre, KatsuyoText)
+
+            if isinstance(pre.katsuyo, k.IDoushiKatsuyo):
+                if isinstance(pre.katsuyo, k.GodanKatsuyo) and (
+                    pre.katsuyo.shushi in ["ぐ", "ぬ", "ぶ", "む"]
+                ):
+                    return pre + Da() + self
+                return pre + Ta() + self
+            elif isinstance(pre.katsuyo, k.KeiyoushiKatsuyo):
+                assert (fkt := pre.as_fkt_renyo) is not None
+                return fkt + self
+            elif isinstance(pre.katsuyo, k.KeiyoudoushiKatsuyo):
+                assert (fkt := pre.as_fkt_renyo_nai) is not None
+                return fkt + self
+
+            raise KatsuyoTextError(
+                f"Unsupported katsuyo_text in {type(self)}: {pre} "
+                f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
+            )
 
 
 HOZYO_NAI = HozyoKatsuyoText(
@@ -238,25 +406,27 @@ class Reru(ZyodoushiKatsuyoText):
         )
 
     def merge(self, pre: IKatsuyoTextSource) -> KatsuyoText:
+        if isinstance(pre, FixedKatsuyoText):
+            return pre + self.katsuyo_text
         if isinstance(pre, INonKatsuyoText):
-            # TODO エラー出す
-            return super().merge(pre)
-        if isinstance(pre.katsuyo, k.IDoushiKatsuyo):
-            if type(pre.katsuyo) is k.SaGyoHenkakuKatsuyo:
-                mizen_reru = pre.katsuyo.mizen_reru
-                return cast(
-                    KatsuyoText,
-                    INonKatsuyoText(pre.gokan + mizen_reru) + self.katsuyo_text,
-                )
-            return cast(
-                KatsuyoText,
-                INonKatsuyoText(pre.gokan + pre.katsuyo.mizen) + self.katsuyo_text,
+            raise KatsuyoTextError(
+                f"Unsupported katsuyo_text in merge of {type(self)}: "
+                f"{pre} type: {type(pre)}"
             )
+        else:
+            assert isinstance(pre, KatsuyoText)
 
-        raise KatsuyoTextError(
-            f"Unsupported katsuyo_text in {type(self)}: {pre} "
-            f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
-        )
+            if isinstance(pre.katsuyo, k.IDoushiKatsuyo):
+                if isinstance(pre.katsuyo, k.SaGyoHenkakuKatsuyo):
+                    assert (fkt := pre.as_fkt_mizen_reru) is not None
+                    return fkt + self.katsuyo_text
+                assert (fkt := pre.as_fkt_mizen) is not None
+                return fkt + self.katsuyo_text
+
+            raise KatsuyoTextError(
+                f"Unsupported katsuyo_text in {type(self)}: {pre} "
+                f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
+            )
 
 
 class Rareru(ZyodoushiKatsuyoText):
@@ -267,25 +437,27 @@ class Rareru(ZyodoushiKatsuyoText):
         )
 
     def merge(self, pre: IKatsuyoTextSource) -> KatsuyoText:
+        if isinstance(pre, FixedKatsuyoText):
+            return pre + self.katsuyo_text
         if isinstance(pre, INonKatsuyoText):
-            # TODO エラー出す
-            return super().merge(pre)
-        if isinstance(pre.katsuyo, k.IDoushiKatsuyo):
-            if type(pre.katsuyo) is k.SaGyoHenkakuKatsuyo:
-                mizen_rareru = pre.katsuyo.mizen_rareru
-                return cast(
-                    KatsuyoText,
-                    INonKatsuyoText(pre.gokan + mizen_rareru) + self.katsuyo_text,
-                )
-            return cast(
-                KatsuyoText,
-                INonKatsuyoText(pre.gokan + pre.katsuyo.mizen) + self.katsuyo_text,
+            raise KatsuyoTextError(
+                f"Unsupported katsuyo_text in merge of {type(self)}: "
+                f"{pre} type: {type(pre)}"
             )
+        else:
+            assert isinstance(pre, KatsuyoText)
 
-        raise KatsuyoTextError(
-            f"Unsupported katsuyo_text in {type(self)}: {pre} "
-            f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
-        )
+            if isinstance(pre.katsuyo, k.IDoushiKatsuyo):
+                if isinstance(pre.katsuyo, k.SaGyoHenkakuKatsuyo):
+                    assert (fkt := pre.as_fkt_mizen_rareru) is not None
+                    return fkt + self.katsuyo_text
+                assert (fkt := pre.as_fkt_mizen) is not None
+                return fkt + self.katsuyo_text
+
+            raise KatsuyoTextError(
+                f"Unsupported katsuyo_text in {type(self)}: {pre} "
+                f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
+            )
 
 
 # ==============================================================================
@@ -301,25 +473,27 @@ class Seru(ZyodoushiKatsuyoText):
         )
 
     def merge(self, pre: IKatsuyoTextSource) -> KatsuyoText:
+        if isinstance(pre, FixedKatsuyoText):
+            return pre + self.katsuyo_text
         if isinstance(pre, INonKatsuyoText):
-            # TODO エラー出す
-            return super().merge(pre)
-        if isinstance(pre.katsuyo, k.IDoushiKatsuyo):
-            if type(pre.katsuyo) is k.SaGyoHenkakuKatsuyo:
-                mizen_reru = pre.katsuyo.mizen_reru
-                return cast(
-                    KatsuyoText,
-                    INonKatsuyoText(pre.gokan + mizen_reru) + self.katsuyo_text,
-                )
-            return cast(
-                KatsuyoText,
-                INonKatsuyoText(pre.gokan + pre.katsuyo.mizen) + self.katsuyo_text,
+            raise KatsuyoTextError(
+                f"Unsupported katsuyo_text in merge of {type(self)}: "
+                f"{pre} type: {type(pre)}"
             )
+        else:
+            assert isinstance(pre, KatsuyoText)
 
-        raise KatsuyoTextError(
-            f"Unsupported katsuyo_text in {type(self)}: {pre} "
-            f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
-        )
+            if isinstance(pre.katsuyo, k.IDoushiKatsuyo):
+                if isinstance(pre.katsuyo, k.SaGyoHenkakuKatsuyo):
+                    assert (fkt := pre.as_fkt_mizen_reru) is not None
+                    return fkt + self.katsuyo_text
+                assert (fkt := pre.as_fkt_mizen) is not None
+                return fkt + self.katsuyo_text
+
+            raise KatsuyoTextError(
+                f"Unsupported katsuyo_text in {type(self)}: {pre} "
+                f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
+            )
 
 
 class Saseru(ZyodoushiKatsuyoText):
@@ -330,20 +504,25 @@ class Saseru(ZyodoushiKatsuyoText):
         )
 
     def merge(self, pre: IKatsuyoTextSource) -> KatsuyoText:
+        if isinstance(pre, FixedKatsuyoText):
+            return pre + self.katsuyo_text
         if isinstance(pre, INonKatsuyoText):
-            # TODO エラー出す
-            return super().merge(pre)
-        if isinstance(pre.katsuyo, k.IDoushiKatsuyo):
-            # サ変活用「〜ずる」には未然形「〜じ させる」を採用したため他と同一の未然形に
-            return cast(
-                KatsuyoText,
-                INonKatsuyoText(pre.gokan + pre.katsuyo.mizen) + self.katsuyo_text,
+            raise KatsuyoTextError(
+                f"Unsupported katsuyo_text in merge of {type(self)}: "
+                f"{pre} type: {type(pre)}"
             )
+        else:
+            assert isinstance(pre, KatsuyoText)
 
-        raise KatsuyoTextError(
-            f"Unsupported katsuyo_text in {type(self)}: {pre} "
-            f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
-        )
+            if isinstance(pre.katsuyo, k.IDoushiKatsuyo):
+                # サ変活用「〜ずる」には未然形「〜じ させる」を採用したため他と同一の未然形に
+                assert (fkt := pre.as_fkt_mizen) is not None
+                return fkt + self.katsuyo_text
+
+            raise KatsuyoTextError(
+                f"Unsupported katsuyo_text in {type(self)}: {pre} "
+                f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
+            )
 
 
 # ==============================================================================
@@ -359,19 +538,22 @@ class Nai(ZyodoushiKatsuyoText):
         )
 
     def merge(self, pre: IKatsuyoTextSource) -> KatsuyoText:
+        if isinstance(pre, FixedKatsuyoText):
+            return pre + self.katsuyo_text
         if isinstance(pre, INonKatsuyoText):
-            # TODO エラー出す
-            return super().merge(pre)
-        if isinstance(pre.katsuyo, k.IDoushiKatsuyo):
-            return cast(
-                KatsuyoText,
-                INonKatsuyoText(pre.gokan + pre.katsuyo.mizen) + self.katsuyo_text,
-            )
+            # 精査してもいいかもしれない
+            return pre + self.katsuyo_text
+        else:
+            assert isinstance(pre, KatsuyoText)
 
-        raise KatsuyoTextError(
-            f"Unsupported katsuyo_text in {type(self)}: {pre} "
-            f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
-        )
+            if isinstance(pre.katsuyo, k.IDoushiKatsuyo):
+                assert (fkt := pre.as_fkt_mizen) is not None
+                return fkt + self.katsuyo_text
+
+            raise KatsuyoTextError(
+                f"Unsupported katsuyo_text in {type(self)}: {pre} "
+                f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
+            )
 
 
 # ==============================================================================
@@ -387,19 +569,24 @@ class Tai(ZyodoushiKatsuyoText):
         )
 
     def merge(self, pre: IKatsuyoTextSource) -> KatsuyoText:
+        if isinstance(pre, FixedKatsuyoText):
+            return pre + self.katsuyo_text
         if isinstance(pre, INonKatsuyoText):
-            # TODO エラー出す
-            return super().merge(pre)
-        if isinstance(pre.katsuyo, k.IDoushiKatsuyo):
-            return cast(
-                KatsuyoText,
-                INonKatsuyoText(pre.gokan + pre.katsuyo.renyo) + self.katsuyo_text,
+            raise KatsuyoTextError(
+                f"Unsupported katsuyo_text in merge of {type(self)}: "
+                f"{pre} type: {type(pre)}"
             )
+        else:
+            assert isinstance(pre, KatsuyoText)
 
-        raise KatsuyoTextError(
-            f"Unsupported katsuyo_text in {type(self)}: {pre} "
-            f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
-        )
+            if isinstance(pre.katsuyo, k.IDoushiKatsuyo):
+                assert (fkt := pre.as_fkt_renyo) is not None
+                return fkt + self.katsuyo_text
+
+            raise KatsuyoTextError(
+                f"Unsupported katsuyo_text in {type(self)}: {pre} "
+                f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
+            )
 
 
 class Tagaru(ZyodoushiKatsuyoText):
@@ -410,19 +597,24 @@ class Tagaru(ZyodoushiKatsuyoText):
         )
 
     def merge(self, pre: IKatsuyoTextSource) -> KatsuyoText:
+        if isinstance(pre, FixedKatsuyoText):
+            return pre + self.katsuyo_text
         if isinstance(pre, INonKatsuyoText):
-            # TODO エラー出す
-            return super().merge(pre)
-        if isinstance(pre.katsuyo, k.IDoushiKatsuyo):
-            return cast(
-                KatsuyoText,
-                INonKatsuyoText(pre.gokan + pre.katsuyo.renyo) + self.katsuyo_text,
+            raise KatsuyoTextError(
+                f"Unsupported katsuyo_text in merge of {type(self)}: "
+                f"{pre} type: {type(pre)}"
             )
+        else:
+            assert isinstance(pre, KatsuyoText)
 
-        raise KatsuyoTextError(
-            f"Unsupported katsuyo_text in {type(self)}: {pre} "
-            f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
-        )
+            if isinstance(pre.katsuyo, k.IDoushiKatsuyo):
+                assert (fkt := pre.as_fkt_renyo) is not None
+                return fkt + self.katsuyo_text
+
+            raise KatsuyoTextError(
+                f"Unsupported katsuyo_text in {type(self)}: {pre} "
+                f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
+            )
 
 
 # ==============================================================================
@@ -438,26 +630,25 @@ class Ta(ZyodoushiKatsuyoText):
         )
 
     def merge(self, pre: IKatsuyoTextSource) -> KatsuyoText:
+        if isinstance(pre, FixedKatsuyoText):
+            return pre + self.katsuyo_text
         if isinstance(pre, INonKatsuyoText):
-            # TODO エラー出す
-            return super().merge(pre)
-        if isinstance(pre.katsuyo, k.RenyoMixin):
-            if isinstance(pre.katsuyo, k.RenyoTaMixin):
-                renyo_ta = pre.gokan + pre.katsuyo.renyo_ta
-                return cast(
-                    KatsuyoText,
-                    INonKatsuyoText(renyo_ta) + self.katsuyo_text,
-                )
-            renyo = pre.gokan + pre.katsuyo.renyo
-            return cast(
-                KatsuyoText,
-                INonKatsuyoText(renyo) + self.katsuyo_text,
+            raise KatsuyoTextError(
+                f"Unsupported katsuyo_text in merge of {type(self)}: "
+                f"{pre} type: {type(pre)}"
             )
+        else:
+            assert isinstance(pre, KatsuyoText)
 
-        raise KatsuyoTextError(
-            f"Unsupported katsuyo_text in {type(self)}: {pre} "
-            f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
-        )
+            if (fkt := pre.as_fkt_renyo_ta) is not None:
+                return fkt + self.katsuyo_text
+            elif (fkt := pre.as_fkt_renyo) is not None:
+                return fkt + self.katsuyo_text
+
+            raise KatsuyoTextError(
+                f"Unsupported katsuyo_text in {type(self)}: {pre} "
+                f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
+            )
 
 
 class Da(ZyodoushiKatsuyoText):
@@ -468,26 +659,25 @@ class Da(ZyodoushiKatsuyoText):
         )
 
     def merge(self, pre: IKatsuyoTextSource) -> KatsuyoText:
+        if isinstance(pre, FixedKatsuyoText):
+            return pre + self.katsuyo_text
         if isinstance(pre, INonKatsuyoText):
-            # TODO エラー出す
-            return super().merge(pre)
-        if isinstance(pre.katsuyo, k.RenyoMixin):
-            if isinstance(pre.katsuyo, k.RenyoTaMixin):
-                renyo_ta = pre.gokan + pre.katsuyo.renyo_ta
-                return cast(
-                    KatsuyoText,
-                    INonKatsuyoText(renyo_ta) + self.katsuyo_text,
-                )
-            renyo = pre.gokan + pre.katsuyo.renyo
-            return cast(
-                KatsuyoText,
-                INonKatsuyoText(renyo) + self.katsuyo_text,
+            raise KatsuyoTextError(
+                f"Unsupported katsuyo_text in merge of {type(self)}: "
+                f"{pre} type: {type(pre)}"
             )
+        else:
+            assert isinstance(pre, KatsuyoText)
 
-        raise KatsuyoTextError(
-            f"Unsupported katsuyo_text in {type(self)}: {pre} "
-            f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
-        )
+            if (fkt := pre.as_fkt_renyo_ta) is not None:
+                return fkt + self.katsuyo_text
+            elif (fkt := pre.as_fkt_renyo) is not None:
+                return fkt + self.katsuyo_text
+
+            raise KatsuyoTextError(
+                f"Unsupported katsuyo_text in {type(self)}: {pre} "
+                f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
+            )
 
 
 # ==============================================================================
@@ -503,24 +693,26 @@ class SoudaYoutai(ZyodoushiKatsuyoText):
         )
 
     def merge(self, pre: IKatsuyoTextSource) -> KatsuyoText:
+        if isinstance(pre, FixedKatsuyoText):
+            return pre + self.katsuyo_text
         if isinstance(pre, INonKatsuyoText):
-            # TODO エラー出す
-            return super().merge(pre)
-        if isinstance(pre.katsuyo, (k.KeiyoushiKatsuyo, k.KeiyoudoushiKatsuyo)):
-            return cast(
-                KatsuyoText,
-                INonKatsuyoText(pre.gokan) + self.katsuyo_text,
+            raise KatsuyoTextError(
+                f"Unsupported katsuyo_text in merge of {type(self)}: "
+                f"{pre} type: {type(pre)}"
             )
-        elif isinstance(pre.katsuyo, k.RenyoMixin):
-            return cast(
-                KatsuyoText,
-                INonKatsuyoText(pre.gokan + pre.katsuyo.renyo) + self.katsuyo_text,
-            )
+        else:
+            assert isinstance(pre, KatsuyoText)
 
-        raise KatsuyoTextError(
-            f"Unsupported katsuyo_text in {type(self)}: {pre} "
-            f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
-        )
+            if isinstance(pre.katsuyo, (k.KeiyoushiKatsuyo, k.KeiyoudoushiKatsuyo)):
+                assert (fkt := pre.as_fkt_gokan) is not None
+                return fkt + self.katsuyo_text
+            elif (fkt := pre.as_fkt_renyo) is not None:
+                return fkt + self.katsuyo_text
+
+            raise KatsuyoTextError(
+                f"Unsupported katsuyo_text in {type(self)}: {pre} "
+                f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
+            )
 
 
 # ==============================================================================
@@ -538,19 +730,23 @@ class SoudaDenbun(ZyodoushiKatsuyoText):
         )
 
     def merge(self, pre: IKatsuyoTextSource) -> KatsuyoText:
+        if isinstance(pre, FixedKatsuyoText):
+            return pre + self.katsuyo_text
         if isinstance(pre, INonKatsuyoText):
-            # TODO エラー出す
-            return super().merge(pre)
-        if isinstance(pre.katsuyo, k.ShushiMixin):
-            return cast(
-                KatsuyoText,
-                INonKatsuyoText(pre.gokan + pre.katsuyo.shushi) + self.katsuyo_text,
+            raise KatsuyoTextError(
+                f"Unsupported katsuyo_text in merge of {type(self)}: "
+                f"{pre} type: {type(pre)}"
             )
+        else:
+            assert isinstance(pre, KatsuyoText)
 
-        raise KatsuyoTextError(
-            f"Unsupported katsuyo_text in {type(self)}: {pre} "
-            f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
-        )
+            if (fkt := pre.as_fkt_shushi) is not None:
+                return fkt + self.katsuyo_text
+
+            raise KatsuyoTextError(
+                f"Unsupported katsuyo_text in {type(self)}: {pre} "
+                f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
+            )
 
 
 # ==============================================================================
@@ -568,25 +764,32 @@ class Rashii(ZyodoushiKatsuyoText):
         )
 
     def merge(self, pre: IKatsuyoTextSource) -> KatsuyoText:
+        if isinstance(pre, FixedKatsuyoText):
+            return pre + self.katsuyo_text
         if isinstance(pre, INonKatsuyoText):
-            # TODO 体言と一部の助詞に対応
-            # TODO エラー出す
-            return super().merge(pre)
-        if isinstance(pre.katsuyo, k.KeiyoudoushiKatsuyo):
-            return cast(
-                KatsuyoText,
-                INonKatsuyoText(pre.gokan) + self.katsuyo_text,
-            )
-        elif isinstance(pre.katsuyo, k.ShushiMixin):
-            return cast(
-                KatsuyoText,
-                INonKatsuyoText(pre.gokan + pre.katsuyo.shushi) + self.katsuyo_text,
-            )
+            if isinstance(pre, TaigenText):
+                return pre + self.katsuyo_text
+            elif isinstance(pre, ZyoshiText):
+                # TODO 助詞の精査
+                return pre + self.katsuyo_text
 
-        raise KatsuyoTextError(
-            f"Unsupported katsuyo_text in {type(self)}: {pre} "
-            f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
-        )
+            raise KatsuyoTextError(
+                f"Unsupported katsuyo_text in merge of {type(self)}: "
+                f"{pre} type: {type(pre)}"
+            )
+        else:
+            assert isinstance(pre, KatsuyoText)
+
+            if isinstance(pre.katsuyo, k.KeiyoudoushiKatsuyo):
+                assert (fkt := pre.as_fkt_gokan) is not None
+                return fkt + self.katsuyo_text
+            elif (fkt := pre.as_fkt_shushi) is not None:
+                return fkt + self.katsuyo_text
+
+            raise KatsuyoTextError(
+                f"Unsupported katsuyo_text in {type(self)}: {pre} "
+                f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
+            )
 
 
 # ==============================================================================
@@ -602,19 +805,24 @@ class Bekida(ZyodoushiKatsuyoText):
         )
 
     def merge(self, pre: IKatsuyoTextSource) -> KatsuyoText:
+        if isinstance(pre, FixedKatsuyoText):
+            return pre + self.katsuyo_text
         if isinstance(pre, INonKatsuyoText):
-            # TODO エラー出す
-            return super().merge(pre)
-        if isinstance(pre.katsuyo, k.IDoushiKatsuyo):
-            return cast(
-                KatsuyoText,
-                INonKatsuyoText(pre.gokan + pre.katsuyo.shushi) + self.katsuyo_text,
+            raise KatsuyoTextError(
+                f"Unsupported katsuyo_text in merge of {type(self)}: "
+                f"{pre} type: {type(pre)}"
             )
+        else:
+            assert isinstance(pre, KatsuyoText)
 
-        raise KatsuyoTextError(
-            f"Unsupported katsuyo_text in {type(self)}: {pre} "
-            f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
-        )
+            if isinstance(pre.katsuyo, k.IDoushiKatsuyo):
+                assert (fkt := pre.as_fkt_shushi) is not None
+                return fkt + self.katsuyo_text
+
+            raise KatsuyoTextError(
+                f"Unsupported katsuyo_text in {type(self)}: {pre} "
+                f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
+            )
 
 
 # ==============================================================================
@@ -630,19 +838,29 @@ class Youda(ZyodoushiKatsuyoText):
         )
 
     def merge(self, pre: IKatsuyoTextSource) -> KatsuyoText:
+        if isinstance(pre, FixedKatsuyoText):
+            return pre + self.katsuyo_text
         if isinstance(pre, INonKatsuyoText):
-            # TODO エラー出す
-            return super().merge(pre)
-        if isinstance(pre.katsuyo, k.RentaiMixin):
-            return cast(
-                KatsuyoText,
-                INonKatsuyoText(pre.gokan + pre.katsuyo.rentai) + self.katsuyo_text,
-            )
+            if isinstance(pre, ZyoshiText):
+                # TODO 助詞の精査
+                return pre + self.katsuyo_text
 
-        raise KatsuyoTextError(
-            f"Unsupported katsuyo_text in {type(self)}: {pre} "
-            f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
-        )
+            # 定義上は連体詞「この」等に接続するが、現状はサポートしない
+
+            raise KatsuyoTextError(
+                f"Unsupported katsuyo_text in merge of {type(self)}: "
+                f"{pre} type: {type(pre)}"
+            )
+        else:
+            assert isinstance(pre, KatsuyoText)
+
+            if (fkt := pre.as_fkt_rentai) is not None:
+                return fkt + self.katsuyo_text
+
+            raise KatsuyoTextError(
+                f"Unsupported katsuyo_text in {type(self)}: {pre} "
+                f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
+            )
 
 
 # ==============================================================================
@@ -660,26 +878,25 @@ class Teiru(ZyodoushiKatsuyoText):
         )
 
     def merge(self, pre: IKatsuyoTextSource) -> KatsuyoText:
+        if isinstance(pre, FixedKatsuyoText):
+            return pre + self.katsuyo_text
         if isinstance(pre, INonKatsuyoText):
-            # TODO エラー出す
-            return super().merge(pre)
-        if isinstance(pre.katsuyo, k.RenyoMixin):
-            if isinstance(pre.katsuyo, k.RenyoTaMixin):
-                renyo_ta = pre.gokan + pre.katsuyo.renyo_ta
-                return cast(
-                    KatsuyoText,
-                    INonKatsuyoText(renyo_ta) + self.katsuyo_text,
-                )
-            renyo = pre.gokan + pre.katsuyo.renyo
-            return cast(
-                KatsuyoText,
-                INonKatsuyoText(renyo) + self.katsuyo_text,
+            raise KatsuyoTextError(
+                f"Unsupported katsuyo_text in merge of {type(self)}: "
+                f"{pre} type: {type(pre)}"
             )
+        else:
+            assert isinstance(pre, KatsuyoText)
 
-        raise KatsuyoTextError(
-            f"Unsupported katsuyo_text in {type(self)}: {pre} "
-            f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
-        )
+            if (fkt := pre.as_fkt_renyo_ta) is not None:
+                return fkt + self.katsuyo_text
+            elif (fkt := pre.as_fkt_renyo) is not None:
+                return fkt + self.katsuyo_text
+
+            raise KatsuyoTextError(
+                f"Unsupported katsuyo_text in {type(self)}: {pre} "
+                f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
+            )
 
 
 class Deiru(ZyodoushiKatsuyoText):
@@ -690,26 +907,25 @@ class Deiru(ZyodoushiKatsuyoText):
         )
 
     def merge(self, pre: IKatsuyoTextSource) -> KatsuyoText:
+        if isinstance(pre, FixedKatsuyoText):
+            return pre + self.katsuyo_text
         if isinstance(pre, INonKatsuyoText):
-            # TODO エラー出す
-            return super().merge(pre)
-        if isinstance(pre.katsuyo, k.RenyoMixin):
-            if isinstance(pre.katsuyo, k.RenyoTaMixin):
-                renyo_ta = pre.gokan + pre.katsuyo.renyo_ta
-                return cast(
-                    KatsuyoText,
-                    INonKatsuyoText(renyo_ta) + self.katsuyo_text,
-                )
-            renyo = pre.gokan + pre.katsuyo.renyo
-            return cast(
-                KatsuyoText,
-                INonKatsuyoText(renyo) + self.katsuyo_text,
+            raise KatsuyoTextError(
+                f"Unsupported katsuyo_text in merge of {type(self)}: "
+                f"{pre} type: {type(pre)}"
             )
+        else:
+            assert isinstance(pre, KatsuyoText)
 
-        raise KatsuyoTextError(
-            f"Unsupported katsuyo_text in {type(self)}: {pre} "
-            f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
-        )
+            if (fkt := pre.as_fkt_renyo_ta) is not None:
+                return fkt + self.katsuyo_text
+            elif (fkt := pre.as_fkt_renyo) is not None:
+                return fkt + self.katsuyo_text
+
+            raise KatsuyoTextError(
+                f"Unsupported katsuyo_text in {type(self)}: {pre} "
+                f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
+            )
 
 
 # ==============================================================================
@@ -719,6 +935,8 @@ class Deiru(ZyodoushiKatsuyoText):
 
 
 class TaigenText(INonKatsuyoText):
+    """体言"""
+
     pass
 
 

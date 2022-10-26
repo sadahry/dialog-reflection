@@ -89,3 +89,5 @@ def test_error():
 
 
 # TODO KatsuyoText x INonKatsuyoText のテストを追加する
+
+# TODO ZyodoushiKatsuyoTextなど活用系のテストを追加する

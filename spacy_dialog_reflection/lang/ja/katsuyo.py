@@ -1,3 +1,4 @@
+from typing import NewType
 import attrs
 
 DAN = {
@@ -36,25 +37,29 @@ class IKatsuyo:
     pass
 
 
+FixedKatsuyo = NewType("FixedKatsuyo", str)
+NO_KATSUYO = FixedKatsuyo("")
+
+
 @attrs.define(frozen=True, slots=False)
 class MizenMixin:
     """未然形"""
 
-    mizen: str
+    mizen: FixedKatsuyo
 
 
 @attrs.define(frozen=True, slots=False)
 class RenyoMixin:
     """連用形"""
 
-    renyo: str
+    renyo: FixedKatsuyo
 
 
 @attrs.define(frozen=True, slots=False)
 class ShushiMixin:
     """終止形"""
 
-    shushi: str
+    shushi: FixedKatsuyo
 
     def __str__(self) -> str:
         return self.shushi
@@ -64,7 +69,7 @@ class ShushiMixin:
 class RentaiMixin:
     """連体形"""
 
-    rentai: str
+    rentai: FixedKatsuyo
 
 
 @attrs.define(frozen=True, slots=False)
@@ -74,14 +79,14 @@ class KateiMixin:
     已然形(izen)は仮定形に含める
     """
 
-    katei: str
+    katei: FixedKatsuyo
 
 
 @attrs.define(frozen=True, slots=False)
 class MeireiMixin:
     """命令形"""
 
-    meirei: str
+    meirei: FixedKatsuyo
 
 
 # 特殊な活用系
@@ -94,7 +99,7 @@ class MizenUMixin:
     「う」に続くとき、活用語尾が変化する活用形が存在する。
     """
 
-    mizen_u: str
+    mizen_u: FixedKatsuyo
 
 
 @attrs.define(frozen=True, slots=False)
@@ -104,17 +109,17 @@ class MizenReruMixin:
     活用語尾が変化する活用形が存在する。
     """
 
-    mizen_reru: str
+    mizen_reru: FixedKatsuyo
 
 
 @attrs.define(frozen=True, slots=False)
-class MizenRareeruMixin:
+class MizenRareruMixin:
     """
     未然形が受身の「られる」や否定の「ぬ」に続くとき、
     活用語尾が変化する活用形が存在する。
     """
 
-    mizen_rareru: str
+    mizen_rareru: FixedKatsuyo
 
 
 @attrs.define(frozen=True, slots=False)
@@ -124,7 +129,7 @@ class RenyoTaMixin:
     活用語尾が変化する活用形が存在する。
     """
 
-    renyo_ta: str
+    renyo_ta: FixedKatsuyo
 
 
 @attrs.define(frozen=True, slots=False)
@@ -134,7 +139,7 @@ class RenyoNaiMixin:
     活用語尾が変化する活用形が存在する。
     """
 
-    renyo_nai: str
+    renyo_nai: FixedKatsuyo
 
 
 # ==============================================================================
@@ -173,122 +178,122 @@ class GodanKatsuyo(
 
 # カ行
 GODAN_KA_GYO = GodanKatsuyo(
-    mizen="か",
-    mizen_u="こ",
-    renyo="き",
-    renyo_ta="い",
-    shushi="く",
-    rentai="く",
-    katei="け",
-    meirei="け",
+    mizen=FixedKatsuyo("か"),
+    mizen_u=FixedKatsuyo("こ"),
+    renyo=FixedKatsuyo("き"),
+    renyo_ta=FixedKatsuyo("い"),
+    shushi=FixedKatsuyo("く"),
+    rentai=FixedKatsuyo("く"),
+    katei=FixedKatsuyo("け"),
+    meirei=FixedKatsuyo("け"),
 )
 
 # ガ行
 GODAN_GA_GYO = GodanKatsuyo(
-    mizen="が",
-    mizen_u="ご",
-    renyo="ぎ",
-    renyo_ta="い",
-    shushi="ぐ",
-    rentai="ぐ",
-    katei="げ",
-    meirei="げ",
+    mizen=FixedKatsuyo("が"),
+    mizen_u=FixedKatsuyo("ご"),
+    renyo=FixedKatsuyo("ぎ"),
+    renyo_ta=FixedKatsuyo("い"),
+    shushi=FixedKatsuyo("ぐ"),
+    rentai=FixedKatsuyo("ぐ"),
+    katei=FixedKatsuyo("げ"),
+    meirei=FixedKatsuyo("げ"),
 )
 
 # サ行
 GODAN_SA_GYO = GodanKatsuyo(
-    mizen="さ",
-    mizen_u="そ",
-    renyo="し",
-    renyo_ta="し",
-    shushi="す",
-    rentai="す",
-    katei="せ",
-    meirei="せ",
+    mizen=FixedKatsuyo("さ"),
+    mizen_u=FixedKatsuyo("そ"),
+    renyo=FixedKatsuyo("し"),
+    renyo_ta=FixedKatsuyo("し"),
+    shushi=FixedKatsuyo("す"),
+    rentai=FixedKatsuyo("す"),
+    katei=FixedKatsuyo("せ"),
+    meirei=FixedKatsuyo("せ"),
 )
 
 # タ行
 GODAN_TA_GYO = GodanKatsuyo(
-    mizen="た",
-    mizen_u="と",
-    renyo="ち",
-    renyo_ta="っ",
-    shushi="つ",
-    rentai="つ",
-    katei="て",
-    meirei="て",
+    mizen=FixedKatsuyo("た"),
+    mizen_u=FixedKatsuyo("と"),
+    renyo=FixedKatsuyo("ち"),
+    renyo_ta=FixedKatsuyo("っ"),
+    shushi=FixedKatsuyo("つ"),
+    rentai=FixedKatsuyo("つ"),
+    katei=FixedKatsuyo("て"),
+    meirei=FixedKatsuyo("て"),
 )
 
 # ナ行
 GODAN_NA_GYO = GodanKatsuyo(
-    mizen="な",
-    mizen_u="の",
-    renyo="に",
-    renyo_ta="ん",
-    shushi="ぬ",
-    rentai="ぬ",
-    katei="ね",
-    meirei="ね",
+    mizen=FixedKatsuyo("な"),
+    mizen_u=FixedKatsuyo("の"),
+    renyo=FixedKatsuyo("に"),
+    renyo_ta=FixedKatsuyo("ん"),
+    shushi=FixedKatsuyo("ぬ"),
+    rentai=FixedKatsuyo("ぬ"),
+    katei=FixedKatsuyo("ね"),
+    meirei=FixedKatsuyo("ね"),
 )
 
 # バ行
 GODAN_BA_GYO = GodanKatsuyo(
-    mizen="ば",
-    mizen_u="ぼ",
-    renyo="び",
-    renyo_ta="ん",
-    shushi="ぶ",
-    rentai="ぶ",
-    katei="べ",
-    meirei="べ",
+    mizen=FixedKatsuyo("ば"),
+    mizen_u=FixedKatsuyo("ぼ"),
+    renyo=FixedKatsuyo("び"),
+    renyo_ta=FixedKatsuyo("ん"),
+    shushi=FixedKatsuyo("ぶ"),
+    rentai=FixedKatsuyo("ぶ"),
+    katei=FixedKatsuyo("べ"),
+    meirei=FixedKatsuyo("べ"),
 )
 
 # マ行
 GODAN_MA_GYO = GodanKatsuyo(
-    mizen="ま",
-    mizen_u="も",
-    renyo="み",
-    renyo_ta="ん",
-    shushi="む",
-    rentai="む",
-    katei="め",
-    meirei="め",
+    mizen=FixedKatsuyo("ま"),
+    mizen_u=FixedKatsuyo("も"),
+    renyo=FixedKatsuyo("み"),
+    renyo_ta=FixedKatsuyo("ん"),
+    shushi=FixedKatsuyo("む"),
+    rentai=FixedKatsuyo("む"),
+    katei=FixedKatsuyo("め"),
+    meirei=FixedKatsuyo("め"),
 )
 
 # ラ行
 GODAN_RA_GYO = GodanKatsuyo(
-    mizen="ら",
-    mizen_u="ろ",
-    renyo="り",
-    renyo_ta="っ",
-    shushi="る",
-    rentai="る",
-    katei="れ",
-    meirei="れ",
+    mizen=FixedKatsuyo("ら"),
+    mizen_u=FixedKatsuyo("ろ"),
+    renyo=FixedKatsuyo("り"),
+    renyo_ta=FixedKatsuyo("っ"),
+    shushi=FixedKatsuyo("る"),
+    rentai=FixedKatsuyo("る"),
+    katei=FixedKatsuyo("れ"),
+    meirei=FixedKatsuyo("れ"),
 )
 
 # ワア行
 GODAN_WAA_GYO = GodanKatsuyo(
-    mizen="わ",
-    mizen_u="お",
-    renyo="い",
-    renyo_ta="っ",
-    shushi="う",
-    rentai="う",
-    katei="え",
-    meirei="え",
+    mizen=FixedKatsuyo("わ"),
+    mizen_u=FixedKatsuyo("お"),
+    renyo=FixedKatsuyo("い"),
+    renyo_ta=FixedKatsuyo("っ"),
+    shushi=FixedKatsuyo("う"),
+    rentai=FixedKatsuyo("う"),
+    katei=FixedKatsuyo("え"),
+    meirei=FixedKatsuyo("え"),
 )
 
 # 「行く」は特殊な活用形を持つ。
 GODAN_IKU = GodanKatsuyo(
-    mizen="か",
-    mizen_u="こ",
-    renyo="き",
-    renyo_ta="っ",
-    shushi="く",
-    rentai="く",
-    katei="け",
-    meirei="け",
+    mizen=FixedKatsuyo("か"),
+    mizen_u=FixedKatsuyo("こ"),
+    renyo=FixedKatsuyo("き"),
+    renyo_ta=FixedKatsuyo("っ"),
+    shushi=FixedKatsuyo("く"),
+    rentai=FixedKatsuyo("く"),
+    katei=FixedKatsuyo("け"),
+    meirei=FixedKatsuyo("け"),
 )
 
 # ==============================================================================
@@ -307,12 +312,12 @@ class KamiIchidanKatsuyo(
 
 
 KAMI_ICHIDAN = KamiIchidanKatsuyo(
-    mizen="",
-    renyo="",
-    shushi="る",
-    rentai="る",
-    katei="れ",
-    meirei="ろ",
+    mizen=FixedKatsuyo(""),
+    renyo=FixedKatsuyo(""),
+    shushi=FixedKatsuyo("る"),
+    rentai=FixedKatsuyo("る"),
+    katei=FixedKatsuyo("れ"),
+    meirei=FixedKatsuyo("ろ"),
 )
 
 # ==============================================================================
@@ -331,12 +336,12 @@ class ShimoIchidanKatsuyo(
 
 
 SHIMO_ICHIDAN = ShimoIchidanKatsuyo(
-    mizen="",
-    renyo="",
-    shushi="る",
-    rentai="る",
-    katei="れ",
-    meirei="ろ",
+    mizen=FixedKatsuyo(""),
+    renyo=FixedKatsuyo(""),
+    shushi=FixedKatsuyo("る"),
+    rentai=FixedKatsuyo("る"),
+    katei=FixedKatsuyo("れ"),
+    meirei=FixedKatsuyo("ろ"),
 )
 
 # ==============================================================================
@@ -354,23 +359,23 @@ class KaGyoHenkakuKatsuyo(
 
 # 「くる」のみ特殊な活用形を持つ。
 KA_GYO_HENKAKU_KURU = KaGyoHenkakuKatsuyo(
-    mizen="こ",
-    renyo="き",
-    shushi="くる",
-    rentai="くる",
-    katei="くれ",
-    meirei="こい",
+    mizen=FixedKatsuyo("こ"),
+    renyo=FixedKatsuyo("き"),
+    shushi=FixedKatsuyo("くる"),
+    rentai=FixedKatsuyo("くる"),
+    katei=FixedKatsuyo("くれ"),
+    meirei=FixedKatsuyo("こい"),
 )
 
 # 「来る」と「くる」を区別
 # TODO ReadingをKatsuyoに含める際には語幹から「来」を除く
 KA_GYO_HENKAKU_KURU_KANJI = KaGyoHenkakuKatsuyo(
-    mizen="",
-    renyo="",
-    shushi="る",
-    rentai="る",
-    katei="れ",
-    meirei="い",
+    mizen=FixedKatsuyo(""),
+    renyo=FixedKatsuyo(""),
+    shushi=FixedKatsuyo("る"),
+    rentai=FixedKatsuyo("る"),
+    katei=FixedKatsuyo("れ"),
+    meirei=FixedKatsuyo("い"),
 )
 
 # ==============================================================================
@@ -385,7 +390,7 @@ class SaGyoHenkakuKatsuyo(
     # 「しろ」のほうが口語的だと判断
     IDoushiKatsuyo,
     MizenReruMixin,
-    MizenRareeruMixin,
+    MizenRareruMixin,
 ):
     pass
 
@@ -393,27 +398,27 @@ class SaGyoHenkakuKatsuyo(
 # 「〜する」の特殊な活用形
 # e.g. 愛（あい）する
 SA_GYO_HENKAKU_SURU = SaGyoHenkakuKatsuyo(
-    mizen="し",
-    mizen_reru="さ",
-    mizen_rareru="せ",
-    renyo="し",
-    shushi="する",
-    rentai="する",
-    katei="すれ",
-    meirei="しろ",
+    mizen=FixedKatsuyo("し"),
+    mizen_reru=FixedKatsuyo("さ"),
+    mizen_rareru=FixedKatsuyo("せ"),
+    renyo=FixedKatsuyo("し"),
+    shushi=FixedKatsuyo("する"),
+    rentai=FixedKatsuyo("する"),
+    katei=FixedKatsuyo("すれ"),
+    meirei=FixedKatsuyo("しろ"),
 )
 
 # 「〜ずる」の特殊な活用形
 # e.g. 生（しょう）ずる
 SA_GYO_HENKAKU_ZURU = SaGyoHenkakuKatsuyo(
-    mizen="じ",
-    mizen_reru="ざ",
-    mizen_rareru="ぜ",
-    renyo="じ",
-    shushi="ずる",
-    rentai="ずる",
-    katei="ずれ",
-    meirei="じろ",
+    mizen=FixedKatsuyo("じ"),
+    mizen_reru=FixedKatsuyo("ざ"),
+    mizen_rareru=FixedKatsuyo("ぜ"),
+    renyo=FixedKatsuyo("じ"),
+    shushi=FixedKatsuyo("ずる"),
+    rentai=FixedKatsuyo("ずる"),
+    katei=FixedKatsuyo("ずれ"),
+    meirei=FixedKatsuyo("じろ"),
 )
 
 
@@ -438,12 +443,12 @@ class KeiyoushiKatsuyo(
 
 
 KEIYOUSHI = KeiyoushiKatsuyo(
-    mizen="かろ",
-    renyo="く",
-    renyo_ta="かっ",
-    shushi="い",
-    rentai="い",
-    katei="けれ",
+    mizen=FixedKatsuyo("かろ"),
+    renyo=FixedKatsuyo("く"),
+    renyo_ta=FixedKatsuyo("かっ"),
+    shushi=FixedKatsuyo("い"),
+    rentai=FixedKatsuyo("い"),
+    katei=FixedKatsuyo("けれ"),
 )
 
 # ==============================================================================
@@ -468,13 +473,13 @@ class KeiyoudoushiKatsuyo(
 
 
 KEIYOUDOUSHI = KeiyoudoushiKatsuyo(
-    mizen="だろ",
-    renyo="に",
-    renyo_ta="だっ",
-    renyo_nai="で",
-    shushi="だ",
-    rentai="な",
-    katei="なら",
+    mizen=FixedKatsuyo("だろ"),
+    renyo=FixedKatsuyo("に"),
+    renyo_ta=FixedKatsuyo("だっ"),
+    renyo_nai=FixedKatsuyo("で"),
+    shushi=FixedKatsuyo("だ"),
+    rentai=FixedKatsuyo("な"),
+    katei=FixedKatsuyo("なら"),
 )
 
 # ==============================================================================
@@ -512,15 +517,15 @@ class TaKatsuyo(
 
 
 ZYODOUSHI_TA = TaKatsuyo(
-    mizen="たろ",
-    shushi="た",
-    rentai="た",
-    katei="たら",
+    mizen=FixedKatsuyo("たろ"),
+    shushi=FixedKatsuyo("た"),
+    rentai=FixedKatsuyo("た"),
+    katei=FixedKatsuyo("たら"),
 )
 
 ZYODOUSHI_DA = TaKatsuyo(
-    mizen="だ",
-    shushi="だ",
-    rentai="だ",
-    katei="だら",
+    mizen=FixedKatsuyo("だ"),
+    shushi=FixedKatsuyo("だ"),
+    rentai=FixedKatsuyo("だ"),
+    katei=FixedKatsuyo("だら"),
 )
