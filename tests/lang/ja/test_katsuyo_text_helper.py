@@ -1149,108 +1149,6 @@ def test_jodoushi_hikyo_reizi_value_error(unsupported_katsuyo_text):
         unsupported_katsuyo_text + jodoushi
 
 
-@pytest.mark.filterwarnings(r"ignore:Error in append_multiple.*KatsuyoTextError")
-@pytest.mark.filterwarnings("ignore:Skip invalid appendant")
-def test_katsuyo_text_warning_KatsuyoTextError(append_multiple):
-    class HelperRaiseKatsuyoTextError(IKatsuyoTextHelper):
-        def __init__(self):
-            super().__init__(bridge=lambda x: x)
-
-        def try_merge(self, _):
-            raise KatsuyoTextError("HOGE")
-
-    katsuyo_text = KURU
-    katsuyo_text_appendants = [
-        HelperRaiseKatsuyoTextError(),
-    ]
-    result, has_error = append_multiple(
-        katsuyo_text,
-        katsuyo_text_appendants,
-    )
-    assert result == katsuyo_text, "No changes"
-    assert has_error, "has_error is True"
-
-
-@pytest.mark.filterwarnings(r"ignore:Error in append_multiple.*AttributeError")
-@pytest.mark.filterwarnings("ignore:Skip invalid appendant")
-def test_katsuyo_text_warning_AttributeError(append_multiple):
-    class HelperRaiseNoneAttributeError(IKatsuyoTextHelper):
-        def __init__(self):
-            super().__init__(bridge=lambda x: x)
-
-        def try_merge(self, _):
-            return KatsuyoText(
-                gokan="",
-                # raise AttributeError
-                katsuyo=KA_GYO_HENKAKU_KURU.hoge,
-            )
-
-    katsuyo_text = KURU
-    katsuyo_text_appendants = [
-        HelperRaiseNoneAttributeError(),
-    ]
-    result, has_error = append_multiple(
-        katsuyo_text,
-        katsuyo_text_appendants,
-    )
-    assert result == katsuyo_text, "No changes"
-    assert has_error, "has_error is True"
-
-
-@pytest.mark.filterwarnings(r"ignore:Error in append_multiple.*KatsuyoTextError")
-@pytest.mark.filterwarnings("ignore:Skip invalid appendant")
-def test_katsuyo_text_warning_KatsuyoTextError_on_bridge(append_multiple):
-    class HelperRaiseKatsuyoTextError(IKatsuyoTextHelper):
-        def __init__(self):
-            def bridge(_):
-                raise KatsuyoTextError("HOGE")
-
-            super().__init__(bridge=bridge)
-
-        def try_merge(self, _):
-            return None
-
-    katsuyo_text = KURU
-    katsuyo_text_appendants = [
-        HelperRaiseKatsuyoTextError(),
-    ]
-    result, has_error = append_multiple(
-        katsuyo_text,
-        katsuyo_text_appendants,
-    )
-    assert result == katsuyo_text, "No changes"
-    assert has_error, "has_error is True"
-
-
-@pytest.mark.filterwarnings(r"ignore:Error in append_multiple.*AttributeError")
-@pytest.mark.filterwarnings("ignore:Skip invalid appendant")
-def test_katsuyo_text_warning_AttributeErrorr_on_bridge(append_multiple):
-    class HelperRaiseNoneAttributeError(IKatsuyoTextHelper):
-        def __init__(self):
-            def bridge(_):
-                return KatsuyoText(
-                    gokan="",
-                    # raise AttributeError
-                    katsuyo=KA_GYO_HENKAKU_KURU.hoge,
-                )
-
-            super().__init__(bridge=bridge)
-
-        def try_merge(self, _):
-            return None
-
-    katsuyo_text = KURU
-    katsuyo_text_appendants = [
-        HelperRaiseNoneAttributeError(),
-    ]
-    result, has_error = append_multiple(
-        katsuyo_text,
-        katsuyo_text_appendants,
-    )
-    assert result == katsuyo_text, "No changes"
-    assert has_error, "has_error is True"
-
-
 @pytest.mark.parametrize(
     "msg, katsuyo_text, expected",
     [
@@ -1413,3 +1311,105 @@ def test_jodoushi_keizoku_value_error(unsupported_katsuyo_text):
     jodoushi = Keizoku()
     with pytest.raises(KatsuyoTextError):
         unsupported_katsuyo_text + jodoushi
+
+
+@pytest.mark.filterwarnings(r"ignore:Error in append_multiple.*KatsuyoTextError")
+@pytest.mark.filterwarnings("ignore:Skip invalid appendant")
+def test_katsuyo_text_warning_KatsuyoTextError(append_multiple):
+    class HelperRaiseKatsuyoTextError(IKatsuyoTextHelper):
+        def __init__(self):
+            super().__init__(bridge=lambda x: x)
+
+        def try_merge(self, _):
+            raise KatsuyoTextError("HOGE")
+
+    katsuyo_text = KURU
+    katsuyo_text_appendants = [
+        HelperRaiseKatsuyoTextError(),
+    ]
+    result, has_error = append_multiple(
+        katsuyo_text,
+        katsuyo_text_appendants,
+    )
+    assert result == katsuyo_text, "No changes"
+    assert has_error, "has_error is True"
+
+
+@pytest.mark.filterwarnings(r"ignore:Error in append_multiple.*AttributeError")
+@pytest.mark.filterwarnings("ignore:Skip invalid appendant")
+def test_katsuyo_text_warning_AttributeError(append_multiple):
+    class HelperRaiseNoneAttributeError(IKatsuyoTextHelper):
+        def __init__(self):
+            super().__init__(bridge=lambda x: x)
+
+        def try_merge(self, _):
+            return KatsuyoText(
+                gokan="",
+                # raise AttributeError
+                katsuyo=KA_GYO_HENKAKU_KURU.hoge,
+            )
+
+    katsuyo_text = KURU
+    katsuyo_text_appendants = [
+        HelperRaiseNoneAttributeError(),
+    ]
+    result, has_error = append_multiple(
+        katsuyo_text,
+        katsuyo_text_appendants,
+    )
+    assert result == katsuyo_text, "No changes"
+    assert has_error, "has_error is True"
+
+
+@pytest.mark.filterwarnings(r"ignore:Error in append_multiple.*KatsuyoTextError")
+@pytest.mark.filterwarnings("ignore:Skip invalid appendant")
+def test_katsuyo_text_warning_KatsuyoTextError_on_bridge(append_multiple):
+    class HelperRaiseKatsuyoTextError(IKatsuyoTextHelper):
+        def __init__(self):
+            def bridge(_):
+                raise KatsuyoTextError("HOGE")
+
+            super().__init__(bridge=bridge)
+
+        def try_merge(self, _):
+            return None
+
+    katsuyo_text = KURU
+    katsuyo_text_appendants = [
+        HelperRaiseKatsuyoTextError(),
+    ]
+    result, has_error = append_multiple(
+        katsuyo_text,
+        katsuyo_text_appendants,
+    )
+    assert result == katsuyo_text, "No changes"
+    assert has_error, "has_error is True"
+
+
+@pytest.mark.filterwarnings(r"ignore:Error in append_multiple.*AttributeError")
+@pytest.mark.filterwarnings("ignore:Skip invalid appendant")
+def test_katsuyo_text_warning_AttributeErrorr_on_bridge(append_multiple):
+    class HelperRaiseNoneAttributeError(IKatsuyoTextHelper):
+        def __init__(self):
+            def bridge(_):
+                return KatsuyoText(
+                    gokan="",
+                    # raise AttributeError
+                    katsuyo=KA_GYO_HENKAKU_KURU.hoge,
+                )
+
+            super().__init__(bridge=bridge)
+
+        def try_merge(self, _):
+            return None
+
+    katsuyo_text = KURU
+    katsuyo_text_appendants = [
+        HelperRaiseNoneAttributeError(),
+    ]
+    result, has_error = append_multiple(
+        katsuyo_text,
+        katsuyo_text_appendants,
+    )
+    assert result == katsuyo_text, "No changes"
+    assert has_error, "has_error is True"
