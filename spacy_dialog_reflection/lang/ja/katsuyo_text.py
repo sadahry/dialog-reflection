@@ -3,8 +3,24 @@ import attrs
 import abc
 import spacy_dialog_reflection.lang.ja.katsuyo as k
 
-A = TypeVar("A", "KatsuyoText", "FixedKatsuyoText", "INonKatsuyoText")
-M = TypeVar("M", "KatsuyoText", "FixedKatsuyoText", "INonKatsuyoText")
+A = TypeVar(
+    "A",
+    "KatsuyoText",
+    "FixedKatsuyoText",
+    # 以下はINonKatsuyoTextの実装クラス
+    "JoshiText",
+    "TaigenText",
+    "IFukujoshiText",
+)
+M = TypeVar(
+    "M",
+    "KatsuyoText",
+    "FixedKatsuyoText",
+    # 以下はINonKatsuyoTextの実装クラス
+    "JoshiText",
+    "TaigenText",
+    "IFukujoshiText",
+)
 
 
 class KatsuyoTextError(ValueError):
@@ -222,10 +238,10 @@ class FixedKatsuyoText(IKatsuyoTextSource, IKatsuyoTextAppendant["FixedKatsuyoTe
                 gokan=str(self) + post.gokan,
                 katsuyo=post.katsuyo,
             )
-        elif isinstance(post, INonKatsuyoText):
-            return INonKatsuyoText(
-                gokan=str(self) + post.gokan,
-            )
+        elif isinstance(post, TaigenText):
+            return TaigenText(gokan=str(self) + post.gokan)
+        elif isinstance(post, JoshiText):
+            return JoshiText(gokan=str(self) + post.gokan)
         elif isinstance(post, KatsuyoText):
             return KatsuyoText(
                 gokan=str(self) + post.gokan,
@@ -240,7 +256,7 @@ class FixedKatsuyoText(IKatsuyoTextSource, IKatsuyoTextAppendant["FixedKatsuyoTe
 
 
 @attrs.define(frozen=True, slots=True)
-class INonKatsuyoText(IKatsuyoTextSource, IKatsuyoTextAppendant["INonKatsuyoText"]):
+class INonKatsuyoText(IKatsuyoTextSource, IKatsuyoTextAppendant[M]):
     """
     活用形を含まない文字列を表すクラス。
     名詞,助詞,接続詞,感動詞,記号,連体詞,接頭辞,接尾辞,補助記号,フィラー,
@@ -250,7 +266,7 @@ class INonKatsuyoText(IKatsuyoTextSource, IKatsuyoTextAppendant["INonKatsuyoText
     gokan: str
     katsuyo: None = None
 
-    def merge(self, pre: IKatsuyoTextSource) -> "INonKatsuyoText":
+    def merge(self, pre: IKatsuyoTextSource) -> M:
         """
         基本的には連体形で受けるが、下位クラスで上書きすることで
         任意の活用形に変換して返すことがある。
@@ -275,10 +291,10 @@ class INonKatsuyoText(IKatsuyoTextSource, IKatsuyoTextAppendant["INonKatsuyoText
                 gokan=str(self) + post.gokan,
                 katsuyo=post.katsuyo,
             )
-        elif isinstance(post, INonKatsuyoText):
-            return INonKatsuyoText(
-                gokan=str(self) + post.gokan,
-            )
+        elif isinstance(post, TaigenText):
+            return TaigenText(gokan=str(self) + post.gokan)
+        elif isinstance(post, JoshiText):
+            return JoshiText(gokan=str(self) + post.gokan)
         elif isinstance(post, KatsuyoText):
             return KatsuyoText(
                 gokan=str(self) + post.gokan,
@@ -971,22 +987,25 @@ JODOUSHI_DEIRU = Deiru()
 # ==============================================================================
 
 
-class TaigenText(INonKatsuyoText):
+class TaigenText(INonKatsuyoText["TaigenText"]):
     """体言"""
 
     pass
 
 
 # ==============================================================================
-# 動詞
-# 細かく分類せず、動詞として扱うものをまとめる
-# e.g. 格助詞,格助詞,接続助詞
+# 助詞
 #
 # ref. https://ja.wikipedia.org/wiki/助詞
 # ==============================================================================
 
 
-class JoshiText(INonKatsuyoText):
+class JoshiText(INonKatsuyoText["JoshiText"]):
+    """
+    助詞。細かく分類せず扱うもののみをまとめる
+    e.g. 格助詞,格助詞,接続助詞
+    """
+
     pass
 
 
