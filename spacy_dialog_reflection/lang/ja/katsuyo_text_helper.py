@@ -114,7 +114,9 @@ def bridge_Shieki_default(pre: kt.IKatsuyoTextSource) -> kt.KatsuyoText:
         (k.KeiyoushiKatsuyo, k.KeiyoudoushiKatsuyo),
     ):
         # 「させる」を動詞として扱い連用形でブリッジ
-        return pre + kt.Saseru().katsuyo_text
+        assert isinstance(pre, kt.KatsuyoText)
+        assert (fkt := pre.as_fkt_renyo) is not None
+        return fkt + kt.Saseru()
 
     raise kt.KatsuyoTextError(
         f"Unsupported katsuyo_text in {sys._getframe().f_code.co_name}: {pre} "
