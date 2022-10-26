@@ -2,6 +2,7 @@ import pytest
 from spacy_dialog_reflection.lang.ja.katsuyo_text import (
     KatsuyoText,
     KatsuyoTextError,
+    TaigenText,
 )
 from spacy_dialog_reflection.lang.ja.katsuyo import (
     GODAN_BA_GYO,
@@ -612,9 +613,8 @@ def katsuyo_texts_appendants_detector_init_warning():
             "それは明日かな",
             "明日",
             "NOUN",
-            KatsuyoText(
+            TaigenText(
                 gokan="明日",
-                katsuyo=KEIYOUDOUSHI,
             ),
         ),
         # 固有名詞
@@ -623,9 +623,8 @@ def katsuyo_texts_appendants_detector_init_warning():
             "それはステファンだ",
             "ステファン",
             "PROPN",
-            KatsuyoText(
+            TaigenText(
                 gokan="ステファン",
-                katsuyo=KEIYOUDOUSHI,
             ),
         ),
     ],

@@ -1,15 +1,22 @@
 import pytest
+from spacy_dialog_reflection.lang.ja.katsuyo_text import (
+    FUKUZYOSHI_BAKARI,
+    KURU,
+    KURU_KANJI,
+    SURU,
+    KatsuyoText,
+    TaigenText,
+)
 from spacy_dialog_reflection.lang.ja.katsuyo import (
     GODAN_BA_GYO,
     GODAN_KA_GYO,
     GODAN_SA_GYO,
     KAMI_ICHIDAN,
+    KEIYOUDOUSHI,
+    KEIYOUSHI,
+    SA_GYO_HENKAKU_SURU,
+    SA_GYO_HENKAKU_ZURU,
     SHIMO_ICHIDAN,
-)
-from spacy_dialog_reflection.lang.ja.katsuyo_text import (
-    KURU_KANJI,
-    SURU,
-    KatsuyoText,
 )
 
 
@@ -91,3 +98,88 @@ def test_error():
 # TODO KatsuyoText x INonKatsuyoText のテストを追加する
 
 # TODO JodoushiKatsuyoTextなど活用系のテストを追加する
+
+
+@pytest.mark.parametrize(
+    "msg, katsuyo_text, expected",
+    [
+        (
+            "五段活用",
+            KatsuyoText(
+                gokan="遊",
+                katsuyo=GODAN_BA_GYO,
+            ),
+            "遊ぶばかり",
+        ),
+        (
+            "上一段活用",
+            KatsuyoText(
+                gokan="見",
+                katsuyo=KAMI_ICHIDAN,
+            ),
+            "見るばかり",
+        ),
+        (
+            "下一段活用",
+            KatsuyoText(
+                gokan="求め",
+                katsuyo=SHIMO_ICHIDAN,
+            ),
+            "求めるばかり",
+        ),
+        (
+            "カ変活用",
+            KURU,
+            "くるばかり",
+        ),
+        (
+            "サ変活用",
+            KatsuyoText(
+                gokan="ウォーキング",
+                katsuyo=SA_GYO_HENKAKU_SURU,
+            ),
+            "ウォーキングするばかり",
+        ),
+        (
+            "サ変活用(する)",
+            KatsuyoText(
+                gokan="尊重",
+                katsuyo=SA_GYO_HENKAKU_SURU,
+            ),
+            "尊重するばかり",
+        ),
+        (
+            "サ変活用(ずる)",
+            KatsuyoText(
+                gokan="重ん",
+                katsuyo=SA_GYO_HENKAKU_ZURU,
+            ),
+            "重んずるばかり",
+        ),
+        (
+            "形容詞",
+            KatsuyoText(
+                gokan="美し",
+                katsuyo=KEIYOUSHI,
+            ),
+            "美しいばかり",
+        ),
+        (
+            "形容動詞",
+            KatsuyoText(
+                gokan="綺麗",
+                katsuyo=KEIYOUDOUSHI,
+            ),
+            "綺麗なばかり",
+        ),
+        (
+            "TaigenText",
+            TaigenText("状態"),
+            "状態ばかり",
+        ),
+    ],
+)
+def test_fukujoshi(msg, katsuyo_text, expected):
+    fukujoshi = FUKUZYOSHI_BAKARI
+    result = katsuyo_text + fukujoshi
+    assert str(result) == expected, msg

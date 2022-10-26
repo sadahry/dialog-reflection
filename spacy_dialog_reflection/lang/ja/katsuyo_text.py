@@ -10,7 +10,7 @@ A = TypeVar(
     # 以下はINonKatsuyoTextの実装クラス
     "JoshiText",
     "TaigenText",
-    "IFukujoshiText",
+    "FukujoshiText",
 )
 M = TypeVar(
     "M",
@@ -19,7 +19,7 @@ M = TypeVar(
     # 以下はINonKatsuyoTextの実装クラス
     "JoshiText",
     "TaigenText",
-    "IFukujoshiText",
+    "FukujoshiText",
 )
 
 
@@ -242,6 +242,8 @@ class FixedKatsuyoText(IKatsuyoTextSource, IKatsuyoTextAppendant["FixedKatsuyoTe
             return TaigenText(gokan=str(self) + post.gokan)
         elif isinstance(post, JoshiText):
             return JoshiText(gokan=str(self) + post.gokan)
+        elif isinstance(post, FukujoshiText):
+            return FukujoshiText(gokan=str(self) + post.gokan)
         elif isinstance(post, KatsuyoText):
             return KatsuyoText(
                 gokan=str(self) + post.gokan,
@@ -255,7 +257,7 @@ class FixedKatsuyoText(IKatsuyoTextSource, IKatsuyoTextAppendant["FixedKatsuyoTe
         return f"{self.gokan}{self.katsuyo}"
 
 
-@attrs.define(frozen=True, slots=True)
+@attrs.define(frozen=True, slots=False)
 class INonKatsuyoText(IKatsuyoTextSource, IKatsuyoTextAppendant[M]):
     """
     活用形を含まない文字列を表すクラス。
@@ -295,6 +297,8 @@ class INonKatsuyoText(IKatsuyoTextSource, IKatsuyoTextAppendant[M]):
             return TaigenText(gokan=str(self) + post.gokan)
         elif isinstance(post, JoshiText):
             return JoshiText(gokan=str(self) + post.gokan)
+        elif isinstance(post, FukujoshiText):
+            return FukujoshiText(gokan=str(self) + post.gokan)
         elif isinstance(post, KatsuyoText):
             return KatsuyoText(
                 gokan=str(self) + post.gokan,
@@ -987,6 +991,7 @@ JODOUSHI_DEIRU = Deiru()
 # ==============================================================================
 
 
+@attrs.define(frozen=True, slots=True)
 class TaigenText(INonKatsuyoText["TaigenText"]):
     """体言"""
 
@@ -1000,6 +1005,7 @@ class TaigenText(INonKatsuyoText["TaigenText"]):
 # ==============================================================================
 
 
+@attrs.define(frozen=True, slots=True)
 class JoshiText(INonKatsuyoText["JoshiText"]):
     """
     助詞。細かく分類せず扱うもののみをまとめる
@@ -1014,3 +1020,20 @@ JOSHI_DE = JoshiText("で")
 JOSHI_HA = JoshiText("は")
 JOSHI_DA = JoshiText("だ")
 JOSHI_NO = JoshiText("の")
+
+# ==============================================================================
+# 副助詞
+# ref. https://ja.wikipedia.org/wiki/助詞#副助詞
+# ==============================================================================
+
+
+@attrs.define(frozen=True, slots=False)
+class FukujoshiText(INonKatsuyoText["FukujoshiText"]):
+    """
+    副助詞。細かく分類せず一括の扱いとする
+    """
+
+    pass
+
+
+FUKUZYOSHI_BAKARI = FukujoshiText("ばかり")

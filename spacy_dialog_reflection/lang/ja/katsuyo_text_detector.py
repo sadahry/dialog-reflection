@@ -21,8 +21,10 @@ from spacy_dialog_reflection.lang.ja.katsuyo import (
 from spacy_dialog_reflection.lang.ja.katsuyo_text import (
     KURU,
     KURU_KANJI,
+    IKatsuyoTextSource,
     KatsuyoText,
     KatsuyoTextError,
+    TaigenText,
 )
 from spacy_dialog_reflection.lang.ja.katsuyo_text_helper import (
     IKatsuyoTextHelper,
@@ -46,7 +48,7 @@ import spacy
 
 class IKatsuyoTextDetector(abc.ABC):
     @abc.abstractmethod
-    def detect(self, src: Any) -> Optional[KatsuyoText]:
+    def detect(self, src: Any) -> Optional[IKatsuyoTextSource]:
         """
         不適切な値が代入された際は、Noneを返却する。
         """
@@ -138,7 +140,7 @@ class SpacyKatsuyoTextDetector(IKatsuyoTextDetector):
         "下一段-ラ行": SHIMO_ICHIDAN,
     }
 
-    def detect(self, src: spacy.tokens.Token) -> Optional[KatsuyoText]:
+    def detect(self, src: spacy.tokens.Token) -> Optional[IKatsuyoTextSource]:
         # spacy.tokens.Tokenから抽出される活用形の特徴を表す変数
         tag = src.tag_
         lemma = src.lemma_
@@ -201,7 +203,7 @@ class SpacyKatsuyoTextDetector(IKatsuyoTextDetector):
             # 形容詞の変形
             # ==================================================
             # e.g. 楽しい -> gokan=楽し + katsuyo=い
-            return KatsuyoText(gokan=src.lemma_[:-1], katsuyo=KEIYOUSHI)
+            return KatsuyoText(gokan=lemma[:-1], katsuyo=KEIYOUSHI)
         elif tag.startswith("形状詞"):
             # ==================================================
             # 形容動詞の変形
@@ -210,7 +212,7 @@ class SpacyKatsuyoTextDetector(IKatsuyoTextDetector):
             # universaldependenciesの形容動詞に語幹は含まれない
             # see: https://universaldependencies.org/treebanks/ja_gsd/ja_gsd-pos-ADJ.html
             # e.g. 健康 -> gokan=健康 + katsuyo=だ
-            return KatsuyoText(gokan=src.lemma_, katsuyo=KEIYOUDOUSHI)
+            return KatsuyoText(gokan=lemma, katsuyo=KEIYOUDOUSHI)
         elif tag.startswith("名詞"):
             # ==================================================
             # 例外：サ変動詞の判定
@@ -228,11 +230,20 @@ class SpacyKatsuyoTextDetector(IKatsuyoTextDetector):
                 # elif right.lemma_ == "ずる":
                 #     return KatsuyoText(gokan=lemma, katsuyo=SA_GYO_HENKAKU_ZURU)
             # ==================================================
+            # 形容動詞の判定
+            # ==================================================
+            # 「形状詞」=「形容動詞の語幹」
+            # universaldependenciesの形容動詞に語幹は含まれない
+            # see: https://universaldependencies.org/treebanks/ja_gsd/ja_gsd-pos-ADJ.html
+            # e.g. 健康 -> gokan=健康 + katsuyo=だ
+            if src.pos_ == "ADJ":
+                return KatsuyoText(gokan=lemma, katsuyo=KEIYOUDOUSHI)
+            # ==================================================
             # 名詞/固有名詞の変形
             # ==================================================
             # 名詞は形容動詞的に扱う
             # e.g. 健康 -> gokan=健康 + katsuyo=だ
-            return KatsuyoText(gokan=src.text, katsuyo=KEIYOUDOUSHI)
+            return TaigenText(gokan=src.text)
         else:
             warnings.warn(f"Unsupported Tag: {tag}", UserWarning)
             return None
