@@ -710,3 +710,37 @@ class Deiru(ZyodoushiKatsuyoText):
             f"Unsupported katsuyo_text in {type(self)}: {pre} "
             f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
         )
+
+
+# ==============================================================================
+# 体言
+# ref. https://ja.wiktionary.org/wiki/体言
+# ==============================================================================
+
+
+class TaigenText(INonKatsuyoText):
+    pass
+
+
+# ==============================================================================
+# 動詞
+# 細かく分類せず、動詞として扱うものをまとめる
+# e.g. 格助詞,格助詞,接続助詞
+#
+# ref. https://ja.wikipedia.org/wiki/助詞
+# ==============================================================================
+
+
+class ZyoshiText(INonKatsuyoText):
+    pass
+
+
+NI = ZyoshiText("に")
+
+DE = ZyoshiText("で")
+
+HA = ZyoshiText("は")
+
+DA = ZyoshiText("だ")
+
+NO = ZyoshiText("の")

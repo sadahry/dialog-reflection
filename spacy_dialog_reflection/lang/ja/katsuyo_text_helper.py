@@ -60,8 +60,7 @@ def bridge_Ukemi_default(pre: IKatsuyoTextSource) -> kt.KatsuyoText:
     )
 
     if isinstance(pre, (kt.INonKatsuyoText)):
-        ni = kt.INonKatsuyoText("に")
-        return cast(kt.KatsuyoText, pre + ni + naru + kt.Reru())
+        return cast(kt.KatsuyoText, pre + kt.NI + naru + kt.Reru())
 
     if isinstance(
         pre.katsuyo,
@@ -114,8 +113,8 @@ class Ukemi(IKatsuyoTextHelper):
 
 def bridge_Shieki_default(pre: IKatsuyoTextSource) -> kt.KatsuyoText:
     if isinstance(pre, kt.INonKatsuyoText):
-        ni = kt.INonKatsuyoText("に")
-        return cast(kt.KatsuyoText, pre + ni + kt.Saseru().katsuyo_text)
+        # 「させる」を動詞として扱い「に」でブリッジ
+        return cast(kt.KatsuyoText, pre + kt.NI + kt.Saseru().katsuyo_text)
 
     if isinstance(
         pre.katsuyo,
@@ -168,8 +167,7 @@ def bridge_Hitei_default(pre: IKatsuyoTextSource) -> kt.KatsuyoText:
     if isinstance(pre, kt.INonKatsuyoText):
         # TODO 助詞のハンドリング
         # TODO 「で」にも切り替えられるように
-        deha = kt.INonKatsuyoText("では")
-        return cast(kt.KatsuyoText, pre + deha + kt.Nai())
+        return cast(kt.KatsuyoText, pre + kt.DE + kt.HA + kt.Nai())
 
     if isinstance(
         pre.katsuyo,
@@ -250,8 +248,11 @@ class KibouOthers(IKatsuyoTextHelper):
 def bridge_KakoKanryo_default(pre: IKatsuyoTextSource) -> kt.KatsuyoText:
     if isinstance(pre, kt.INonKatsuyoText):
         # TODO 助詞のハンドリング
-        dat = kt.INonKatsuyoText("だっ")
-        return cast(kt.KatsuyoText, pre + dat + kt.Ta())
+        da = kt.KatsuyoText(
+            gokan="",
+            katsuyo=k.KEIYOUDOUSHI,
+        )
+        return cast(kt.KatsuyoText, pre + da + kt.Ta())
 
     raise KatsuyoTextError(
         f"Unsupported katsuyo_text in {sys._getframe().f_code.co_name}: {pre} "
@@ -319,8 +320,7 @@ class Youtai(IKatsuyoTextHelper):
 
 def bridge_Denbun_default(pre: IKatsuyoTextSource) -> kt.KatsuyoText:
     if isinstance(pre, kt.INonKatsuyoText):
-        dearu = kt.INonKatsuyoText("だ")
-        return cast(kt.KatsuyoText, pre + dearu + kt.SoudaDenbun())
+        return cast(kt.KatsuyoText, pre + kt.DA + kt.SoudaDenbun())
 
     raise KatsuyoTextError(
         f"Unsupported katsuyo_text in {sys._getframe().f_code.co_name}: {pre} "
@@ -383,21 +383,21 @@ class Suitei(IKatsuyoTextHelper):
 
 
 def bridge_Touzen_default(pre: IKatsuyoTextSource) -> kt.KatsuyoText:
-    aru = kt.KatsuyoText(
-        gokan="あ",
-        katsuyo=k.GODAN_RA_GYO,
-    )
-
     if isinstance(pre, kt.INonKatsuyoText):
-        de = kt.INonKatsuyoText("で")
-        return cast(kt.KatsuyoText, pre + de + aru + kt.Bekida())
+        return cast(
+            kt.KatsuyoText,
+            pre + kt.DE + kt.HOZYO_ARU + kt.Bekida(),
+        )
 
     if isinstance(
         pre.katsuyo,
         (k.KeiyoushiKatsuyo, k.KeiyoudoushiKatsuyo),
     ):
         # 補助動詞「ある」でブリッジ
-        return cast(kt.KatsuyoText, pre + kt.HOZYO_ARU + kt.Bekida())
+        return cast(
+            kt.KatsuyoText,
+            pre + kt.HOZYO_ARU + kt.Bekida(),
+        )
 
     raise KatsuyoTextError(
         f"Unsupported katsuyo_text in {sys._getframe().f_code.co_name}: {pre} "
@@ -428,8 +428,7 @@ class Touzen(IKatsuyoTextHelper):
 
 def bridge_HikyoReizi_default(pre: IKatsuyoTextSource) -> kt.KatsuyoText:
     if isinstance(pre, kt.INonKatsuyoText):
-        no = kt.INonKatsuyoText("の")
-        return cast(kt.KatsuyoText, pre + no + kt.Youda())
+        return cast(kt.KatsuyoText, pre + kt.NO + kt.Youda())
 
     raise KatsuyoTextError(
         f"Unsupported katsuyo_text in {sys._getframe().f_code.co_name}: {pre} "

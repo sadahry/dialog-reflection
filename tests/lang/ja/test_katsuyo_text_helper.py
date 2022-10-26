@@ -3,7 +3,7 @@ import pytest
 from spacy_dialog_reflection.lang.ja.katsuyo_text import (
     KURU,
     KatsuyoText,
-    INonKatsuyoText,
+    TaigenText,
     KatsuyoTextError,
 )
 from spacy_dialog_reflection.lang.ja.katsuyo import (
@@ -136,8 +136,8 @@ def unsupported_katsuyo_text():
             "綺麗になられる",
         ),
         (
-            "INonKatsuyoText",
-            INonKatsuyoText("状態"),
+            "TaigenText",
+            TaigenText("状態"),
             "状態になられる",
         ),
     ],
@@ -227,8 +227,8 @@ def test_zyodoushi_ukemi_value_error(unsupported_katsuyo_text):
             "綺麗にさせる",
         ),
         (
-            "INonKatsuyoText",
-            INonKatsuyoText("状態"),
+            "TaigenText",
+            TaigenText("状態"),
             "状態にさせる",
         ),
     ],
@@ -319,8 +319,8 @@ def test_zyodoushi_shieki_value_error(unsupported_katsuyo_text):
         ),
         # TODO 助詞のハンドリング
         (
-            "INonKatsuyoText",
-            INonKatsuyoText("状態"),
+            "TaigenText",
+            TaigenText("状態"),
             "状態ではない",
         ),
     ],
@@ -419,8 +419,8 @@ def test_zyodoushi_kibou_self(msg, katsuyo_text, expected):
             ),
         ),
         (
-            "INonKatsuyoText",
-            INonKatsuyoText("状態"),
+            "TaigenText",
+            TaigenText("状態"),
         ),
     ],
 )
@@ -513,8 +513,8 @@ def test_zyodoushi_kibou_others(msg, katsuyo_text, expected):
             ),
         ),
         (
-            "INonKatsuyoText",
-            INonKatsuyoText("状態"),
+            "TaigenText",
+            TaigenText("状態"),
         ),
     ],
 )
@@ -671,8 +671,8 @@ def test_zyodoushi_kibou_others_value_error(msg, katsuyo_text):
             "綺麗だった",
         ),
         (
-            "INonKatsuyoText",
-            INonKatsuyoText("状態"),
+            "TaigenText",
+            TaigenText("状態"),
             "状態だった",
         ),
     ],
@@ -763,8 +763,8 @@ def test_zyodoushi_kako_kanryo_value_error(unsupported_katsuyo_text):
         ),
         # TODO 助詞のハンドリング
         (
-            "INonKatsuyoText",
-            INonKatsuyoText("状態"),
+            "TaigenText",
+            TaigenText("状態"),
             "状態そうだ",
         ),
     ],
@@ -855,8 +855,8 @@ def test_zyodoushi_youtai_value_error(unsupported_katsuyo_text):
         ),
         # TODO 助詞のハンドリング
         (
-            "INonKatsuyoText",
-            INonKatsuyoText("状態"),
+            "TaigenText",
+            TaigenText("状態"),
             "状態だそうだ",
         ),
     ],
@@ -947,8 +947,8 @@ def test_zyodoushi_denbun_value_error(unsupported_katsuyo_text):
         ),
         # TODO 助詞のハンドリング
         (
-            "INonKatsuyoText",
-            INonKatsuyoText("状態"),
+            "TaigenText",
+            TaigenText("状態"),
             "状態らしい",
         ),
     ],
@@ -1039,8 +1039,8 @@ def test_zyodoushi_suitei_value_error(unsupported_katsuyo_text):
         ),
         # TODO 助詞のハンドリング
         (
-            "INonKatsuyoText",
-            INonKatsuyoText("状態"),
+            "TaigenText",
+            TaigenText("状態"),
             "状態であるべきだ",
         ),
     ],
@@ -1131,8 +1131,8 @@ def test_zyodoushi_touzen_value_error(unsupported_katsuyo_text):
         ),
         # TODO 助詞のハンドリング
         (
-            "INonKatsuyoText",
-            INonKatsuyoText("状態"),
+            "TaigenText",
+            TaigenText("状態"),
             "状態のようだ",
         ),
     ],
@@ -1397,8 +1397,8 @@ def test_katsuyo_text_warning_AttributeErrorr_on_bridge(append_multiple):
             "綺麗でいる",
         ),
         (
-            "INonKatsuyoText",
-            INonKatsuyoText("状態"),
+            "TaigenText",
+            TaigenText("状態"),
             "状態でいる",
         ),
     ],
