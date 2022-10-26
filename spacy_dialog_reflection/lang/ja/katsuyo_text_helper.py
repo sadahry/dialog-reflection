@@ -171,7 +171,7 @@ def bridge_Hitei_default(pre: kt.IKatsuyoTextSource) -> kt.KatsuyoText:
         (k.KeiyoushiKatsuyo, k.KeiyoudoushiKatsuyo),
     ):
         # 「ない」を補助形容詞としてブリッジ
-        return pre + kt.HOZYO_NAI
+        return pre + kt.HOJO_NAI
 
     raise kt.KatsuyoTextError(
         f"Unsupported katsuyo_text in {sys._getframe().f_code.co_name}: {pre} "
@@ -391,14 +391,14 @@ class Suitei(IKatsuyoTextHelper):
 
 def bridge_Touzen_default(pre: kt.IKatsuyoTextSource) -> kt.KatsuyoText:
     if isinstance(pre, kt.INonKatsuyoText):
-        return pre + kt.DE + kt.HOZYO_ARU + kt.Bekida()
+        return pre + kt.DE + kt.HOJO_ARU + kt.Bekida()
 
     if isinstance(
         pre.katsuyo,
         (k.KeiyoushiKatsuyo, k.KeiyoudoushiKatsuyo),
     ):
         # 補助動詞「ある」でブリッジ
-        return pre + kt.HOZYO_ARU + kt.Bekida()
+        return pre + kt.HOJO_ARU + kt.Bekida()
 
     raise kt.KatsuyoTextError(
         f"Unsupported katsuyo_text in {sys._getframe().f_code.co_name}: {pre} "
@@ -475,7 +475,7 @@ def bridge_Keizoku_default(pre: kt.IKatsuyoTextSource) -> kt.KatsuyoText:
         (k.KeiyoushiKatsuyo, k.KeiyoudoushiKatsuyo),
     ):
         # 形容詞/形容動詞では「いる」でブリッジ
-        return pre + kt.HOZYO_IRU
+        return pre + kt.HOJO_IRU
 
     raise kt.KatsuyoTextError(
         f"Unsupported katsuyo_text in {sys._getframe().f_code.co_name}: {pre} "

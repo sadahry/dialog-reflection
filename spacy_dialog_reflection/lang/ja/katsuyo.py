@@ -516,14 +516,14 @@ class TaKatsuyo(
     pass
 
 
-ZYODOUSHI_TA = TaKatsuyo(
+JODOUSHI_TA = TaKatsuyo(
     mizen=FixedKatsuyo("たろ"),
     shushi=FixedKatsuyo("た"),
     rentai=FixedKatsuyo("た"),
     katei=FixedKatsuyo("たら"),
 )
 
-ZYODOUSHI_DA = TaKatsuyo(
+JODOUSHI_DA = TaKatsuyo(
     mizen=FixedKatsuyo("だ"),
     shushi=FixedKatsuyo("だ"),
     rentai=FixedKatsuyo("だ"),

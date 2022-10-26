@@ -363,17 +363,17 @@ class HojoKatsuyoText(KatsuyoText):
             )
 
 
-HOZYO_NAI = HojoKatsuyoText(
+HOJO_NAI = HojoKatsuyoText(
     gokan="な",
     katsuyo=k.KEIYOUSHI,
 )
 
-HOZYO_ARU = HojoKatsuyoText(
+HOJO_ARU = HojoKatsuyoText(
     gokan="あ",
     katsuyo=k.GODAN_RA_GYO,
 )
 
-HOZYO_IRU = HojoKatsuyoText(
+HOJO_IRU = HojoKatsuyoText(
     gokan="い",
     katsuyo=k.KAMI_ICHIDAN,
 )
@@ -626,7 +626,7 @@ class Ta(JodoushiKatsuyoText):
     def __init__(self):
         super().__init__(
             gokan="",
-            katsuyo=k.ZYODOUSHI_TA,
+            katsuyo=k.JODOUSHI_TA,
         )
 
     def merge(self, pre: IKatsuyoTextSource) -> KatsuyoText:
@@ -655,7 +655,7 @@ class Da(JodoushiKatsuyoText):
     def __init__(self):
         super().__init__(
             gokan="",
-            katsuyo=k.ZYODOUSHI_DA,
+            katsuyo=k.JODOUSHI_DA,
         )
 
     def merge(self, pre: IKatsuyoTextSource) -> KatsuyoText:
