@@ -384,7 +384,7 @@ HOJO_IRU = HojoKatsuyoText(
 # ==============================================================================
 
 
-class JodoushiKatsuyoText(KatsuyoText):
+class IJodoushiKatsuyoText(KatsuyoText):
     @property
     def katsuyo_text(self) -> KatsuyoText:
         return KatsuyoText(
@@ -398,7 +398,7 @@ class JodoushiKatsuyoText(KatsuyoText):
 # ==============================================================================
 
 
-class Reru(JodoushiKatsuyoText):
+class Reru(IJodoushiKatsuyoText):
     def __init__(self):
         super().__init__(
             gokan="れ",
@@ -429,7 +429,7 @@ class Reru(JodoushiKatsuyoText):
             )
 
 
-class Rareru(JodoushiKatsuyoText):
+class Rareru(IJodoushiKatsuyoText):
     def __init__(self):
         super().__init__(
             gokan="られ",
@@ -460,12 +460,15 @@ class Rareru(JodoushiKatsuyoText):
             )
 
 
+JODOUSHI_RERU = Reru()
+JODOUSHI_RARERU = Rareru()
+
 # ==============================================================================
 # 助動詞::使役
 # ==============================================================================
 
 
-class Seru(JodoushiKatsuyoText):
+class Seru(IJodoushiKatsuyoText):
     def __init__(self):
         super().__init__(
             gokan="せ",
@@ -496,11 +499,17 @@ class Seru(JodoushiKatsuyoText):
             )
 
 
-class Saseru(JodoushiKatsuyoText):
+SASERU = KatsuyoText(
+    gokan="させ",
+    katsuyo=k.SHIMO_ICHIDAN,
+)
+
+
+class Saseru(IJodoushiKatsuyoText):
     def __init__(self):
         super().__init__(
-            gokan="させ",
-            katsuyo=k.SHIMO_ICHIDAN,
+            gokan=SASERU.gokan,
+            katsuyo=SASERU.katsuyo,
         )
 
     def merge(self, pre: IKatsuyoTextSource) -> KatsuyoText:
@@ -525,12 +534,15 @@ class Saseru(JodoushiKatsuyoText):
             )
 
 
+JODOUSHI_SERU = Seru()
+JODOUSHI_SASERU = Saseru()
+
 # ==============================================================================
 # 助動詞::否定
 # ==============================================================================
 
 
-class Nai(JodoushiKatsuyoText):
+class Nai(IJodoushiKatsuyoText):
     def __init__(self):
         super().__init__(
             gokan="な",
@@ -541,8 +553,10 @@ class Nai(JodoushiKatsuyoText):
         if isinstance(pre, FixedKatsuyoText):
             return pre + self.katsuyo_text
         if isinstance(pre, INonKatsuyoText):
-            # 精査してもいいかもしれない
-            return pre + self.katsuyo_text
+            raise KatsuyoTextError(
+                f"Unsupported katsuyo_text in merge of {type(self)}: "
+                f"{pre} type: {type(pre)}"
+            )
         else:
             assert isinstance(pre, KatsuyoText)
 
@@ -556,12 +570,14 @@ class Nai(JodoushiKatsuyoText):
             )
 
 
+JODOUSHI_NAI = Nai()
+
 # ==============================================================================
 # 助動詞::希望
 # ==============================================================================
 
 
-class Tai(JodoushiKatsuyoText):
+class Tai(IJodoushiKatsuyoText):
     def __init__(self):
         super().__init__(
             gokan="た",
@@ -589,7 +605,7 @@ class Tai(JodoushiKatsuyoText):
             )
 
 
-class Tagaru(JodoushiKatsuyoText):
+class Tagaru(IJodoushiKatsuyoText):
     def __init__(self):
         super().__init__(
             gokan="たが",
@@ -617,12 +633,15 @@ class Tagaru(JodoushiKatsuyoText):
             )
 
 
+JODOUSHI_TAI = Tai()
+JODOUSHI_TAGARU = Tagaru()
+
 # ==============================================================================
 # 助動詞::過去・完了
 # ==============================================================================
 
 
-class Ta(JodoushiKatsuyoText):
+class Ta(IJodoushiKatsuyoText):
     def __init__(self):
         super().__init__(
             gokan="",
@@ -651,7 +670,7 @@ class Ta(JodoushiKatsuyoText):
             )
 
 
-class Da(JodoushiKatsuyoText):
+class Da(IJodoushiKatsuyoText):
     def __init__(self):
         super().__init__(
             gokan="",
@@ -680,12 +699,16 @@ class Da(JodoushiKatsuyoText):
             )
 
 
+JODOUSHI_TA = Ta()
+JODOUSHI_DA = Da()
+
+
 # ==============================================================================
 # 助動詞::様態
 # ==============================================================================
 
 
-class SoudaYoutai(JodoushiKatsuyoText):
+class SoudaYoutai(IJodoushiKatsuyoText):
     def __init__(self):
         super().__init__(
             gokan="そう",
@@ -715,12 +738,14 @@ class SoudaYoutai(JodoushiKatsuyoText):
             )
 
 
+JODOUSHI_SOUDA_YOUTAI = SoudaYoutai()
+
 # ==============================================================================
 # 助動詞::伝聞
 # ==============================================================================
 
 
-class SoudaDenbun(JodoushiKatsuyoText):
+class SoudaDenbun(IJodoushiKatsuyoText):
     def __init__(self):
         super().__init__(
             gokan="そう",
@@ -749,12 +774,15 @@ class SoudaDenbun(JodoushiKatsuyoText):
             )
 
 
+JODOUSHI_SOUDA_DENBUN = SoudaDenbun()
+
+
 # ==============================================================================
 # 助動詞::推定
 # ==============================================================================
 
 
-class Rashii(JodoushiKatsuyoText):
+class Rashii(IJodoushiKatsuyoText):
     def __init__(self):
         super().__init__(
             gokan="らし",
@@ -792,12 +820,14 @@ class Rashii(JodoushiKatsuyoText):
             )
 
 
+JODOUSHI_RASHII = Rashii()
+
 # ==============================================================================
 # 助動詞::当然
 # ==============================================================================
 
 
-class Bekida(JodoushiKatsuyoText):
+class Bekida(IJodoushiKatsuyoText):
     def __init__(self):
         super().__init__(
             gokan="べき",
@@ -825,12 +855,14 @@ class Bekida(JodoushiKatsuyoText):
             )
 
 
+JODOUSHI_BEKIDA = Bekida()
+
 # ==============================================================================
 # 助動詞::比況 例示 推定
 # ==============================================================================
 
 
-class Youda(JodoushiKatsuyoText):
+class Youda(IJodoushiKatsuyoText):
     def __init__(self):
         super().__init__(
             gokan="よう",
@@ -863,6 +895,8 @@ class Youda(JodoushiKatsuyoText):
             )
 
 
+JODOUSHI_YOUDA = Youda()
+
 # ==============================================================================
 # 助動詞::継続
 # 助動詞の参照リンクには含まれないが、口語では頻出されるため追記
@@ -870,7 +904,7 @@ class Youda(JodoushiKatsuyoText):
 # ==============================================================================
 
 
-class Teiru(JodoushiKatsuyoText):
+class Teiru(IJodoushiKatsuyoText):
     def __init__(self):
         super().__init__(
             gokan="てい",
@@ -899,7 +933,7 @@ class Teiru(JodoushiKatsuyoText):
             )
 
 
-class Deiru(JodoushiKatsuyoText):
+class Deiru(IJodoushiKatsuyoText):
     def __init__(self):
         super().__init__(
             gokan="でい",
@@ -928,6 +962,9 @@ class Deiru(JodoushiKatsuyoText):
             )
 
 
+JODOUSHI_TEIRU = Teiru()
+JODOUSHI_DEIRU = Deiru()
+
 # ==============================================================================
 # 体言
 # ref. https://ja.wiktionary.org/wiki/体言
@@ -953,12 +990,8 @@ class JoshiText(INonKatsuyoText):
     pass
 
 
-NI = JoshiText("に")
-
-DE = JoshiText("で")
-
-HA = JoshiText("は")
-
-DA = JoshiText("だ")
-
-NO = JoshiText("の")
+JOSHI_NI = JoshiText("に")
+JOSHI_DE = JoshiText("で")
+JOSHI_HA = JoshiText("は")
+JOSHI_DA = JoshiText("だ")
+JOSHI_NO = JoshiText("の")
