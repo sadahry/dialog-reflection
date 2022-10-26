@@ -142,16 +142,16 @@ def unsupported_katsuyo_text():
         ),
     ],
 )
-def test_zyodoushi_ukemi(msg, katsuyo_text, expected):
-    zyodoushi = Ukemi()
-    result = katsuyo_text + zyodoushi
+def test_jodoushi_ukemi(msg, katsuyo_text, expected):
+    jodoushi = Ukemi()
+    result = katsuyo_text + jodoushi
     assert str(result) == expected, msg
 
 
-def test_zyodoushi_ukemi_value_error(unsupported_katsuyo_text):
-    zyodoushi = Ukemi()
+def test_jodoushi_ukemi_value_error(unsupported_katsuyo_text):
+    jodoushi = Ukemi()
     with pytest.raises(KatsuyoTextError):
-        unsupported_katsuyo_text + zyodoushi
+        unsupported_katsuyo_text + jodoushi
 
 
 @pytest.mark.parametrize(
@@ -233,16 +233,16 @@ def test_zyodoushi_ukemi_value_error(unsupported_katsuyo_text):
         ),
     ],
 )
-def test_zyodoushi_shieki(msg, katsuyo_text, expected):
-    zyodoushi = Shieki()
-    result = katsuyo_text + zyodoushi
+def test_jodoushi_shieki(msg, katsuyo_text, expected):
+    jodoushi = Shieki()
+    result = katsuyo_text + jodoushi
     assert str(result) == expected, msg
 
 
-def test_zyodoushi_shieki_value_error(unsupported_katsuyo_text):
-    zyodoushi = Shieki()
+def test_jodoushi_shieki_value_error(unsupported_katsuyo_text):
+    jodoushi = Shieki()
     with pytest.raises(KatsuyoTextError):
-        unsupported_katsuyo_text + zyodoushi
+        unsupported_katsuyo_text + jodoushi
 
 
 @pytest.mark.parametrize(
@@ -325,16 +325,16 @@ def test_zyodoushi_shieki_value_error(unsupported_katsuyo_text):
         ),
     ],
 )
-def test_zyodoushi_hiteii(msg, katsuyo_text, expected):
-    zyodoushi = Hitei()
-    result = katsuyo_text + zyodoushi
+def test_jodoushi_hiteii(msg, katsuyo_text, expected):
+    jodoushi = Hitei()
+    result = katsuyo_text + jodoushi
     assert str(result) == expected, msg
 
 
-def test_zyodoushi_hitei_value_error(unsupported_katsuyo_text):
-    zyodoushi = Hitei()
+def test_jodoushi_hitei_value_error(unsupported_katsuyo_text):
+    jodoushi = Hitei()
     with pytest.raises(KatsuyoTextError):
-        unsupported_katsuyo_text + zyodoushi
+        unsupported_katsuyo_text + jodoushi
 
 
 @pytest.mark.parametrize(
@@ -395,9 +395,9 @@ def test_zyodoushi_hitei_value_error(unsupported_katsuyo_text):
         ),
     ],
 )
-def test_zyodoushi_kibou_self(msg, katsuyo_text, expected):
-    zyodoushi = KibouSelf()
-    result = katsuyo_text + zyodoushi
+def test_jodoushi_kibou_self(msg, katsuyo_text, expected):
+    jodoushi = KibouSelf()
+    result = katsuyo_text + jodoushi
     assert str(result) == expected, msg
 
 
@@ -424,10 +424,10 @@ def test_zyodoushi_kibou_self(msg, katsuyo_text, expected):
         ),
     ],
 )
-def test_zyodoushi_kibou_self_value_error(msg, katsuyo_text):
-    zyodoushi = KibouSelf()
+def test_jodoushi_kibou_self_value_error(msg, katsuyo_text):
+    jodoushi = KibouSelf()
     with pytest.raises(KatsuyoTextError, match=re.compile(r"Unsupported.*")):
-        katsuyo_text + zyodoushi
+        katsuyo_text + jodoushi
         assert False, msg
 
 
@@ -489,9 +489,9 @@ def test_zyodoushi_kibou_self_value_error(msg, katsuyo_text):
         ),
     ],
 )
-def test_zyodoushi_kibou_others(msg, katsuyo_text, expected):
-    zyodoushi = KibouOthers()
-    result = katsuyo_text + zyodoushi
+def test_jodoushi_kibou_others(msg, katsuyo_text, expected):
+    jodoushi = KibouOthers()
+    result = katsuyo_text + jodoushi
     assert str(result) == expected, msg
 
 
@@ -518,10 +518,10 @@ def test_zyodoushi_kibou_others(msg, katsuyo_text, expected):
         ),
     ],
 )
-def test_zyodoushi_kibou_others_value_error(msg, katsuyo_text):
-    zyodoushi = KibouOthers()
+def test_jodoushi_kibou_others_value_error(msg, katsuyo_text):
+    jodoushi = KibouOthers()
     with pytest.raises(KatsuyoTextError, match=re.compile(r"Unsupported.*")):
-        katsuyo_text + zyodoushi
+        katsuyo_text + jodoushi
         assert False, msg
 
 
@@ -677,16 +677,16 @@ def test_zyodoushi_kibou_others_value_error(msg, katsuyo_text):
         ),
     ],
 )
-def test_zyodoushi_kako_kanryo(msg, katsuyo_text, expected):
-    zyodoushi = KakoKanryo()
-    result = katsuyo_text + zyodoushi
+def test_jodoushi_kako_kanryo(msg, katsuyo_text, expected):
+    jodoushi = KakoKanryo()
+    result = katsuyo_text + jodoushi
     assert str(result) == expected, msg
 
 
-def test_zyodoushi_kako_kanryo_value_error(unsupported_katsuyo_text):
-    zyodoushi = KakoKanryo()
+def test_jodoushi_kako_kanryo_value_error(unsupported_katsuyo_text):
+    jodoushi = KakoKanryo()
     with pytest.raises(KatsuyoTextError):
-        unsupported_katsuyo_text + zyodoushi
+        unsupported_katsuyo_text + jodoushi
 
 
 @pytest.mark.parametrize(
@@ -769,16 +769,16 @@ def test_zyodoushi_kako_kanryo_value_error(unsupported_katsuyo_text):
         ),
     ],
 )
-def test_zyodoushi_youtaii(msg, katsuyo_text, expected):
-    zyodoushi = Youtai()
-    result = katsuyo_text + zyodoushi
+def test_jodoushi_youtaii(msg, katsuyo_text, expected):
+    jodoushi = Youtai()
+    result = katsuyo_text + jodoushi
     assert str(result) == expected, msg
 
 
-def test_zyodoushi_youtai_value_error(unsupported_katsuyo_text):
-    zyodoushi = Youtai()
+def test_jodoushi_youtai_value_error(unsupported_katsuyo_text):
+    jodoushi = Youtai()
     with pytest.raises(KatsuyoTextError):
-        unsupported_katsuyo_text + zyodoushi
+        unsupported_katsuyo_text + jodoushi
 
 
 @pytest.mark.parametrize(
@@ -861,16 +861,16 @@ def test_zyodoushi_youtai_value_error(unsupported_katsuyo_text):
         ),
     ],
 )
-def test_zyodoushi_denbun(msg, katsuyo_text, expected):
-    zyodoushi = Denbun()
-    result = katsuyo_text + zyodoushi
+def test_jodoushi_denbun(msg, katsuyo_text, expected):
+    jodoushi = Denbun()
+    result = katsuyo_text + jodoushi
     assert str(result) == expected, msg
 
 
-def test_zyodoushi_denbun_value_error(unsupported_katsuyo_text):
-    zyodoushi = Denbun()
+def test_jodoushi_denbun_value_error(unsupported_katsuyo_text):
+    jodoushi = Denbun()
     with pytest.raises(KatsuyoTextError):
-        unsupported_katsuyo_text + zyodoushi
+        unsupported_katsuyo_text + jodoushi
 
 
 @pytest.mark.parametrize(
@@ -953,16 +953,16 @@ def test_zyodoushi_denbun_value_error(unsupported_katsuyo_text):
         ),
     ],
 )
-def test_zyodoushi_suitei(msg, katsuyo_text, expected):
-    zyodoushi = Suitei()
-    result = katsuyo_text + zyodoushi
+def test_jodoushi_suitei(msg, katsuyo_text, expected):
+    jodoushi = Suitei()
+    result = katsuyo_text + jodoushi
     assert str(result) == expected, msg
 
 
-def test_zyodoushi_suitei_value_error(unsupported_katsuyo_text):
-    zyodoushi = Suitei()
+def test_jodoushi_suitei_value_error(unsupported_katsuyo_text):
+    jodoushi = Suitei()
     with pytest.raises(KatsuyoTextError):
-        unsupported_katsuyo_text + zyodoushi
+        unsupported_katsuyo_text + jodoushi
 
 
 @pytest.mark.parametrize(
@@ -1045,16 +1045,16 @@ def test_zyodoushi_suitei_value_error(unsupported_katsuyo_text):
         ),
     ],
 )
-def test_zyodoushi_touzen(msg, katsuyo_text, expected):
-    zyodoushi = Touzen()
-    result = katsuyo_text + zyodoushi
+def test_jodoushi_touzen(msg, katsuyo_text, expected):
+    jodoushi = Touzen()
+    result = katsuyo_text + jodoushi
     assert str(result) == expected, msg
 
 
-def test_zyodoushi_touzen_value_error(unsupported_katsuyo_text):
-    zyodoushi = Touzen()
+def test_jodoushi_touzen_value_error(unsupported_katsuyo_text):
+    jodoushi = Touzen()
     with pytest.raises(KatsuyoTextError):
-        unsupported_katsuyo_text + zyodoushi
+        unsupported_katsuyo_text + jodoushi
 
 
 @pytest.mark.parametrize(
@@ -1137,16 +1137,16 @@ def test_zyodoushi_touzen_value_error(unsupported_katsuyo_text):
         ),
     ],
 )
-def test_zyodoushi_hikyo_reizi(msg, katsuyo_text, expected):
-    zyodoushi = HikyoReizi()
-    result = katsuyo_text + zyodoushi
+def test_jodoushi_hikyo_reizi(msg, katsuyo_text, expected):
+    jodoushi = HikyoReizi()
+    result = katsuyo_text + jodoushi
     assert str(result) == expected, msg
 
 
-def test_zyodoushi_hikyo_reizi_value_error(unsupported_katsuyo_text):
-    zyodoushi = HikyoReizi()
+def test_jodoushi_hikyo_reizi_value_error(unsupported_katsuyo_text):
+    jodoushi = HikyoReizi()
     with pytest.raises(KatsuyoTextError):
-        unsupported_katsuyo_text + zyodoushi
+        unsupported_katsuyo_text + jodoushi
 
 
 @pytest.mark.filterwarnings(r"ignore:Error in append_multiple.*KatsuyoTextError")
@@ -1403,13 +1403,13 @@ def test_katsuyo_text_warning_AttributeErrorr_on_bridge(append_multiple):
         ),
     ],
 )
-def test_zyodoushi_keizoku(msg, katsuyo_text, expected):
-    zyodoushi = Keizoku()
-    result = katsuyo_text + zyodoushi
+def test_jodoushi_keizoku(msg, katsuyo_text, expected):
+    jodoushi = Keizoku()
+    result = katsuyo_text + jodoushi
     assert str(result) == expected, msg
 
 
-def test_zyodoushi_keizoku_value_error(unsupported_katsuyo_text):
-    zyodoushi = Keizoku()
+def test_jodoushi_keizoku_value_error(unsupported_katsuyo_text):
+    jodoushi = Keizoku()
     with pytest.raises(KatsuyoTextError):
-        unsupported_katsuyo_text + zyodoushi
+        unsupported_katsuyo_text + jodoushi

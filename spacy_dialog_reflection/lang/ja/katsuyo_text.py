@@ -328,12 +328,12 @@ ZURU = KatsuyoText(
 # ==============================================================================
 
 
-class HozyoKatsuyoText(KatsuyoText):
+class HojoKatsuyoText(KatsuyoText):
     def merge(self, pre: IKatsuyoTextSource) -> KatsuyoText:
         if isinstance(pre, FixedKatsuyoText):
             return pre + self
         elif isinstance(pre, INonKatsuyoText):
-            if isinstance(pre, ZyoshiText):
+            if isinstance(pre, JoshiText):
                 # TODO 助詞の精査
                 return pre + self
 
@@ -363,17 +363,17 @@ class HozyoKatsuyoText(KatsuyoText):
             )
 
 
-HOZYO_NAI = HozyoKatsuyoText(
+HOZYO_NAI = HojoKatsuyoText(
     gokan="な",
     katsuyo=k.KEIYOUSHI,
 )
 
-HOZYO_ARU = HozyoKatsuyoText(
+HOZYO_ARU = HojoKatsuyoText(
     gokan="あ",
     katsuyo=k.GODAN_RA_GYO,
 )
 
-HOZYO_IRU = HozyoKatsuyoText(
+HOZYO_IRU = HojoKatsuyoText(
     gokan="い",
     katsuyo=k.KAMI_ICHIDAN,
 )
@@ -384,7 +384,7 @@ HOZYO_IRU = HozyoKatsuyoText(
 # ==============================================================================
 
 
-class ZyodoushiKatsuyoText(KatsuyoText):
+class JodoushiKatsuyoText(KatsuyoText):
     @property
     def katsuyo_text(self) -> KatsuyoText:
         return KatsuyoText(
@@ -398,7 +398,7 @@ class ZyodoushiKatsuyoText(KatsuyoText):
 # ==============================================================================
 
 
-class Reru(ZyodoushiKatsuyoText):
+class Reru(JodoushiKatsuyoText):
     def __init__(self):
         super().__init__(
             gokan="れ",
@@ -429,7 +429,7 @@ class Reru(ZyodoushiKatsuyoText):
             )
 
 
-class Rareru(ZyodoushiKatsuyoText):
+class Rareru(JodoushiKatsuyoText):
     def __init__(self):
         super().__init__(
             gokan="られ",
@@ -465,7 +465,7 @@ class Rareru(ZyodoushiKatsuyoText):
 # ==============================================================================
 
 
-class Seru(ZyodoushiKatsuyoText):
+class Seru(JodoushiKatsuyoText):
     def __init__(self):
         super().__init__(
             gokan="せ",
@@ -496,7 +496,7 @@ class Seru(ZyodoushiKatsuyoText):
             )
 
 
-class Saseru(ZyodoushiKatsuyoText):
+class Saseru(JodoushiKatsuyoText):
     def __init__(self):
         super().__init__(
             gokan="させ",
@@ -530,7 +530,7 @@ class Saseru(ZyodoushiKatsuyoText):
 # ==============================================================================
 
 
-class Nai(ZyodoushiKatsuyoText):
+class Nai(JodoushiKatsuyoText):
     def __init__(self):
         super().__init__(
             gokan="な",
@@ -561,7 +561,7 @@ class Nai(ZyodoushiKatsuyoText):
 # ==============================================================================
 
 
-class Tai(ZyodoushiKatsuyoText):
+class Tai(JodoushiKatsuyoText):
     def __init__(self):
         super().__init__(
             gokan="た",
@@ -589,7 +589,7 @@ class Tai(ZyodoushiKatsuyoText):
             )
 
 
-class Tagaru(ZyodoushiKatsuyoText):
+class Tagaru(JodoushiKatsuyoText):
     def __init__(self):
         super().__init__(
             gokan="たが",
@@ -622,7 +622,7 @@ class Tagaru(ZyodoushiKatsuyoText):
 # ==============================================================================
 
 
-class Ta(ZyodoushiKatsuyoText):
+class Ta(JodoushiKatsuyoText):
     def __init__(self):
         super().__init__(
             gokan="",
@@ -651,7 +651,7 @@ class Ta(ZyodoushiKatsuyoText):
             )
 
 
-class Da(ZyodoushiKatsuyoText):
+class Da(JodoushiKatsuyoText):
     def __init__(self):
         super().__init__(
             gokan="",
@@ -685,7 +685,7 @@ class Da(ZyodoushiKatsuyoText):
 # ==============================================================================
 
 
-class SoudaYoutai(ZyodoushiKatsuyoText):
+class SoudaYoutai(JodoushiKatsuyoText):
     def __init__(self):
         super().__init__(
             gokan="そう",
@@ -720,7 +720,7 @@ class SoudaYoutai(ZyodoushiKatsuyoText):
 # ==============================================================================
 
 
-class SoudaDenbun(ZyodoushiKatsuyoText):
+class SoudaDenbun(JodoushiKatsuyoText):
     def __init__(self):
         super().__init__(
             gokan="そう",
@@ -754,7 +754,7 @@ class SoudaDenbun(ZyodoushiKatsuyoText):
 # ==============================================================================
 
 
-class Rashii(ZyodoushiKatsuyoText):
+class Rashii(JodoushiKatsuyoText):
     def __init__(self):
         super().__init__(
             gokan="らし",
@@ -769,7 +769,7 @@ class Rashii(ZyodoushiKatsuyoText):
         if isinstance(pre, INonKatsuyoText):
             if isinstance(pre, TaigenText):
                 return pre + self.katsuyo_text
-            elif isinstance(pre, ZyoshiText):
+            elif isinstance(pre, JoshiText):
                 # TODO 助詞の精査
                 return pre + self.katsuyo_text
 
@@ -797,7 +797,7 @@ class Rashii(ZyodoushiKatsuyoText):
 # ==============================================================================
 
 
-class Bekida(ZyodoushiKatsuyoText):
+class Bekida(JodoushiKatsuyoText):
     def __init__(self):
         super().__init__(
             gokan="べき",
@@ -830,7 +830,7 @@ class Bekida(ZyodoushiKatsuyoText):
 # ==============================================================================
 
 
-class Youda(ZyodoushiKatsuyoText):
+class Youda(JodoushiKatsuyoText):
     def __init__(self):
         super().__init__(
             gokan="よう",
@@ -841,7 +841,7 @@ class Youda(ZyodoushiKatsuyoText):
         if isinstance(pre, FixedKatsuyoText):
             return pre + self.katsuyo_text
         if isinstance(pre, INonKatsuyoText):
-            if isinstance(pre, ZyoshiText):
+            if isinstance(pre, JoshiText):
                 # TODO 助詞の精査
                 return pre + self.katsuyo_text
 
@@ -870,7 +870,7 @@ class Youda(ZyodoushiKatsuyoText):
 # ==============================================================================
 
 
-class Teiru(ZyodoushiKatsuyoText):
+class Teiru(JodoushiKatsuyoText):
     def __init__(self):
         super().__init__(
             gokan="てい",
@@ -899,7 +899,7 @@ class Teiru(ZyodoushiKatsuyoText):
             )
 
 
-class Deiru(ZyodoushiKatsuyoText):
+class Deiru(JodoushiKatsuyoText):
     def __init__(self):
         super().__init__(
             gokan="でい",
@@ -949,16 +949,16 @@ class TaigenText(INonKatsuyoText):
 # ==============================================================================
 
 
-class ZyoshiText(INonKatsuyoText):
+class JoshiText(INonKatsuyoText):
     pass
 
 
-NI = ZyoshiText("に")
+NI = JoshiText("に")
 
-DE = ZyoshiText("で")
+DE = JoshiText("で")
 
-HA = ZyoshiText("は")
+HA = JoshiText("は")
 
-DA = ZyoshiText("だ")
+DA = JoshiText("だ")
 
-NO = ZyoshiText("の")
+NO = JoshiText("の")

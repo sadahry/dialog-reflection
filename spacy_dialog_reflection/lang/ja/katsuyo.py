@@ -489,7 +489,7 @@ KEIYOUDOUSHI = KeiyoudoushiKatsuyo(
 
 
 @attrs.define(frozen=True, slots=False)
-class IZyodoushiKatsuyo(IKatsuyo):
+class IJodoushiKatsuyo(IKatsuyo):
     """
     このクラスは助動詞の活用形を表すクラスではなく、
     特殊な活用であることを表すクラスである。
@@ -505,7 +505,7 @@ class IZyodoushiKatsuyo(IKatsuyo):
 
 @attrs.define(frozen=True, slots=True)
 class TaKatsuyo(
-    IZyodoushiKatsuyo,
+    IJodoushiKatsuyo,
     MizenMixin,
     # NO: RenyoMixin,
     ShushiMixin,
