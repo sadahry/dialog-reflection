@@ -165,6 +165,6 @@ class JaSpacyReflectionTextBuilder(ISpacyReflectionTextBuilder):
             )
 
     def build_instead_of_error(self, e: BaseException) -> str:
-        if type(e) is ReflectionTextError and e.instant_reflection_text is not None:
+        if isinstance(e, ReflectionTextError) and e.instant_reflection_text is not None:
             return e.instant_reflection_text
         return self.message_when_not_valid_doc
