@@ -20,7 +20,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text_helper import (
     Youtai,
 )
 from spacy_dialog_reflection.lang.ja.katsuyo_text_detector import (
-    IKatsuyoTextDetector,
+    IKatsuyoTextSourceDetector,
     IKatsuyoTextAppendantsDetector,
     SpacyKatsuyoTextAppendantsDetector,
     SpacyKatsuyoTextDetector,
@@ -33,7 +33,7 @@ import warnings
 class IKatsuyoTextBuilder(abc.ABC):
     def __init__(
         self,
-        root_detector: IKatsuyoTextDetector,
+        root_detector: IKatsuyoTextSourceDetector,
         appendants_detector: IKatsuyoTextAppendantsDetector,
     ) -> None:
         self.root_detector = root_detector

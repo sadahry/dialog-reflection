@@ -61,7 +61,7 @@ import warnings
 import spacy
 
 
-class IKatsuyoTextDetector(abc.ABC):
+class IKatsuyoTextSourceDetector(abc.ABC):
     @abc.abstractmethod
     def detect(self, src: Any) -> Optional[IKatsuyoTextSource]:
         """
@@ -138,7 +138,7 @@ class IKatsuyoTextAppendantsDetector(abc.ABC):
         return self.__class__.__name__
 
 
-class SpacyKatsuyoTextDetector(IKatsuyoTextDetector):
+class SpacyKatsuyoTextDetector(IKatsuyoTextSourceDetector):
     VERB_KATSUYOS_BY_CONJUGATION_TYPE = {
         "五段-カ行": GODAN_KA_GYO,
         "五段-ガ行": GODAN_GA_GYO,
