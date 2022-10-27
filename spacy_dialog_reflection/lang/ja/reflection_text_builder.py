@@ -9,7 +9,10 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text import (
 from spacy_dialog_reflection.reflection_text_builder import (
     ReflectionTextError,
 )
-from spacy_dialog_reflection.reflector import ISpacyReflectionTextBuilder
+from spacy_dialog_reflection.reflector import (
+    ISpacyReflectionTextBuilder,
+    SpacyReflector,
+)
 from spacy_dialog_reflection.lang.ja.katsuyo_text_builder import (
     SpacyKatsuyoTextBuilder,
 )
@@ -168,3 +171,13 @@ class JaSpacyReflectionTextBuilder(ISpacyReflectionTextBuilder):
         if isinstance(e, ReflectionTextError) and e.instant_reflection_text is not None:
             return e.instant_reflection_text
         return self.message_when_not_valid_doc
+
+
+class JaSpacyReflector(SpacyReflector):
+    def __init__(
+        self,
+        model: str,  # need to be installed
+        builder: JaSpacyReflectionTextBuilder = JaSpacyReflectionTextBuilder(),
+    ) -> None:
+        nlp = spacy.load(model)
+        super().__init__(nlp, builder)

@@ -1,18 +1,13 @@
-import spacy
-
 # fmt: off
 # TODO パッケージが完成したら消して、以下のように書き換える
 import sys
 dir = sys.path[0]
 sys.path.append(dir + "/../")
-from spacy_dialog_reflection.reflector import SpacyReflector # noqa: E402,E261
-from spacy_dialog_reflection.lang.ja.reflection_text_builder import JaSpacyReflectionTextBuilder # noqa: E402,E261
+from spacy_dialog_reflection.lang.ja.reflection_text_builder import JaSpacyReflector # noqa: E402,E261
 # from spacy_dialog_reflection import SpacyReflector
 # fmt: on
 
-nlp = spacy.load("ja_ginza")
-builder = JaSpacyReflectionTextBuilder()
-refactor = SpacyReflector(nlp, builder)
+refactor = JaSpacyReflector(model="ja_ginza")
 
 print("Ctrl+C to exit")
 print()
