@@ -4,6 +4,18 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text import (
     IKatsuyoTextSource,
     KatsuyoTextError,
     KatsuyoTextHasError,
+    FUKUZYOSHI_BAKARI,
+    FUKUZYOSHI_MADE,
+    FUKUZYOSHI_DAKE,
+    FUKUZYOSHI_HODO,
+    FUKUZYOSHI_KURAI,
+    FUKUZYOSHI_NADO,
+    FUKUZYOSHI_NARI,
+    FUKUZYOSHI_KA,
+    FUKUZYOSHI_ZUTSU,
+    FUKUZYOSHI_NOMI,
+    FUKUZYOSHI_KIRI,
+    FUKUZYOSHI_YARA,
 )
 from spacy_dialog_reflection.lang.ja.katsuyo_text_helper import (
     Denbun,
@@ -93,7 +105,7 @@ class SpacyKatsuyoTextBuilder(IKatsuyoTextBuilder):
             root_detector=SpacyKatsuyoTextDetector(),
             appendants_detector=SpacyKatsuyoTextAppendantsDetector(
                 # TODO もっと柔軟な設定ができるように
-                (
+                helpers=(
                     Ukemi(),
                     Shieki(),
                     Hitei(),
@@ -106,6 +118,20 @@ class SpacyKatsuyoTextBuilder(IKatsuyoTextBuilder):
                     Touzen(),
                     HikyoReizi(),
                     Keizoku(),
+                ),
+                fukujoshis=(
+                    FUKUZYOSHI_BAKARI,
+                    FUKUZYOSHI_MADE,
+                    FUKUZYOSHI_DAKE,
+                    FUKUZYOSHI_HODO,
+                    FUKUZYOSHI_KURAI,
+                    FUKUZYOSHI_NADO,
+                    FUKUZYOSHI_NARI,
+                    FUKUZYOSHI_KA,
+                    FUKUZYOSHI_ZUTSU,
+                    FUKUZYOSHI_NOMI,
+                    FUKUZYOSHI_KIRI,
+                    FUKUZYOSHI_YARA,
                 ),
             ),
         )

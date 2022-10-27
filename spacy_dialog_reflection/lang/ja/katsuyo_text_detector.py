@@ -19,20 +19,9 @@ from spacy_dialog_reflection.lang.ja.katsuyo import (
     SHIMO_ICHIDAN,
 )
 from spacy_dialog_reflection.lang.ja.katsuyo_text import (
-    FUKUZYOSHI_BAKARI,
-    FUKUZYOSHI_MADE,
-    FUKUZYOSHI_DAKE,
-    FUKUZYOSHI_HODO,
-    FUKUZYOSHI_KURAI,
-    FUKUZYOSHI_NADO,
-    FUKUZYOSHI_NARI,
-    FUKUZYOSHI_KA,
-    FUKUZYOSHI_ZUTSU,
-    FUKUZYOSHI_NOMI,
-    FUKUZYOSHI_KIRI,
-    FUKUZYOSHI_YARA,
     KURU,
     KURU_KANJI,
+    FukujoshiText,
     KatsuyoTextErrorMessage,
     KatsuyoTextHasError,
     IKatsuyoTextAppendant,
@@ -89,7 +78,11 @@ class IKatsuyoTextAppendantsDetector(abc.ABC):
         Keizoku,
     )
 
-    def __init__(self, helpers: Set[IKatsuyoTextHelper]) -> None:
+    def __init__(
+        self,
+        helpers: Set[IKatsuyoTextHelper],
+        fukujoshis: Set[FukujoshiText],
+    ) -> None:
         # validate helpers
         for helper in helpers:
             if not isinstance(helper, self.SUPPORTED_HELPERS):
@@ -102,6 +95,8 @@ class IKatsuyoTextAppendantsDetector(abc.ABC):
             if not issubclass(supported_helper, tuple(self.appendants_dict.keys())):
                 warnings.warn(f"this object doesn't have helper: {supported_helper}")
 
+        self.fukujoshis_dict = {fukujoshi.gokan: fukujoshi for fukujoshi in fukujoshis}
+
     def try_get_helper(
         self, typ: Type[IKatsuyoTextHelper]
     ) -> Tuple[Optional[IKatsuyoTextHelper], Optional[KatsuyoTextErrorMessage]]:
@@ -113,6 +108,19 @@ class IKatsuyoTextAppendantsDetector(abc.ABC):
         return None, KatsuyoTextErrorMessage(
             f"Unsupported type in try_get_helper: {typ}"
         )
+
+    def try_get_fukujoshi(
+        self, norm: str
+    ) -> Tuple[Optional[FukujoshiText], Optional[KatsuyoTextErrorMessage]]:
+        helper = self.fukujoshis_dict.get(norm)
+        if helper is not None:
+            return helper, None
+
+        # 例外が多いため、Noneを返却する
+        # return None, KatsuyoTextErrorMessage(
+        #     f"Unsupported type in try_get_fukujoshi: {norm}"
+        # )
+        return None, None
 
     @abc.abstractmethod
     def detect_from_sent(
@@ -286,22 +294,6 @@ class SpacyKatsuyoTextDetector(IKatsuyoTextSourceDetector):
 
 
 class SpacyKatsuyoTextAppendantsDetector(IKatsuyoTextAppendantsDetector):
-    # builderから渡すようにしてもいいかも
-    FUKUJOSHI_BY_NORM = {
-        "ばかり": FUKUZYOSHI_BAKARI,
-        "まで": FUKUZYOSHI_MADE,
-        "だけ": FUKUZYOSHI_DAKE,
-        "ほど": FUKUZYOSHI_HODO,
-        "くらい": FUKUZYOSHI_KURAI,
-        "など": FUKUZYOSHI_NADO,
-        "なり": FUKUZYOSHI_NARI,
-        "やら": FUKUZYOSHI_YARA,
-        "か": FUKUZYOSHI_KA,
-        "ずつ": FUKUZYOSHI_ZUTSU,
-        "のみ": FUKUZYOSHI_NOMI,
-        "きり": FUKUZYOSHI_KIRI,
-    }
-
     def detect_from_sent(
         self, sent: spacy.tokens.Span, src: spacy.tokens.Token
     ) -> Tuple[List[IKatsuyoTextAppendant], KatsuyoTextHasError]:
@@ -379,9 +371,7 @@ class SpacyKatsuyoTextAppendantsDetector(IKatsuyoTextAppendantsDetector):
             # ==================================================
             # 副助詞の判定
             # ==================================================
-            fukujoshi_text = self.FUKUJOSHI_BY_NORM.get(norm)
-            if fukujoshi_text is not None:
-                return fukujoshi_text, None
+            return self.try_get_fukujoshi(norm)
 
         elif pos_tag == "ADJ":
             # 「ない」のみ対応
