@@ -13,6 +13,9 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text import (
     FUKUZYOSHI_YARA,
     FUKUZYOSHI_ZUTSU,
     SHUJOSHI_KA,
+    SHUJOSHI_KASHIRA,
+    SHUJOSHI_NA,
+    SHUJOSHI_NO,
     SHUJOSHI_NONI,
     KatsuyoText,
     KatsuyoTextError,
@@ -1071,16 +1074,10 @@ def test_spacy_katsuyo_text_appendants_detector(
             [FUKUZYOSHI_KIRI],
         ),
         (
-            "あなたを愛するのか",
-            "か",
+            "あなたを愛するの",
+            "の",
             "助詞-終助詞",
-            [SHUJOSHI_KA],
-        ),
-        (
-            "あなたを愛するか",
-            "か",
-            "助詞-終助詞",
-            [SHUJOSHI_KA],
+            [SHUJOSHI_NO],
         ),
         (
             "あなたを愛するのに",
@@ -1093,6 +1090,30 @@ def test_spacy_katsuyo_text_appendants_detector(
             "に",
             "助詞-格助詞",  # 特殊なケース
             [],
+        ),
+        (
+            "あなたを愛しちゃうな",
+            "な",
+            "助詞-終助詞",
+            [SHUJOSHI_NA],
+        ),
+        (
+            "あなたを愛するのか",
+            "か",
+            "助詞-終助詞",
+            [SHUJOSHI_KA],
+        ),
+        (
+            "あなたを愛するか",
+            "か",
+            "助詞-終助詞",
+            [SHUJOSHI_KA],
+        ),
+        (
+            "あなたを愛せるかしら",
+            "かしら",
+            "助詞-終助詞",
+            [SHUJOSHI_KASHIRA],
         ),
     ],
 )
