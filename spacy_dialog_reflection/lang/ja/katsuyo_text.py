@@ -1054,9 +1054,9 @@ FUKUZYOSHI_KURAI = FukujoshiText("くらい")
 
 
 @attrs.define(frozen=True, slots=False)
-class FukujoshiTaigenText(FukujoshiText):
+class FukujoshiGokanText(FukujoshiText):
     """
-    副助詞のなかでも活用形を体言的に扱う(=形容動詞を語幹で扱う)もの
+    副助詞のなかで、形容動詞を語幹で扱うもの
     """
 
     def merge(self, pre: IKatsuyoTextSource) -> FukujoshiText:
@@ -1067,16 +1067,59 @@ class FukujoshiTaigenText(FukujoshiText):
 
         return super().merge(pre)
 
-    pass
+
+FUKUZYOSHI_NADO = FukujoshiGokanText("など")
+FUKUZYOSHI_NARI = FukujoshiGokanText("なり")
+FUKUZYOSHI_YARA = FukujoshiGokanText("やら")
+FUKUZYOSHI_KA = FukujoshiGokanText("か")
+FUKUZYOSHI_NOMI = FukujoshiGokanText("のみ")
 
 
-FUKUZYOSHI_NADO = FukujoshiTaigenText("など")
-FUKUZYOSHI_NARI = FukujoshiTaigenText("なり")
-FUKUZYOSHI_YARA = FukujoshiTaigenText("やら")
-FUKUZYOSHI_KA = FukujoshiTaigenText("か")
+@attrs.define(frozen=True, slots=False)
+class FukujoshiTaigenText(FukujoshiText):
+    """
+    副助詞のなかでも活用形を体言的に扱う
+    """
+
+    def merge(self, pre: IKatsuyoTextSource) -> FukujoshiText:
+        if isinstance(pre, TaigenText):
+            return pre + self
+
+        raise KatsuyoTextError(
+            f"Unsupported katsuyo_text in {type(self)}: {pre} "
+            f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
+        )
+
+
 FUKUZYOSHI_ZUTSU = FukujoshiTaigenText("ずつ")
-FUKUZYOSHI_NOMI = FukujoshiTaigenText("のみ")
-FUKUZYOSHI_KIRI = FukujoshiTaigenText("きり")
+
+
+@attrs.define(frozen=True, slots=False)
+class Kiri(FukujoshiText):
+    """
+    副助詞のなかでも特殊な活用形である「きり」のクラス
+    """
+
+    def merge(self, pre: IKatsuyoTextSource) -> FukujoshiText:
+        if isinstance(pre, FixedKatsuyoText):
+            return pre + self
+        elif isinstance(pre, TaigenText):
+            return pre + self
+        elif isinstance(pre, KatsuyoText):
+            if isinstance(pre.katsuyo, k.TaKatsuyo):
+                assert (fkt := pre.as_fkt_rentai) is not None
+                return fkt + self
+            elif isinstance(pre.katsuyo, k.IDoushiKatsuyo):
+                assert (fkt := pre.as_fkt_renyo) is not None
+                return fkt + FukujoshiText("っきり")
+
+        raise KatsuyoTextError(
+            f"Unsupported katsuyo_text in {type(self)}: {pre} "
+            f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
+        )
+
+
+FUKUZYOSHI_KIRI = Kiri("きり")
 
 # ==============================================================================
 # 係助詞
