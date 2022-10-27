@@ -1,5 +1,7 @@
 from typing import Any, Optional, List, Tuple
 from spacy_dialog_reflection.lang.ja.katsuyo_text import (
+    SHUJOSHI_KA,
+    SHUJOSHI_NONI,
     IKatsuyoTextAppendant,
     IKatsuyoTextSource,
     KatsuyoTextError,
@@ -132,6 +134,10 @@ class SpacyKatsuyoTextBuilder(IKatsuyoTextBuilder):
                     FUKUZYOSHI_NOMI,
                     FUKUZYOSHI_KIRI,
                     FUKUZYOSHI_YARA,
+                ),
+                shujoshis=(
+                    SHUJOSHI_KA,
+                    SHUJOSHI_NONI,
                 ),
             ),
         )

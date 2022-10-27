@@ -3,6 +3,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text import (
     FUKUZYOSHI_BAKARI,
     KURU,
     KURU_KANJI,
+    SHUJOSHI_KA,
     SURU,
     KatsuyoText,
     TaigenText,
@@ -182,4 +183,89 @@ def test_error():
 def test_fukujoshi(msg, katsuyo_text, expected):
     fukujoshi = FUKUZYOSHI_BAKARI
     result = katsuyo_text + fukujoshi
+    assert str(result) == expected, msg
+
+
+@pytest.mark.parametrize(
+    "msg, katsuyo_text, expected",
+    [
+        (
+            "五段活用",
+            KatsuyoText(
+                gokan="遊",
+                katsuyo=GODAN_BA_GYO,
+            ),
+            "遊ぶか",
+        ),
+        (
+            "上一段活用",
+            KatsuyoText(
+                gokan="見",
+                katsuyo=KAMI_ICHIDAN,
+            ),
+            "見るか",
+        ),
+        (
+            "下一段活用",
+            KatsuyoText(
+                gokan="求め",
+                katsuyo=SHIMO_ICHIDAN,
+            ),
+            "求めるか",
+        ),
+        (
+            "カ変活用",
+            KURU,
+            "くるか",
+        ),
+        (
+            "サ変活用",
+            KatsuyoText(
+                gokan="ウォーキング",
+                katsuyo=SA_GYO_HENKAKU_SURU,
+            ),
+            "ウォーキングするか",
+        ),
+        (
+            "サ変活用(する)",
+            KatsuyoText(
+                gokan="尊重",
+                katsuyo=SA_GYO_HENKAKU_SURU,
+            ),
+            "尊重するか",
+        ),
+        (
+            "サ変活用(ずる)",
+            KatsuyoText(
+                gokan="重ん",
+                katsuyo=SA_GYO_HENKAKU_ZURU,
+            ),
+            "重んずるか",
+        ),
+        (
+            "形容詞",
+            KatsuyoText(
+                gokan="美し",
+                katsuyo=KEIYOUSHI,
+            ),
+            "美しいか",
+        ),
+        (
+            "形容動詞",
+            KatsuyoText(
+                gokan="綺麗",
+                katsuyo=KEIYOUDOUSHI,
+            ),
+            "綺麗か",
+        ),
+        (
+            "TaigenText",
+            TaigenText("状態"),
+            "状態か",
+        ),
+    ],
+)
+def test_shujoshi(msg, katsuyo_text, expected):
+    shujoshi = SHUJOSHI_KA
+    result = katsuyo_text + shujoshi
     assert str(result) == expected, msg

@@ -1,5 +1,8 @@
 import pytest
 from spacy_dialog_reflection.lang.ja.katsuyo_text import (
+    FUKUZYOSHI_BAKARI,
+    SHUJOSHI_KA,
+    SHUJOSHI_NONI,
     KatsuyoText,
     KatsuyoTextError,
     TaigenText,
@@ -960,6 +963,53 @@ def test_spacy_katsuyo_text_appendants_detector(
     assert not has_error, "has error in detection"
     appendant_types = [type(appendant) for appendant in appendants]
     assert appendant_types == expected
+
+
+@pytest.mark.parametrize(
+    "text, norm, tag, expected",
+    [
+        (
+            "あなたを愛するばかり",
+            "ばかり",
+            "助詞-副助詞",
+            [FUKUZYOSHI_BAKARI],
+        ),
+        (
+            "あなたを愛するのか",
+            "か",
+            "助詞-終助詞",
+            [SHUJOSHI_KA],
+        ),
+        (
+            "あなたを愛するか",
+            "か",
+            "助詞-終助詞",
+            [SHUJOSHI_KA],
+        ),
+        (
+            "あなたを愛するのに",
+            "に",
+            "助詞-格助詞",  # 特殊なケース
+            [SHUJOSHI_NONI],
+        ),
+        (
+            "その荷物は遠方のに",
+            "に",
+            "助詞-格助詞",  # 特殊なケース
+            [],
+        ),
+    ],
+)
+def test_spacy_shujoshi_appendants_detector(
+    nlp_ja, spacy_appendants_detector, text, norm, tag, expected
+):
+    sent = next(nlp_ja(text).sents)
+    last_token = sent[-1]
+    assert last_token.norm_ == norm, "last token is not correct"
+    assert last_token.tag_ == tag, "last token is not correct"
+    appendants, has_error = spacy_appendants_detector.detect_from_sent(sent, sent.root)
+    assert not has_error, "has error in detection"
+    assert appendants == expected
 
 
 @pytest.mark.parametrize(

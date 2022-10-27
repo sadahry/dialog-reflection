@@ -11,6 +11,7 @@ A = TypeVar(
     "JoshiText",
     "TaigenText",
     "FukujoshiText",
+    "ShujoshiText",
 )
 M = TypeVar(
     "M",
@@ -20,6 +21,7 @@ M = TypeVar(
     "JoshiText",
     "TaigenText",
     "FukujoshiText",
+    "ShujoshiText",
 )
 
 
@@ -248,6 +250,8 @@ class FixedKatsuyoText(IKatsuyoTextSource, IKatsuyoTextAppendant["FixedKatsuyoTe
             return JoshiText(gokan=str(self) + post.gokan)
         elif isinstance(post, FukujoshiText):
             return FukujoshiText(gokan=str(self) + post.gokan)
+        elif isinstance(post, ShujoshiText):
+            return ShujoshiText(gokan=str(self) + post.gokan)
         elif isinstance(post, KatsuyoText):
             return KatsuyoText(
                 gokan=str(self) + post.gokan,
@@ -303,6 +307,8 @@ class INonKatsuyoText(IKatsuyoTextSource, IKatsuyoTextAppendant[M]):
             return JoshiText(gokan=str(self) + post.gokan)
         elif isinstance(post, FukujoshiText):
             return FukujoshiText(gokan=str(self) + post.gokan)
+        elif isinstance(post, ShujoshiText):
+            return ShujoshiText(gokan=str(self) + post.gokan)
         elif isinstance(post, KatsuyoText):
             return KatsuyoText(
                 gokan=str(self) + post.gokan,
@@ -1004,7 +1010,7 @@ class TaigenText(INonKatsuyoText["TaigenText"]):
 
 # ==============================================================================
 # 助詞
-#
+# NOTE: 活用形が明確ではないため、用例によっては厳密な活用形とはなっていない
 # ref. https://ja.wikipedia.org/wiki/助詞
 # ==============================================================================
 
@@ -1045,13 +1051,32 @@ FUKUZYOSHI_MADE = FukujoshiText("まで")
 FUKUZYOSHI_DAKE = FukujoshiText("だけ")
 FUKUZYOSHI_HODO = FukujoshiText("ほど")
 FUKUZYOSHI_KURAI = FukujoshiText("くらい")
-FUKUZYOSHI_NADO = FukujoshiText("など")
-FUKUZYOSHI_NARI = FukujoshiText("なり")
-FUKUZYOSHI_YARA = FukujoshiText("やら")
-FUKUZYOSHI_KA = FukujoshiText("か")
-FUKUZYOSHI_ZUTSU = FukujoshiText("ずつ")
-FUKUZYOSHI_NOMI = FukujoshiText("のみ")
-FUKUZYOSHI_KIRI = FukujoshiText("きり")
+
+
+@attrs.define(frozen=True, slots=False)
+class FukujoshiTaigenText(FukujoshiText):
+    """
+    副助詞のなかでも活用形を体言的に扱う(=形容動詞を語幹で扱う)もの
+    """
+
+    def merge(self, pre: IKatsuyoTextSource) -> FukujoshiText:
+        if isinstance(pre.katsuyo, k.KeiyoudoushiKatsuyo):
+            assert isinstance(pre, KatsuyoText)
+            assert (fkt := pre.as_fkt_gokan) is not None
+            return fkt + self
+
+        return super().merge(pre)
+
+    pass
+
+
+FUKUZYOSHI_NADO = FukujoshiTaigenText("など")
+FUKUZYOSHI_NARI = FukujoshiTaigenText("なり")
+FUKUZYOSHI_YARA = FukujoshiTaigenText("やら")
+FUKUZYOSHI_KA = FukujoshiTaigenText("か")
+FUKUZYOSHI_ZUTSU = FukujoshiTaigenText("ずつ")
+FUKUZYOSHI_NOMI = FukujoshiTaigenText("のみ")
+FUKUZYOSHI_KIRI = FukujoshiTaigenText("きり")
 
 # ==============================================================================
 # 係助詞
@@ -1061,3 +1086,61 @@ FUKUZYOSHI_KIRI = FukujoshiText("きり")
 # NOTE: 係助詞は現状の係り受け解析方法では扱わない
 #       (最後の動詞/形容詞からのAppendantの解析を行うため、後に動詞/形容詞/形容動詞を
 #        伴うことの多い係助詞を解析する必要がない)
+
+# ==============================================================================
+# 終助詞
+# ref. https://ja.wikipedia.org/wiki/助詞#終助詞
+# ==============================================================================
+
+
+@attrs.define(frozen=True, slots=False)
+class ShujoshiText(INonKatsuyoText["ShujoshiText"]):
+    """
+    終助詞。通常形は、連体形につくものをまとめる
+    """
+
+    pass
+
+
+SHUJOSHI_NO = ShujoshiText("の")
+SHUJOSHI_NONI = ShujoshiText("のに")
+
+
+@attrs.define(frozen=True, slots=False)
+class ShujoshShushiiText(ShujoshiText):
+    """
+    終助詞。終止形につくもの
+    """
+
+    def merge(self, pre: IKatsuyoTextSource) -> "ShujoshiText":
+        if isinstance(pre.katsuyo, k.ShushiMixin):
+            assert isinstance(pre, KatsuyoText)
+            assert (fkt := pre.as_fkt_shushi) is not None
+            return fkt + self
+
+        return super().merge(pre)
+
+
+SHUJOSHI_NA = ShujoshShushiiText("な")
+SHUJOSHI_TOMO = ShujoshShushiiText("とも")
+
+
+@attrs.define(frozen=True, slots=False)
+class ShujoshiTaigenText(ShujoshiText):
+    """
+    終助詞のなかでも、活用形を体言的に扱う(=形容動詞を語幹で扱う)もの
+    """
+
+    def merge(self, pre: IKatsuyoTextSource) -> ShujoshiText:
+        if isinstance(pre.katsuyo, k.KeiyoudoushiKatsuyo):
+            assert isinstance(pre, KatsuyoText)
+            assert (fkt := pre.as_fkt_gokan) is not None
+            return fkt + self
+
+        return super().merge(pre)
+
+
+SHUJOSHI_KA = ShujoshiTaigenText("か")
+# 終助詞「やら」は副助詞として取得されるため、ここでは定義しない
+# SHUJOSHI_YARA = ShujoshiTaigenText("やら")
+SHUJOSHI_KASHIRA = ShujoshiTaigenText("かしら")
