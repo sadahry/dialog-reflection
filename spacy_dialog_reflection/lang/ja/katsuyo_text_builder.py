@@ -1,11 +1,11 @@
-from typing import Any, Optional, List, Tuple, Union
+from typing import Any, Optional, List, Tuple
 from spacy_dialog_reflection.lang.ja.katsuyo_text import (
-    KatsuyoText,
-    INonKatsuyoText,
+    IKatsuyoTextAppendant,
+    IKatsuyoTextSource,
     KatsuyoTextError,
+    KatsuyoTextHasError,
 )
 from spacy_dialog_reflection.lang.ja.katsuyo_text_helper import (
-    IKatsuyoTextHelper,
     Denbun,
     HikyoReizi,
     Hitei,
@@ -40,10 +40,10 @@ class IKatsuyoTextBuilder(abc.ABC):
         self.appendants_detector = appendants_detector
 
     def append_multiple(
-        self, root: KatsuyoText, appendants: List[IKatsuyoTextHelper]
-    ) -> Tuple[Union[KatsuyoText, INonKatsuyoText], bool]:
+        self, root: IKatsuyoTextSource, appendants: List[IKatsuyoTextAppendant]
+    ) -> Tuple[IKatsuyoTextSource, KatsuyoTextHasError]:
         # clone KatsuyoText
-        result: Union[KatsuyoText, INonKatsuyoText] = attrs.evolve(root)
+        result: IKatsuyoTextSource = attrs.evolve(root)
 
         has_error = False
         for appendant in appendants:
@@ -58,11 +58,11 @@ class IKatsuyoTextBuilder(abc.ABC):
                 )
                 has_error = True
 
-        return result, has_error
+        return result, KatsuyoTextHasError(has_error)
 
     def build(
         self, sent: Any, src: Any
-    ) -> Tuple[Optional[Union[KatsuyoText, INonKatsuyoText]], bool]:
+    ) -> Tuple[Optional[IKatsuyoTextSource], KatsuyoTextHasError]:
         """
         サポートされていないrootを検知した際は、Noneとhas_error=Trueを返却する。
         予期されたエラーを検知した場合は、UserWarningを発生させてKatsuyoTextとhas_error=Trueを返却する。
@@ -73,15 +73,15 @@ class IKatsuyoTextBuilder(abc.ABC):
         katsuyo_text = self.root_detector.detect(src)
         if katsuyo_text is None:
             has_error = True
-            return None, has_error
+            return None, KatsuyoTextHasError(has_error)
 
-        appendants, is_error = self.appendants_detector.detect(sent, src)
-        has_error = has_error or is_error
+        appendants, _has_error = self.appendants_detector.detect_from_sent(sent, src)
+        has_error = has_error or _has_error
 
-        result, is_error = self.append_multiple(katsuyo_text, appendants)
-        has_error = has_error or is_error
+        result, _has_error = self.append_multiple(katsuyo_text, appendants)
+        has_error = has_error or _has_error
 
-        return result, has_error
+        return result, KatsuyoTextHasError(has_error)
 
     def __str__(self):
         return self.__class__.__name__

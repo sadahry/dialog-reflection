@@ -298,6 +298,26 @@ class TestReflectionBuilder:
                 "働くんですね。",
                 "no dependencies",
             ),
+            (
+                "今日が繁忙期だ。",
+                "繁忙期なんですね。",
+                "ADJ parse",
+            ),
+            (
+                "今日が繁忙期。",
+                "繁忙期なんですね。",
+                "NOUN parse",
+            ),
+            (
+                "今年は繁忙期なだけだ。",
+                "繁忙期なだけなんですね。",
+                "FUKUJOSHI + ADJ parse",
+            ),
+            (
+                "今年は繁忙期だけだ。",
+                "繁忙期だけなんですね。",
+                "FUKUJOSHI + NOUN parse",
+            ),
         ],
     )
     def test_build_suffix(

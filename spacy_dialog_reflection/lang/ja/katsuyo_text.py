@@ -1,4 +1,4 @@
-from typing import Optional, Union, TypeVar, Generic
+from typing import Optional, Union, TypeVar, Generic, NewType
 import attrs
 import abc
 import spacy_dialog_reflection.lang.ja.katsuyo as k
@@ -25,6 +25,10 @@ M = TypeVar(
 
 class KatsuyoTextError(ValueError):
     pass
+
+
+KatsuyoTextErrorMessage = NewType("KatsuyoTextErrorMessage", str)
+KatsuyoTextHasError = NewType("KatsuyoTextHasError", bool)
 
 
 @attrs.define(frozen=True, slots=False)
@@ -1037,3 +1041,23 @@ class FukujoshiText(INonKatsuyoText["FukujoshiText"]):
 
 
 FUKUZYOSHI_BAKARI = FukujoshiText("ばかり")
+FUKUZYOSHI_MADE = FukujoshiText("まで")
+FUKUZYOSHI_DAKE = FukujoshiText("だけ")
+FUKUZYOSHI_HODO = FukujoshiText("ほど")
+FUKUZYOSHI_KURAI = FukujoshiText("くらい")
+FUKUZYOSHI_NADO = FukujoshiText("など")
+FUKUZYOSHI_NARI = FukujoshiText("なり")
+FUKUZYOSHI_YARA = FukujoshiText("やら")
+FUKUZYOSHI_KA = FukujoshiText("か")
+FUKUZYOSHI_ZUTSU = FukujoshiText("ずつ")
+FUKUZYOSHI_NOMI = FukujoshiText("のみ")
+FUKUZYOSHI_KIRI = FukujoshiText("きり")
+
+# ==============================================================================
+# 係助詞
+# ref. https://ja.wikipedia.org/wiki/助詞#係助詞
+# ==============================================================================
+
+# 係助詞は現状の係り受け解析方法では扱わない
+# (最後の動詞/形容詞からのAppendantの解析を行うため、後に動詞/形容詞/形容動詞を
+#  伴うことの多い係助詞を解析する必要がない)

@@ -2,8 +2,9 @@ from itertools import takewhile
 from typing import Callable, Set
 from spacy_dialog_reflection.lang.ja.katsuyo import KeiyoudoushiKatsuyo
 from spacy_dialog_reflection.lang.ja.katsuyo_text import (
+    FukujoshiText,
     IKatsuyoTextSource,
-    KatsuyoText,
+    TaigenText,
 )
 from spacy_dialog_reflection.reflection_text_builder import (
     ReflectionTextError,
@@ -17,7 +18,7 @@ import spacy
 
 
 def finalize_build_suffix_default(katsuyo_text: IKatsuyoTextSource) -> str:
-    if isinstance(katsuyo_text, KatsuyoText) and (
+    if isinstance(katsuyo_text, (TaigenText, FukujoshiText)) or (
         type(katsuyo_text.katsuyo) is KeiyoudoushiKatsuyo
     ):
         return katsuyo_text.gokan + "なんですね。"

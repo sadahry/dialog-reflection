@@ -19,8 +19,23 @@ from spacy_dialog_reflection.lang.ja.katsuyo import (
     SHIMO_ICHIDAN,
 )
 from spacy_dialog_reflection.lang.ja.katsuyo_text import (
+    FUKUZYOSHI_BAKARI,
+    FUKUZYOSHI_MADE,
+    FUKUZYOSHI_DAKE,
+    FUKUZYOSHI_HODO,
+    FUKUZYOSHI_KURAI,
+    FUKUZYOSHI_NADO,
+    FUKUZYOSHI_NARI,
+    FUKUZYOSHI_KA,
+    FUKUZYOSHI_ZUTSU,
+    FUKUZYOSHI_NOMI,
+    FUKUZYOSHI_KIRI,
+    FUKUZYOSHI_YARA,
     KURU,
     KURU_KANJI,
+    KatsuyoTextErrorMessage,
+    KatsuyoTextHasError,
+    IKatsuyoTextAppendant,
     IKatsuyoTextSource,
     KatsuyoText,
     KatsuyoTextError,
@@ -87,18 +102,35 @@ class IKatsuyoTextAppendantsDetector(abc.ABC):
             if not issubclass(supported_helper, tuple(self.appendants_dict.keys())):
                 warnings.warn(f"this object doesn't have helper: {supported_helper}")
 
-    def try_append(self, typ: type, appendants: List[IKatsuyoTextHelper]) -> bool:
-        if typ not in self.appendants_dict:
-            # TODO ignoreリストを追加してここからwarningを出さないようにする
-            warnings.warn(f"Unsupported type in try_append: {typ}")
-            return False
-        appendants.append(self.appendants_dict[typ])
-        return True
+    def try_get_helper(
+        self, typ: Type[IKatsuyoTextHelper]
+    ) -> Tuple[Optional[IKatsuyoTextHelper], Optional[KatsuyoTextErrorMessage]]:
+        # TODO ignoreリストの追加
+        helper = self.appendants_dict.get(typ)
+        if helper is not None:
+            return helper, None
+
+        return None, KatsuyoTextErrorMessage(
+            f"Unsupported type in try_get_helper: {typ}"
+        )
 
     @abc.abstractmethod
-    def detect(self, sent: Any, src: Any) -> Tuple[List[IKatsuyoTextHelper], bool]:
+    def detect_from_sent(
+        self, sent: Any, src: Any
+    ) -> Tuple[List[IKatsuyoTextAppendant], KatsuyoTextHasError]:
         """
-        不適切な値が代入された際は、Noneを返却する。
+        detectされなかった場合は、空のListを返却する。
+        意図しない値が代入された際は、KatsuyoTextHasError=Trueを返却する。
+        """
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def try_detect(
+        self, candidate: Any
+    ) -> Tuple[Optional[IKatsuyoTextAppendant], Optional[KatsuyoTextErrorMessage]]:
+        """
+        detectされなかった場合は、IKatsuyoTextAppendant=Noneを返却する。
+        意図しない値が代入された際は、KatsuyoTextErrorMessageを返却する。
         """
         raise NotImplementedError()
 
@@ -238,6 +270,10 @@ class SpacyKatsuyoTextDetector(IKatsuyoTextDetector):
             # e.g. 健康 -> gokan=健康 + katsuyo=だ
             if src.pos_ == "ADJ":
                 return KatsuyoText(gokan=lemma, katsuyo=KEIYOUDOUSHI)
+            elif src.pos_ == "NOUN":
+                right = next(src.rights)
+                if right.lemma_ == "だ":
+                    return KatsuyoText(gokan=lemma, katsuyo=KEIYOUDOUSHI)
             # ==================================================
             # 名詞/固有名詞の変形
             # ==================================================
@@ -250,34 +286,49 @@ class SpacyKatsuyoTextDetector(IKatsuyoTextDetector):
 
 
 class SpacyKatsuyoTextAppendantsDetector(IKatsuyoTextAppendantsDetector):
-    def detect(
+    # builderから渡すようにしてもいいかも
+    FUKUJOSHI_BY_NORM = {
+        "ばかり": FUKUZYOSHI_BAKARI,
+        "まで": FUKUZYOSHI_MADE,
+        "だけ": FUKUZYOSHI_DAKE,
+        "ほど": FUKUZYOSHI_HODO,
+        "くらい": FUKUZYOSHI_KURAI,
+        "など": FUKUZYOSHI_NADO,
+        "なり": FUKUZYOSHI_NARI,
+        "やら": FUKUZYOSHI_YARA,
+        "か": FUKUZYOSHI_KA,
+        "ずつ": FUKUZYOSHI_ZUTSU,
+        "のみ": FUKUZYOSHI_NOMI,
+        "きり": FUKUZYOSHI_KIRI,
+    }
+
+    def detect_from_sent(
         self, sent: spacy.tokens.Span, src: spacy.tokens.Token
-    ) -> Tuple[List[IKatsuyoTextHelper], bool]:
+    ) -> Tuple[List[IKatsuyoTextAppendant], KatsuyoTextHasError]:
         assert src in sent
 
-        appendants: List[IKatsuyoTextHelper] = []
+        appendants: List[IKatsuyoTextAppendant] = []
         has_error = False
 
         # NOTE: srcに紐づくトークンを取得するのに、依存関係を見ずにsrcトークンのindex以降のトークンを見る
         #       これは、srcがrootとなるとは限らないことと、sentをあらかじめ必要な長さに分割していることを前提としている
-        candidate_tokens = dropwhile(lambda t: t.i <= src.i, sent)
-        for candidate_token in candidate_tokens:
-            helper, warning_msg = self._detect_appendant(candidate_token)
+        candidates = dropwhile(lambda t: t.i <= src.i, sent)
+        for candidate in candidates:
+            appendant, warning_msg = self.try_detect(candidate)
             if warning_msg:
                 has_error = True
                 warnings.warn(f"{warning_msg} src: {src} sent: {sent}", UserWarning)
-            if helper is None:
+            if appendant is None:
                 continue
-            is_succeeded = self.try_append(helper, appendants)
-            has_error = has_error or not is_succeeded
+            appendants.append(appendant)
 
-        return appendants, has_error
+        return appendants, KatsuyoTextHasError(has_error)
 
-    def _detect_appendant(
-        self, candidate_token: spacy.tokens.Token
-    ) -> Tuple[Optional[Type[IKatsuyoTextHelper]], Optional[str]]:
-        pos_tag = candidate_token.pos_
-        norm = candidate_token.norm_
+    def try_detect(
+        self, candidate: spacy.tokens.Token
+    ) -> Tuple[Optional[IKatsuyoTextAppendant], Optional[KatsuyoTextErrorMessage]]:
+        pos_tag = candidate.pos_
+        norm = candidate.norm_
 
         if pos_tag == "AUX":
             # ==================================================
@@ -300,77 +351,85 @@ class SpacyKatsuyoTextAppendantsDetector(IKatsuyoTextAppendantsDetector):
                 return None, None
 
             if norm in ["れる", "られる"]:
-                return Ukemi, None
+                return self.try_get_helper(Ukemi)
             elif norm in ["せる", "させる"]:
-                return Shieki, None
+                return self.try_get_helper(Shieki)
             elif norm in ["ない", "ず"]:
                 # 「ず」も「ない」として扱う
-                return Hitei, None
+                return self.try_get_helper(Hitei)
             elif norm in ["たい"]:
-                return KibouSelf, None
+                return self.try_get_helper(KibouSelf)
             elif norm in ["たがる"]:
-                return KibouOthers, None
+                return self.try_get_helper(KibouOthers)
             elif norm in ["た"]:
-                return KakoKanryo, None
+                return self.try_get_helper(KakoKanryo)
             elif norm in ["そう"]:
-                return self._detect_appendant_sou(candidate_token)
+                return self._detect_appendant_sou(candidate)
             elif norm in ["らしい"]:
-                return Suitei, None
+                return self.try_get_helper(Suitei)
             elif norm in ["べし"]:
-                return Touzen, None
+                return self.try_get_helper(Touzen)
             elif norm in ["よう"]:
-                return HikyoReizi, None
+                return self.try_get_helper(HikyoReizi)
             elif norm in ["てる"]:
-                return Keizoku, None
+                return self.try_get_helper(Keizoku)
 
-            return None, f"Unsupported AUX: {norm}"
+            return None, KatsuyoTextErrorMessage(f"Unsupported AUX: {norm}")
+        elif pos_tag == "ADP":
+            # ==================================================
+            # 副助詞の判定
+            # ==================================================
+            fukujoshi_text = self.FUKUJOSHI_BY_NORM.get(norm)
+            if fukujoshi_text is not None:
+                return fukujoshi_text, None
+
         elif pos_tag == "ADJ":
             # 「ない」のみ対応
             # NOTE: 必ずしも正確に否定表現を解析できるとは限らない
             #       @see: https://github.com/sadahry/spacy-dialog-reflection/blob/17507db530da24c11816374d6caa4766e4614f69/tests/lang/ja/test_katsuyo_text_detector.py#L676-L693
             if norm in ["無い"]:
-                return Hitei, None
+                return self.try_get_helper(Hitei)
         elif pos_tag == "ADV":
             # 「そう」のみ対応
             if norm in ["そう"]:
-                return self._detect_appendant_sou(candidate_token)
+                return self._detect_appendant_sou(candidate)
 
         return None, None
 
     def _detect_appendant_sou(
-        self, candidate_token: spacy.tokens.Token
-    ) -> Tuple[Optional[Type[IKatsuyoTextHelper]], Optional[str]]:
+        self, candidate: spacy.tokens.Token
+    ) -> Tuple[Optional[IKatsuyoTextAppendant], Optional[KatsuyoTextErrorMessage]]:
         # 「様態」「伝聞」の判別
-        left = candidate_token.doc[candidate_token.i - 1]
+        left = candidate.doc[candidate.i - 1]
         # 動詞判定
         if left.tag_.startswith("動詞"):
             # @ref: https://github.com/sadahry/spacy-dialog-reflection/blob/6a56bd3378daee41a30bc7bb50b8de6c063a8437/spacy_dialog_reflection/lang/ja/katsuyo_text_detector.py#L136-L144
             inflection = left.morph.get("Inflection")[0].split(";")
             katsuyo_type = inflection[1]
             if "連用形" in katsuyo_type:
-                return Youtai, None
+                return self.try_get_helper(Youtai)
             elif "終止形" in katsuyo_type or "連体形" in katsuyo_type:
-                return Denbun, None
+                return self.try_get_helper(Denbun)
         # 形容詞判定
         if "形容詞" in left.tag_:
             # @ref: https://github.com/sadahry/spacy-dialog-reflection/blob/6a56bd3378daee41a30bc7bb50b8de6c063a8437/spacy_dialog_reflection/lang/ja/katsuyo_text_detector.py#L136-L144
             inflection = left.morph.get("Inflection")[0].split(";")
             katsuyo_type = inflection[1]
             if "語幹" in katsuyo_type:
-                return Youtai, None
+                return self.try_get_helper(Youtai)
             elif "終止形" in katsuyo_type or "連体形" in katsuyo_type:
-                return Denbun, None
+                return self.try_get_helper(Denbun)
         # 形容動詞判定
         if left.pos_ == "AUX" and left.text == "だ":
             # 形容動詞の基本形(終止or連体)が取れていると判断する
-            return Denbun, None
+            return self.try_get_helper(Denbun)
         elif "形状詞" in left.tag_:
             # e.g.,
             # 困難    ADJ     名詞-普通名詞-形状詞可能
             # 的      PART    接尾辞-形状詞的
-            return Youtai, None
+            return self.try_get_helper(Youtai)
         elif left.pos_ == "ADJ" and left.tag_.startswith("名詞"):
             # 形状詞可能ではない形容動詞の語幹が取れていると判断する
-            return Youtai, None
+            return self.try_get_helper(Youtai)
 
-        return None, f"Unexpected {candidate_token.norm_} no matched"
+        return None, KatsuyoTextErrorMessage(f"Unexpected {candidate.norm_} no matched")
