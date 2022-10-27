@@ -114,11 +114,6 @@ def test_error():
         KURU_KANJI + 1
 
 
-# TODO KatsuyoText x INonKatsuyoText のテストを追加する
-
-# TODO JodoushiKatsuyoTextなど活用系のテストを追加する
-
-
 @pytest.mark.parametrize(
     "msg, katsuyo_text, expected",
     [
