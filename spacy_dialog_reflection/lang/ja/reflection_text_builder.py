@@ -16,6 +16,8 @@ from spacy_dialog_reflection.reflector import (
 from spacy_dialog_reflection.lang.ja.katsuyo_text_builder import (
     SpacyKatsuyoTextBuilder,
 )
+import sys
+import traceback
 import re
 import spacy
 
@@ -160,11 +162,13 @@ class JaSpacyReflectionTextBuilder(ISpacyReflectionTextBuilder):
                 )
 
             return self.finalize_build_suffix(katsuyo_text)
-        except BaseException as e:
+        except BaseException:
+            type_, value, traceback_ = sys.exc_info()
             # ReflectionTextErrorでwrapしてinstant_reflection_textを残す
             instant_reflection_text = str(sent.root) + self.word_ending_unpersed
             raise ReflectionTextError(
-                e, instant_reflection_text=instant_reflection_text
+                traceback.format_exception(type_, value, traceback_),
+                instant_reflection_text=instant_reflection_text,
             )
 
     def build_instead_of_error(self, e: BaseException) -> str:
