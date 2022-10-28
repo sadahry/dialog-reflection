@@ -1,3 +1,5 @@
+import time
+
 # fmt: off
 # TODO パッケージが完成したら消して、以下のように書き換える
 import sys
@@ -16,4 +18,7 @@ print("システム: 今日の出来事について、教えてください。")
 print("システム: たとえば「今日は旅行へ行った」という言葉に対して、私は「旅行へ行ったんですね」と返します。")
 while True:
     message = input("あなた: ")
-    print(f"システム: {refactor.reflect(message)}")
+    start = time.time()
+    response = refactor.reflect(message)
+    end = time.time()
+    print(f"システム: {refactor.reflect(message)} ({end - start:.3f} sec)")
