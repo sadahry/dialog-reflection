@@ -8,7 +8,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text import (
     FUKUZYOSHI_KURAI,
     FUKUZYOSHI_MADE,
     FUKUZYOSHI_NADO,
-    FUKUZYOSHI_NARI,
+    # FUKUZYOSHI_NARI,
     FUKUZYOSHI_NOMI,
     FUKUZYOSHI_YARA,
     FUKUZYOSHI_ZUTSU,
