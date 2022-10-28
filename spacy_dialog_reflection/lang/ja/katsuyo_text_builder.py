@@ -40,7 +40,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text_detector import (
     IKatsuyoTextSourceDetector,
     IKatsuyoTextAppendantsDetector,
     SpacyKatsuyoTextAppendantsDetector,
-    SpacyKatsuyoTextDetector,
+    SpacyKatsuyoTextSourceDetector,
 )
 import abc
 import attrs
@@ -107,7 +107,7 @@ class IKatsuyoTextBuilder(abc.ABC):
 class SpacyKatsuyoTextBuilder(IKatsuyoTextBuilder):
     def __init__(self):
         super().__init__(
-            root_detector=SpacyKatsuyoTextDetector(),
+            root_detector=SpacyKatsuyoTextSourceDetector(),
             appendants_detector=SpacyKatsuyoTextAppendantsDetector(
                 # TODO もっと柔軟な設定ができるように
                 helpers=(

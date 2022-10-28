@@ -162,7 +162,7 @@ class IKatsuyoTextAppendantsDetector(abc.ABC):
         return self.__class__.__name__
 
 
-class SpacyKatsuyoTextDetector(IKatsuyoTextSourceDetector):
+class SpacyKatsuyoTextSourceDetector(IKatsuyoTextSourceDetector):
     VERB_KATSUYOS_BY_CONJUGATION_TYPE = {
         "五段-カ行": GODAN_KA_GYO,
         "五段-ガ行": GODAN_GA_GYO,
@@ -353,7 +353,7 @@ class SpacyKatsuyoTextAppendantsDetector(IKatsuyoTextAppendantsDetector):
                 "ます",
                 "ちゃう",
                 "やがる",
-                # 「する」の助動詞はSpacyKatsuyoTextDetectorで対処されるので
+                # 「する」の助動詞はSpacyKatsuyoTextSourceDetectorで対処されるので
                 # ここでは無視する
                 "為る",
             }:
