@@ -12,6 +12,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text import (
     FUKUZYOSHI_NOMI,
     FUKUZYOSHI_YARA,
     FUKUZYOSHI_ZUTSU,
+    JOSHI_NI,
     JODOUSHI_DA,
     JODOUSHI_TA,
     KURU,
@@ -187,9 +188,29 @@ def test_error():
             "綺麗なばかり",
         ),
         (
+            "助動詞「た」",
+            JODOUSHI_TA,
+            "たばかり",
+        ),
+        (
             "TaigenText",
             TaigenText("状態"),
             "状態ばかり",
+        ),
+        (
+            "FukujoshiText",
+            FUKUZYOSHI_HODO,
+            "ほどばかり",
+        ),
+        (
+            "ShujoshiText",
+            SHUJOSHI_NO,
+            "のばかり",
+        ),
+        (
+            "JoshiText",
+            JOSHI_NI,
+            "にばかり",
         ),
     ],
 )
@@ -272,9 +293,29 @@ def test_FUKUZYOSHI_BAKARI(msg, katsuyo_text, expected):
             "綺麗なまで",
         ),
         (
+            "助動詞「た」",
+            JODOUSHI_TA,
+            "たまで",
+        ),
+        (
             "TaigenText",
             TaigenText("状態"),
             "状態まで",
+        ),
+        (
+            "FukujoshiText",
+            FUKUZYOSHI_HODO,
+            "ほどまで",
+        ),
+        (
+            "ShujoshiText",
+            SHUJOSHI_NO,
+            "のまで",
+        ),
+        (
+            "JoshiText",
+            JOSHI_NI,
+            "にまで",
         ),
     ],
 )
@@ -357,9 +398,29 @@ def test_FUKUZYOSHI_MADE(msg, katsuyo_text, expected):
             "綺麗なだけ",
         ),
         (
+            "助動詞「た」",
+            JODOUSHI_TA,
+            "ただけ",
+        ),
+        (
             "TaigenText",
             TaigenText("状態"),
             "状態だけ",
+        ),
+        (
+            "FukujoshiText",
+            FUKUZYOSHI_HODO,
+            "ほどだけ",
+        ),
+        (
+            "ShujoshiText",
+            SHUJOSHI_NO,
+            "のだけ",
+        ),
+        (
+            "JoshiText",
+            JOSHI_NI,
+            "にだけ",
         ),
     ],
 )
@@ -442,9 +503,29 @@ def test_FUKUZYOSHI_DAKE(msg, katsuyo_text, expected):
             "綺麗なほど",
         ),
         (
+            "助動詞「た」",
+            JODOUSHI_TA,
+            "たほど",
+        ),
+        (
             "TaigenText",
             TaigenText("状態"),
             "状態ほど",
+        ),
+        (
+            "FukujoshiText",
+            FUKUZYOSHI_ZUTSU,
+            "ずつほど",
+        ),
+        (
+            "ShujoshiText",
+            SHUJOSHI_NO,
+            "のほど",
+        ),
+        (
+            "JoshiText",
+            JOSHI_NI,
+            "にほど",
         ),
     ],
 )
@@ -527,9 +608,29 @@ def test_FUKUZYOSHI_HODO(msg, katsuyo_text, expected):
             "綺麗なくらい",
         ),
         (
+            "助動詞「た」",
+            JODOUSHI_TA,
+            "たくらい",
+        ),
+        (
             "TaigenText",
             TaigenText("状態"),
             "状態くらい",
+        ),
+        (
+            "FukujoshiText",
+            FUKUZYOSHI_HODO,
+            "ほどくらい",
+        ),
+        (
+            "ShujoshiText",
+            SHUJOSHI_NO,
+            "のくらい",
+        ),
+        (
+            "JoshiText",
+            JOSHI_NI,
+            "にくらい",
         ),
     ],
 )
@@ -612,9 +713,29 @@ def test_FUKUZYOSHI_KURAI(msg, katsuyo_text, expected):
             "綺麗など",
         ),
         (
+            "助動詞「た」",
+            JODOUSHI_TA,
+            "たなど",
+        ),
+        (
             "TaigenText",
             TaigenText("状態"),
             "状態など",
+        ),
+        (
+            "FukujoshiText",
+            FUKUZYOSHI_HODO,
+            "ほどなど",
+        ),
+        (
+            "ShujoshiText",
+            SHUJOSHI_NO,
+            "のなど",
+        ),
+        (
+            "JoshiText",
+            JOSHI_NI,
+            "になど",
         ),
     ],
 )
@@ -697,9 +818,29 @@ def test_FUKUZYOSHI_NADO(msg, katsuyo_text, expected):
             "綺麗なり",
         ),
         (
+            "助動詞「た」",
+            JODOUSHI_TA,
+            "たなり",
+        ),
+        (
             "TaigenText",
             TaigenText("状態"),
             "状態なり",
+        ),
+        (
+            "FukujoshiText",
+            FUKUZYOSHI_HODO,
+            "ほどなり",
+        ),
+        (
+            "ShujoshiText",
+            SHUJOSHI_NO,
+            "のなり",
+        ),
+        (
+            "JoshiText",
+            JOSHI_NI,
+            "になり",
         ),
     ],
 )
@@ -782,9 +923,29 @@ def test_FUKUZYOSHI_NARI(msg, katsuyo_text, expected):
             "綺麗やら",
         ),
         (
+            "助動詞「た」",
+            JODOUSHI_TA,
+            "たやら",
+        ),
+        (
             "TaigenText",
             TaigenText("状態"),
             "状態やら",
+        ),
+        (
+            "FukujoshiText",
+            FUKUZYOSHI_HODO,
+            "ほどやら",
+        ),
+        (
+            "ShujoshiText",
+            SHUJOSHI_NO,
+            "のやら",
+        ),
+        (
+            "JoshiText",
+            JOSHI_NI,
+            "にやら",
         ),
     ],
 )
@@ -867,9 +1028,29 @@ def test_FUKUZYOSHI_YARA(msg, katsuyo_text, expected):
             "綺麗か",
         ),
         (
+            "助動詞「た」",
+            JODOUSHI_TA,
+            "たか",
+        ),
+        (
             "TaigenText",
             TaigenText("状態"),
             "状態か",
+        ),
+        (
+            "FukujoshiText",
+            FUKUZYOSHI_HODO,
+            "ほどか",
+        ),
+        (
+            "ShujoshiText",
+            SHUJOSHI_NO,
+            "のか",
+        ),
+        (
+            "JoshiText",
+            JOSHI_NI,
+            "にか",
         ),
     ],
 )
@@ -952,9 +1133,29 @@ def test_FUKUZYOSHI_KA(msg, katsuyo_text, expected):
             "綺麗のみ",
         ),
         (
+            "助動詞「た」",
+            JODOUSHI_TA,
+            "たのみ",
+        ),
+        (
             "TaigenText",
             TaigenText("状態"),
             "状態のみ",
+        ),
+        (
+            "FukujoshiText",
+            FUKUZYOSHI_HODO,
+            "ほどのみ",
+        ),
+        (
+            "ShujoshiText",
+            SHUJOSHI_NO,
+            "ののみ",
+        ),
+        (
+            "JoshiText",
+            JOSHI_NI,
+            "にのみ",
         ),
     ],
 )
@@ -1025,11 +1226,6 @@ def test_FUKUZYOSHI_NOMI(msg, katsuyo_text, expected):
         #     "重んずるか",
         # ),
         (
-            "TaigenText",
-            TaigenText("ひとり"),
-            "ひとりきり",
-        ),
-        (
             "JodoushiText",
             JODOUSHI_TA,
             "たきり",  # e.g. 寝たきり
@@ -1038,6 +1234,11 @@ def test_FUKUZYOSHI_NOMI(msg, katsuyo_text, expected):
             "JodoushiText",
             JODOUSHI_DA,
             "だきり",  # e.g. 遊んだきり
+        ),
+        (
+            "TaigenText",
+            TaigenText("ひとり"),
+            "ひとりきり",
         ),
     ],
 )
@@ -1063,6 +1264,18 @@ def test_FUKUZYOSHI_KIRI(msg, katsuyo_text, expected):
                 gokan="綺麗",
                 katsuyo=KEIYOUDOUSHI,
             ),
+        ),
+        (
+            "FukujoshiText",
+            FUKUZYOSHI_HODO,
+        ),
+        (
+            "ShujoshiText",
+            SHUJOSHI_NA,
+        ),
+        (
+            "JoshiText",
+            JOSHI_NI,
         ),
     ],
 )
@@ -1152,6 +1365,18 @@ def test_FUKUZYOSHI_ZUTSU(msg, katsuyo_text, expected):
                 katsuyo=KEIYOUDOUSHI,
             ),
         ),
+        (
+            "FukujoshiText",
+            FUKUZYOSHI_HODO,
+        ),
+        (
+            "ShujoshiText",
+            SHUJOSHI_NA,
+        ),
+        (
+            "JoshiText",
+            JOSHI_NI,
+        ),
     ],
 )
 def test_FUKUZYOSHI_ZUTSU_error(msg, katsuyo_text):
@@ -1234,9 +1459,9 @@ def test_FUKUZYOSHI_ZUTSU_error(msg, katsuyo_text):
             "綺麗なの",
         ),
         (
-            "TaigenText",
-            TaigenText("状態"),
-            "状態の",
+            "助動詞「た」",
+            JODOUSHI_TA,
+            "たの",
         ),
     ],
 )
@@ -1244,6 +1469,34 @@ def test_SHUJOSHI_NO(msg, katsuyo_text, expected):
     shujoshi = SHUJOSHI_NO
     result = katsuyo_text + shujoshi
     assert str(result) == expected, msg
+
+
+@pytest.mark.parametrize(
+    "msg, katsuyo_text",
+    [
+        (
+            "TaigenText",
+            TaigenText("それ"),
+        ),
+        (
+            "FukujoshiText",
+            FUKUZYOSHI_HODO,
+        ),
+        (
+            "ShujoshiText",
+            SHUJOSHI_NA,
+        ),
+        (
+            "JoshiText",
+            JOSHI_NI,
+        ),
+    ],
+)
+def test_SHUJOSHI_NO_error(msg, katsuyo_text):
+    fukujoshi = SHUJOSHI_NO
+    with pytest.raises(KatsuyoTextError):
+        katsuyo_text + fukujoshi
+        assert False, msg
 
 
 @pytest.mark.parametrize(
@@ -1319,9 +1572,9 @@ def test_SHUJOSHI_NO(msg, katsuyo_text, expected):
             "綺麗なのに",
         ),
         (
-            "TaigenText",
-            TaigenText("状態"),
-            "状態のに",
+            "助動詞「た」",
+            JODOUSHI_TA,
+            "たのに",
         ),
     ],
 )
@@ -1329,6 +1582,34 @@ def test_SHUJOSHI_NONI(msg, katsuyo_text, expected):
     shujoshi = SHUJOSHI_NONI
     result = katsuyo_text + shujoshi
     assert str(result) == expected, msg
+
+
+@pytest.mark.parametrize(
+    "msg, katsuyo_text",
+    [
+        (
+            "TaigenText",
+            TaigenText("それ"),
+        ),
+        (
+            "FukujoshiText",
+            FUKUZYOSHI_HODO,
+        ),
+        (
+            "ShujoshiText",
+            SHUJOSHI_NA,
+        ),
+        (
+            "JoshiText",
+            JOSHI_NI,
+        ),
+    ],
+)
+def test_SHUJOSHI_NONI_error(msg, katsuyo_text):
+    fukujoshi = SHUJOSHI_NONI
+    with pytest.raises(KatsuyoTextError):
+        katsuyo_text + fukujoshi
+        assert False, msg
 
 
 @pytest.mark.parametrize(
@@ -1403,6 +1684,21 @@ def test_SHUJOSHI_NONI(msg, katsuyo_text, expected):
             ),
             "綺麗だな",
         ),
+        (
+            "助動詞「た」",
+            JODOUSHI_TA,
+            "たな",
+        ),
+        # NOTE: 現代語の表現として存在しうるが、
+        #       取得する手段がなく、特殊なケースであるためサポートしない
+        # # text = それな
+        # 1       それ    それ    PRON    代名詞  _       0       root    _       SpaceAfter=No|BunsetuBILabel=B|BunsetuPositionType=ROOT|NP_B|Reading=ソレ
+        # 2       な      だ      PART    助動詞  _       1       mark    _       SpaceAfter=No|BunsetuBILabel=I|BunsetuPositionType=SYN_HEAD|Inf=助動詞-ダ,連体形-一般|Reading=ナ
+        # (
+        #     "TaigenText",
+        #     TaigenText("それ"),
+        #     "それな",
+        # ),
     ],
 )
 def test_SHUJOSHI_NA(msg, katsuyo_text, expected):
@@ -1417,6 +1713,18 @@ def test_SHUJOSHI_NA(msg, katsuyo_text, expected):
         (
             "TaigenText",
             TaigenText("状態"),
+        ),
+        (
+            "FukujoshiText",
+            FUKUZYOSHI_HODO,
+        ),
+        (
+            "ShujoshiText",
+            SHUJOSHI_NO,
+        ),
+        (
+            "JoshiText",
+            JOSHI_NI,
         ),
     ],
 )
@@ -1500,9 +1808,29 @@ def test_SHUJOSHI_NA_error(msg, katsuyo_text):
             "綺麗か",
         ),
         (
+            "助動詞「た」",
+            JODOUSHI_TA,
+            "たか",
+        ),
+        (
             "TaigenText",
             TaigenText("状態"),
             "状態か",
+        ),
+        (
+            "FukujoshiText",
+            FUKUZYOSHI_HODO,
+            "ほどか",
+        ),
+        (
+            "ShujoshiText",
+            SHUJOSHI_NO,
+            "のか",
+        ),
+        (
+            "JoshiText",
+            JOSHI_NI,
+            "にか",
         ),
     ],
 )
@@ -1585,9 +1913,29 @@ def test_SHUJOSHI_KA(msg, katsuyo_text, expected):
             "綺麗かしら",
         ),
         (
+            "助動詞「た」",
+            JODOUSHI_TA,
+            "たかしら",
+        ),
+        (
             "TaigenText",
             TaigenText("状態"),
             "状態かしら",
+        ),
+        (
+            "FukujoshiText",
+            FUKUZYOSHI_HODO,
+            "ほどかしら",
+        ),
+        (
+            "ShujoshiText",
+            SHUJOSHI_NO,
+            "のかしら",
+        ),
+        (
+            "JoshiText",
+            JOSHI_NI,
+            "にかしら",
         ),
     ],
 )

@@ -1048,7 +1048,7 @@ JOSHI_NO = JoshiText("の")
 @attrs.define(frozen=True, slots=False)
 class FukujoshiText(INonKatsuyoText["FukujoshiText"]):
     """
-    副助詞。細かく分類せず一括の扱いとする
+    副助詞。連体形につくものをまとめる
     """
 
     @property
@@ -1072,12 +1072,18 @@ class FukujoshiGokanText(FukujoshiText):
     def merge(self, pre: IKatsuyoTextSource) -> FukujoshiText:
         if isinstance(pre, (FixedKatsuyoText, INonKatsuyoText)):
             return pre + self.fukujoshi
-        elif isinstance(pre.katsuyo, k.KeiyoudoushiKatsuyo):
-            assert isinstance(pre, KatsuyoText)
+
+        assert isinstance(pre, KatsuyoText)
+        if isinstance(pre.katsuyo, k.KeiyoudoushiKatsuyo):
             assert (fkt := pre.as_fkt_gokan) is not None
             return fkt + self.fukujoshi
+        elif (fkt := pre.as_fkt_rentai) is not None:
+            return fkt + self
 
-        return super().merge(pre)
+        raise KatsuyoTextError(
+            f"Unsupported katsuyo_text in merge of {type(self)}: {pre} "
+            f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
+        )
 
 
 FUKUZYOSHI_NADO = FukujoshiGokanText("など")
@@ -1151,7 +1157,7 @@ FUKUZYOSHI_KIRI = Kiri("きり")
 @attrs.define(frozen=True, slots=False)
 class ShujoshiText(INonKatsuyoText["ShujoshiText"]):
     """
-    終助詞。通常形は、連体形につくものをまとめる
+    終助詞。連体形につくものをまとめる
     """
 
     @property
@@ -1159,8 +1165,26 @@ class ShujoshiText(INonKatsuyoText["ShujoshiText"]):
         return ShujoshiText(self.gokan)
 
 
-SHUJOSHI_NO = ShujoshiText("の")
-SHUJOSHI_NONI = ShujoshiText("のに")
+@attrs.define(frozen=True, slots=False)
+class ShujoshiYogenText(ShujoshiText):
+    """
+    終助詞。連体形につくもので用言にしか紐づかないものをまとめる
+    """
+
+    def merge(self, pre: IKatsuyoTextSource) -> "ShujoshiText":
+        if isinstance(pre, FixedKatsuyoText):
+            return pre + self.shujoshi
+        elif isinstance(pre, KatsuyoText):
+            return pre + self.shujoshi
+
+        raise KatsuyoTextError(
+            f"Unsupported katsuyo_text in {type(self)}: {pre} "
+            f"type: {type(pre)} katsuyo: {type(pre.katsuyo)}"
+        )
+
+
+SHUJOSHI_NO = ShujoshiYogenText("の")
+SHUJOSHI_NONI = ShujoshiYogenText("のに")
 
 
 @attrs.define(frozen=True, slots=False)
