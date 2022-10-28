@@ -279,8 +279,8 @@ class SpacyKatsuyoTextSourceDetector(IKatsuyoTextSourceDetector):
             # 1       ウォーキング    ウォーキング    VERB    名詞-普通名詞-一般      _       0       root    _       SpaceAfter=No|BunsetuBILabel=B|BunsetuPositionType=ROOT|Reading=ウォーキング
             # 2       する    する    AUX     動詞-非自立可能 _       1       aux     _       SpaceAfter=No|BunsetuBILabel=I|BunsetuPositionType=SYN_HEAD|Inf=サ行変格,終止形-一般|Reading=スル
             if src.pos_ == "VERB":
-                right = next(src.rights)
-                if right.lemma_ == "する":
+                right = next(src.rights, None)
+                if right and right.lemma_ == "する":
                     return KatsuyoText(gokan=lemma, katsuyo=SA_GYO_HENKAKU_SURU)
                 # このパターンは存在しない
                 # elif right.lemma_ == "ずる":
@@ -295,8 +295,8 @@ class SpacyKatsuyoTextSourceDetector(IKatsuyoTextSourceDetector):
             if src.pos_ == "ADJ":
                 return KatsuyoText(gokan=lemma, katsuyo=KEIYOUDOUSHI)
             elif src.pos_ == "NOUN":
-                right = next(src.rights)
-                if right.lemma_ == "だ":
+                right = next(src.rights, None)
+                if right and right.lemma_ == "だ":
                     return KatsuyoText(gokan=lemma, katsuyo=KEIYOUDOUSHI)
             # ==================================================
             # 名詞/固有名詞の変形
