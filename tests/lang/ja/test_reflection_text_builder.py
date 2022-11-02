@@ -201,6 +201,11 @@ class TestReflectionBuilder:
                 "400メートル走を頑張る。",
                 "with nummod",
             ),
+            (
+                "面接での対人恐怖症を克服する。",
+                "対人恐怖症を克服する。",
+                "with compound",
+            ),
         ],
     )
     def test_extract_tokens_with_nearest_heads(
