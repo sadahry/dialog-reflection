@@ -191,6 +191,16 @@ class TestReflectionBuilder:
                 "働く。",
                 "no dependencies",
             ),
+            (
+                "対人恐怖症を克服する。",
+                "対人恐怖症を克服する。",
+                "with compound",
+            ),
+            (
+                "400メートル走を頑張る。",
+                "400メートル走を頑張る。",
+                "with nummod",
+            ),
         ],
     )
     def test_extract_tokens_with_nearest_heads(

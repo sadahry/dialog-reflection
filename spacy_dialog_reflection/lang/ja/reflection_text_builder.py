@@ -35,7 +35,7 @@ class JaSpacyReflectionTextBuilder(ISpacyReflectionTextBuilder):
     def __init__(
         self,
         # restrict root pos tags to facilitate handling of suffixes in Japanese
-        # root: -VERB (29585; 52% instances), -NOUN (19528; 34% instances), -ADJ (3807; 7% instances), -PROPN (1508; 3% instances), -NUM (953; 2% instances), ...  
+        # root: -VERB (29585; 52% instances), -NOUN (19528; 34% instances), -ADJ (3807; 7% instances), -PROPN (1508; 3% instances), -NUM (953; 2% instances), ...
         # https://universaldependencies.org/treebanks/ja_bccwj/ja_bccwj-dep-root.html
         allowed_root_pos_tags: Set[str] = {"VERB", "NOUN", "PROPN", "ADJ", "NUM"},
         # NOTE: Will not use pos tags when build text in Japanese
@@ -108,6 +108,8 @@ class JaSpacyReflectionTextBuilder(ISpacyReflectionTextBuilder):
                 # the search is done from left in Japanese
                 token.lefts,
             ):
+                if head_token.dep_ in {"compound", "nummod"}:
+                    break
                 pass
             if head_token is not None:
                 return _extract_head_token(head_token)
