@@ -1,30 +1,27 @@
 from collections.abc import Callable
-from typing import Optional, TypeVar
+from typing import Optional
 import abc
 import sys
 import spacy_dialog_reflection.lang.ja.katsuyo as k
 import spacy_dialog_reflection.lang.ja.katsuyo_text as kt
 
 
-M = TypeVar("M", kt.KatsuyoText, kt.INonKatsuyoText)
-
-
-class IKatsuyoTextHelper(kt.IKatsuyoTextAppendant[M]):
+class IKatsuyoTextHelper(kt.IKatsuyoTextAppendant[kt.M]):
     """
     柔軟に活用系を変換するためのクラス
     """
 
     def __init__(
         self,
-        bridge: Optional[Callable[[kt.IKatsuyoTextSource], M]] = None,
+        bridge: Optional[Callable[[kt.IKatsuyoTextSource], kt.M]] = None,
     ) -> None:
-        self.bridge: Optional[Callable[[kt.IKatsuyoTextSource], M]] = bridge
+        self.bridge: Optional[Callable[[kt.IKatsuyoTextSource], kt.M]] = bridge
         """
         文法的には不正な活用形の組み合わせを
         任意の活用形に変換して返せるようにするための関数
         """
 
-    def merge(self, pre: kt.IKatsuyoTextSource) -> M:
+    def merge(self, pre: kt.IKatsuyoTextSource) -> kt.M:
         result = self.try_merge(pre)
         if result is not None:
             return result
@@ -37,7 +34,7 @@ class IKatsuyoTextHelper(kt.IKatsuyoTextAppendant[M]):
         )
 
     @abc.abstractmethod
-    def try_merge(self, pre: kt.IKatsuyoTextSource) -> Optional[M]:
+    def try_merge(self, pre: kt.IKatsuyoTextSource) -> Optional[kt.M]:
         raise NotImplementedError()
 
 
@@ -54,7 +51,7 @@ def bridge_Ukemi_default(pre: kt.IKatsuyoTextSource) -> kt.KatsuyoText:
     )
 
     if isinstance(pre, (kt.INonKatsuyoText)):
-        return pre + kt.JOSHI_NI + naru + kt.JODOUSHI_RERU
+        return pre + kt.KAKUJOSHI_NI + naru + kt.JODOUSHI_RERU
 
     if isinstance(
         pre.katsuyo,
@@ -107,7 +104,7 @@ class Ukemi(IKatsuyoTextHelper[kt.KatsuyoText]):
 def bridge_Shieki_default(pre: kt.IKatsuyoTextSource) -> kt.KatsuyoText:
     if isinstance(pre, kt.INonKatsuyoText):
         # 「させる」を動詞として扱い「に」でブリッジ
-        return pre + kt.JOSHI_NI + kt.SASERU
+        return pre + kt.KAKUJOSHI_NI + kt.SASERU
 
     if isinstance(
         pre.katsuyo,
@@ -164,7 +161,7 @@ def bridge_Hitei_default(pre: kt.IKatsuyoTextSource) -> kt.KatsuyoText:
     if isinstance(pre, kt.INonKatsuyoText):
         # TODO 助詞のハンドリング
         # TODO 「で」にも切り替えられるように
-        return pre + kt.JOSHI_DE + kt.JOSHI_HA + kt.HOJO_NAI
+        return pre + kt.KAKUJOSHI_DE + kt.KAKUJOSHI_HA + kt.HOJO_NAI
 
     if isinstance(
         pre.katsuyo,
@@ -322,7 +319,7 @@ class Youtai(IKatsuyoTextHelper):
 
 def bridge_Denbun_default(pre: kt.IKatsuyoTextSource) -> kt.KatsuyoText:
     if isinstance(pre, kt.INonKatsuyoText):
-        return pre + kt.JOSHI_DA + kt.JODOUSHI_SOUDA_DENBUN
+        return pre + kt.KAKUJOSHI_DA + kt.JODOUSHI_SOUDA_DENBUN
 
     raise kt.KatsuyoTextError(
         f"Unsupported katsuyo_text in {sys._getframe().f_code.co_name}: {pre} "
@@ -390,7 +387,7 @@ class Suitei(IKatsuyoTextHelper):
 
 def bridge_Touzen_default(pre: kt.IKatsuyoTextSource) -> kt.KatsuyoText:
     if isinstance(pre, kt.INonKatsuyoText):
-        return pre + kt.JOSHI_DE + kt.HOJO_ARU + kt.JODOUSHI_BEKIDA
+        return pre + kt.KAKUJOSHI_DE + kt.HOJO_ARU + kt.JODOUSHI_BEKIDA
 
     if isinstance(
         pre.katsuyo,
@@ -430,7 +427,7 @@ class Touzen(IKatsuyoTextHelper):
 
 def bridge_HikyoReizi_default(pre: kt.IKatsuyoTextSource) -> kt.KatsuyoText:
     if isinstance(pre, kt.INonKatsuyoText):
-        return pre + kt.JOSHI_NO + kt.JODOUSHI_YOUDA
+        return pre + kt.KAKUJOSHI_NO + kt.JODOUSHI_YOUDA
 
     raise kt.KatsuyoTextError(
         f"Unsupported katsuyo_text in {sys._getframe().f_code.co_name}: {pre} "
