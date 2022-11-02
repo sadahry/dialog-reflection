@@ -115,6 +115,12 @@ def test_error():
         KURU_KANJI + 1
 
 
+# TODO KakujoTextのテストを追加
+# TODO TaigenTextのテストを追加
+# TODO KeijoshiTextのテストを追加
+# TODO SetsuzokujoshiTextのテストを追加
+
+
 @pytest.mark.parametrize(
     "msg, katsuyo_text, expected",
     [

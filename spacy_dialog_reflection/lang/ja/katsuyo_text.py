@@ -12,6 +12,7 @@ A = TypeVar(
     "Keijoshi",
     "TaigenText",
     "FukujoshiText",
+    "SetsuzokujoshiText",
     "ShujoshiText",
 )
 M = TypeVar(
@@ -23,6 +24,7 @@ M = TypeVar(
     "Keijoshi",
     "TaigenText",
     "FukujoshiText",
+    "SetsuzokujoshiText",
     "ShujoshiText",
 )
 
@@ -262,6 +264,9 @@ class FixedKatsuyoText(IKatsuyoTextSource, IKatsuyoTextAppendant["FixedKatsuyoTe
         elif isinstance(post, Keijoshi):
             # TODO 特殊な活用系の実装
             return Keijoshi(gokan=str(self) + post.gokan)
+        elif isinstance(post, SetsuzokujoshiText):
+            # TODO 特殊な活用系の実装
+            return SetsuzokujoshiText(gokan=str(self) + post.gokan)
         elif isinstance(post, KatsuyoText):
             return KatsuyoText(
                 gokan=str(self) + post.gokan,
@@ -327,6 +332,9 @@ class INonKatsuyoText(IKatsuyoTextSource, IKatsuyoTextAppendant[M]):
         elif isinstance(post, Keijoshi):
             # TODO 特殊な活用系の実装
             return Keijoshi(gokan=str(self) + post.gokan)
+        elif isinstance(post, SetsuzokujoshiText):
+            # TODO 特殊な活用系の実装
+            return SetsuzokujoshiText(gokan=str(self) + post.gokan)
         elif isinstance(post, KatsuyoText):
             return KatsuyoText(
                 gokan=str(self) + post.gokan,
@@ -1167,6 +1175,22 @@ class Kiri(FukujoshiText):
 
 
 FUKUZYOSHI_KIRI = Kiri("きり")
+
+# ==============================================================================
+# 接続助詞
+# NOTE: 活用形が明確ではないため、用例によっては厳密な活用形とはなっていない
+# ref. https://ja.wikipedia.org/wiki/助詞#接続助詞
+# ==============================================================================
+
+
+@attrs.define(frozen=True, slots=True)
+class SetsuzokujoshiText(INonKatsuyoText["SetsuzokujoshiText"]):
+    """
+    接続助詞
+    """
+
+    pass
+
 
 # ==============================================================================
 # 終助詞
