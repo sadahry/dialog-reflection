@@ -19,6 +19,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text_builder import (
 import sys
 import traceback
 import re
+import warnings
 import spacy
 
 
@@ -46,6 +47,21 @@ class JaSpacyReflectionTextBuilder(ISpacyReflectionTextBuilder):
             "形容詞",  # ADJ
             "形状詞",  # ADJ
         },
+        forbidden_wh_norms: Set[str] = {
+            "何",
+            "何故",
+            "誰",
+            "いつ",
+            "どこ",
+            "どちら",
+            "どう",
+            "どの",
+            "どれ",
+            "どんな",
+            "どっち",
+            "幾ら",
+            "幾つ",
+        },
         finalize_build_suffix: Callable[
             [IKatsuyoTextSource], str
         ] = finalize_build_suffix_default,
@@ -59,6 +75,7 @@ class JaSpacyReflectionTextBuilder(ISpacyReflectionTextBuilder):
         self.allowed_tag_pattern = self._build_allowed_tag_pattern(
             allowed_bottom_token_tags
         )
+        self.forbidden_wh_norms = forbidden_wh_norms
         self.finalize_build_suffix = finalize_build_suffix
 
     def _build_allowed_tag_pattern(self, allowed_root_tags: Set[str]) -> re.Pattern:
@@ -84,6 +101,12 @@ class JaSpacyReflectionTextBuilder(ISpacyReflectionTextBuilder):
         sents = reversed(list(doc.sents))
         for sent in sents:
             if sent.root.pos_ in self.allowed_root_pos_tags:
+                wh_word = next(
+                    filter(lambda x: x.norm_ in self.forbidden_wh_norms, sent), None
+                )
+                if wh_word:
+                    warnings.warn(f"sent has wh_word: {wh_word} {sent}", UserWarning)
+                    continue
                 return sent.root
 
         raise ReflectionTextError(

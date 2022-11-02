@@ -113,8 +113,84 @@ class TestReflectionBuilder:
                 "行き",
                 "not extract last sentence ADV",
             ),
+            (
+                "こんにちは。今日は旅行に行きました。何で行ったんでしょうね。",
+                "行き",
+                "not extract last sentence 何",
+            ),
+            (
+                "こんにちは。今日は旅行に行きました。なんで行ったんでしょうね。",
+                "行き",
+                "not extract last sentence なん",
+            ),
+            (
+                "こんにちは。今日は旅行に行きました。なにで行ったんでしょうね。",
+                "行き",
+                "not extract last sentence なに",
+            ),
+            (
+                "こんにちは。今日は旅行に行きました。なぜ行ったんでしょうね。",
+                "行き",
+                "not extract last sentence なぜ",
+            ),
+            (
+                "こんにちは。今日は旅行に行きました。誰と行ったんでしょうね。",
+                "行き",
+                "not extract last sentence 誰",
+            ),
+            (
+                "こんにちは。今日は旅行に行きました。いつ行ったんでしょうね。",
+                "行き",
+                "not extract last sentence いつ",
+            ),
+            (
+                "こんにちは。今日は旅行に行きました。 どこに行ったんでしょうね。",
+                "行き",
+                "not extract last sentence どこ",
+            ),
+            (
+                "こんにちは。今日は旅行に行きました。 どちらに行ったんでしょうね。",
+                "行き",
+                "not extract last sentence どちら",
+            ),
+            (
+                "こんにちは。今日は旅行に行きました。 どう行ったんでしょうね。",
+                "行き",
+                "not extract last sentence どう",
+            ),
+            (
+                "こんにちは。今日は旅行に行きました。 どのように行ったんでしょうね。",
+                "行き",
+                "not extract last sentence どの",
+            ),
+            (
+                "こんにちは。今日は旅行に行きました。 どれくらい行ったんでしょうね。",
+                "行き",
+                "not extract last sentence どれ",
+            ),
+            (
+                "こんにちは。今日は旅行に行きました。 どんなので行ったんでしょうね。",
+                "行き",
+                "not extract last sentence どんな",
+            ),
+            (
+                "こんにちは。今日は旅行に行きました。 どっちに行ったんでしょうね。",
+                "行き",
+                "not extract last sentence どっち",
+            ),
+            (
+                "こんにちは。今日は旅行に行きました。 いくらで行ったんでしょうね。",
+                "行き",
+                "not extract last sentence いくら",
+            ),
+            (
+                "こんにちは。今日は旅行に行きました。 いくつの頃に行ったんでしょうね。",
+                "行き",
+                "not extract last sentence いくつ",
+            ),
         ],
     )
+    @pytest.mark.filterwarnings("ignore:sent has wh_word")
     def test_extract_root_token(
         self,
         nlp_ja,
