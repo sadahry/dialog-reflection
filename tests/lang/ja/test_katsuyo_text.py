@@ -117,7 +117,7 @@ def test_error():
 
 # TODO KakujoTextのテストを追加
 # TODO TaigenTextのテストを追加
-# TODO KeijoshiTextのテストを追加
+# TODO KeijoshiTextTextのテストを追加
 # TODO SetsuzokujoshiTextのテストを追加
 
 
@@ -214,7 +214,7 @@ def test_error():
             "のばかり",
         ),
         (
-            "Kakujoshi",
+            "KakujoshiText",
             KAKUJOSHI_NI,
             "にばかり",
         ),
@@ -319,7 +319,7 @@ def test_FUKUZYOSHI_BAKARI(msg, katsuyo_text, expected):
             "のまで",
         ),
         (
-            "Kakujoshi",
+            "KakujoshiText",
             KAKUJOSHI_NI,
             "にまで",
         ),
@@ -424,7 +424,7 @@ def test_FUKUZYOSHI_MADE(msg, katsuyo_text, expected):
             "のだけ",
         ),
         (
-            "Kakujoshi",
+            "KakujoshiText",
             KAKUJOSHI_NI,
             "にだけ",
         ),
@@ -529,7 +529,7 @@ def test_FUKUZYOSHI_DAKE(msg, katsuyo_text, expected):
             "のほど",
         ),
         (
-            "Kakujoshi",
+            "KakujoshiText",
             KAKUJOSHI_NI,
             "にほど",
         ),
@@ -634,7 +634,7 @@ def test_FUKUZYOSHI_HODO(msg, katsuyo_text, expected):
             "のくらい",
         ),
         (
-            "Kakujoshi",
+            "KakujoshiText",
             KAKUJOSHI_NI,
             "にくらい",
         ),
@@ -739,7 +739,7 @@ def test_FUKUZYOSHI_KURAI(msg, katsuyo_text, expected):
             "のなど",
         ),
         (
-            "Kakujoshi",
+            "KakujoshiText",
             KAKUJOSHI_NI,
             "になど",
         ),
@@ -844,7 +844,7 @@ def test_FUKUZYOSHI_NADO(msg, katsuyo_text, expected):
             "のなり",
         ),
         (
-            "Kakujoshi",
+            "KakujoshiText",
             KAKUJOSHI_NI,
             "になり",
         ),
@@ -949,7 +949,7 @@ def test_FUKUZYOSHI_NARI(msg, katsuyo_text, expected):
             "のやら",
         ),
         (
-            "Kakujoshi",
+            "KakujoshiText",
             KAKUJOSHI_NI,
             "にやら",
         ),
@@ -1054,7 +1054,7 @@ def test_FUKUZYOSHI_YARA(msg, katsuyo_text, expected):
             "のか",
         ),
         (
-            "Kakujoshi",
+            "KakujoshiText",
             KAKUJOSHI_NI,
             "にか",
         ),
@@ -1159,7 +1159,7 @@ def test_FUKUZYOSHI_KA(msg, katsuyo_text, expected):
             "ののみ",
         ),
         (
-            "Kakujoshi",
+            "KakujoshiText",
             KAKUJOSHI_NI,
             "にのみ",
         ),
@@ -1280,7 +1280,7 @@ def test_FUKUZYOSHI_KIRI(msg, katsuyo_text, expected):
             SHUJOSHI_NA,
         ),
         (
-            "Kakujoshi",
+            "KakujoshiText",
             KAKUJOSHI_NI,
         ),
     ],
@@ -1380,7 +1380,7 @@ def test_FUKUZYOSHI_ZUTSU(msg, katsuyo_text, expected):
             SHUJOSHI_NA,
         ),
         (
-            "Kakujoshi",
+            "KakujoshiText",
             KAKUJOSHI_NI,
         ),
     ],
@@ -1493,7 +1493,7 @@ def test_SHUJOSHI_NO(msg, katsuyo_text, expected):
             SHUJOSHI_NA,
         ),
         (
-            "Kakujoshi",
+            "KakujoshiText",
             KAKUJOSHI_NI,
         ),
     ],
@@ -1606,7 +1606,7 @@ def test_SHUJOSHI_NONI(msg, katsuyo_text, expected):
             SHUJOSHI_NA,
         ),
         (
-            "Kakujoshi",
+            "KakujoshiText",
             KAKUJOSHI_NI,
         ),
     ],
@@ -1729,7 +1729,7 @@ def test_SHUJOSHI_NA(msg, katsuyo_text, expected):
             SHUJOSHI_NO,
         ),
         (
-            "Kakujoshi",
+            "KakujoshiText",
             KAKUJOSHI_NI,
         ),
     ],
@@ -1834,7 +1834,7 @@ def test_SHUJOSHI_NA_error(msg, katsuyo_text):
             "のか",
         ),
         (
-            "Kakujoshi",
+            "KakujoshiText",
             KAKUJOSHI_NI,
             "にか",
         ),
@@ -1939,7 +1939,7 @@ def test_SHUJOSHI_KA(msg, katsuyo_text, expected):
             "のかしら",
         ),
         (
-            "Kakujoshi",
+            "KakujoshiText",
             KAKUJOSHI_NI,
             "にかしら",
         ),

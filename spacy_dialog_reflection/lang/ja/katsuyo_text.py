@@ -8,8 +8,8 @@ A = TypeVar(
     "KatsuyoText",
     "FixedKatsuyoText",
     # 以下はINonKatsuyoTextの実装クラス
-    "Kakujoshi",
-    "Keijoshi",
+    "KakujoshiText",
+    "KeijoshiText",
     "TaigenText",
     "FukujoshiText",
     "SetsuzokujoshiText",
@@ -21,8 +21,8 @@ M = TypeVar(
     "KatsuyoText",
     "FixedKatsuyoText",
     # 以下はINonKatsuyoTextの実装クラス
-    "Kakujoshi",
-    "Keijoshi",
+    "KakujoshiText",
+    "KeijoshiText",
     "TaigenText",
     "FukujoshiText",
     "SetsuzokujoshiText",
@@ -260,12 +260,12 @@ class FixedKatsuyoText(IKatsuyoTextSource, IKatsuyoTextAppendant["FixedKatsuyoTe
             if type(post) is not ShujoshiText:  # 特殊な活用系の場合
                 return post.merge(self)
             return ShujoshiText(gokan=str(self) + post.gokan)
-        elif isinstance(post, Kakujoshi):
+        elif isinstance(post, KakujoshiText):
             # TODO 特殊な活用系の実装
-            return Kakujoshi(gokan=str(self) + post.gokan)
-        elif isinstance(post, Keijoshi):
+            return KakujoshiText(gokan=str(self) + post.gokan)
+        elif isinstance(post, KeijoshiText):
             # TODO 特殊な活用系の実装
-            return Keijoshi(gokan=str(self) + post.gokan)
+            return KeijoshiText(gokan=str(self) + post.gokan)
         elif isinstance(post, SetsuzokujoshiText):
             # TODO 特殊な活用系の実装
             return SetsuzokujoshiText(gokan=str(self) + post.gokan)
@@ -331,12 +331,12 @@ class INonKatsuyoText(IKatsuyoTextSource, IKatsuyoTextAppendant[M]):
             if type(post) is not ShujoshiText:  # 特殊な活用系の場合
                 return post.merge(self)
             return ShujoshiText(gokan=str(self) + post.gokan)
-        elif isinstance(post, Kakujoshi):
+        elif isinstance(post, KakujoshiText):
             # TODO 特殊な活用系の実装
-            return Kakujoshi(gokan=str(self) + post.gokan)
-        elif isinstance(post, Keijoshi):
+            return KakujoshiText(gokan=str(self) + post.gokan)
+        elif isinstance(post, KeijoshiText):
             # TODO 特殊な活用系の実装
-            return Keijoshi(gokan=str(self) + post.gokan)
+            return KeijoshiText(gokan=str(self) + post.gokan)
         elif isinstance(post, SetsuzokujoshiText):
             # TODO 特殊な活用系の実装
             return SetsuzokujoshiText(gokan=str(self) + post.gokan)
@@ -397,7 +397,7 @@ class HojoKatsuyoText(KatsuyoText):
         if isinstance(pre, FixedKatsuyoText):
             return pre + self
         elif isinstance(pre, INonKatsuyoText):
-            if isinstance(pre, Kakujoshi):
+            if isinstance(pre, KakujoshiText):
                 # TODO 助詞の精査
                 return pre + self
 
@@ -861,7 +861,7 @@ class Rashii(IJodoushiKatsuyoText):
         if isinstance(pre, INonKatsuyoText):
             if isinstance(pre, TaigenText):
                 return pre + self.katsuyo_text
-            elif isinstance(pre, Kakujoshi):
+            elif isinstance(pre, KakujoshiText):
                 # TODO 助詞の精査
                 return pre + self.katsuyo_text
 
@@ -937,7 +937,7 @@ class Youda(IJodoushiKatsuyoText):
         if isinstance(pre, FixedKatsuyoText):
             return pre + self.katsuyo_text
         if isinstance(pre, INonKatsuyoText):
-            if isinstance(pre, Kakujoshi):
+            if isinstance(pre, KakujoshiText):
                 # TODO 助詞の精査
                 return pre + self.katsuyo_text
 
@@ -1050,7 +1050,7 @@ class TaigenText(INonKatsuyoText["TaigenText"]):
 
 
 @attrs.define(frozen=True, slots=True)
-class Kakujoshi(INonKatsuyoText["Kakujoshi"]):
+class KakujoshiText(INonKatsuyoText["KakujoshiText"]):
     """
     格助詞
     """
@@ -1059,10 +1059,10 @@ class Kakujoshi(INonKatsuyoText["Kakujoshi"]):
 
 
 # TODO 特殊な活用系の実装
-KAKUJOSHI_NI = Kakujoshi("に")
-KAKUJOSHI_DE = Kakujoshi("で")
-KAKUJOSHI_DA = Kakujoshi("だ")
-KAKUJOSHI_NO = Kakujoshi("の")
+KAKUJOSHI_NI = KakujoshiText("に")
+KAKUJOSHI_DE = KakujoshiText("で")
+KAKUJOSHI_DA = KakujoshiText("だ")
+KAKUJOSHI_NO = KakujoshiText("の")
 
 # ==============================================================================
 # 係助詞
@@ -1072,7 +1072,7 @@ KAKUJOSHI_NO = Kakujoshi("の")
 
 
 @attrs.define(frozen=True, slots=True)
-class Keijoshi(INonKatsuyoText["Keijoshi"]):
+class KeijoshiText(INonKatsuyoText["KeijoshiText"]):
     """
     係助詞
     """
@@ -1081,7 +1081,7 @@ class Keijoshi(INonKatsuyoText["Keijoshi"]):
 
 
 # TODO 特殊な活用系の実装
-KEIJOSHI_HA = Keijoshi("は")
+KEIJOSHI_HA = KeijoshiText("は")
 
 # ==============================================================================
 # 副助詞
