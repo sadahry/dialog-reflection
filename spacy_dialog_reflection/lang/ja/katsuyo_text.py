@@ -8,7 +8,7 @@ A = TypeVar(
     "KatsuyoText",
     "FixedKatsuyoText",
     # 以下はINonKatsuyoTextの実装クラス
-    "JoshiText",
+    "Kakujoshi",
     "TaigenText",
     "FukujoshiText",
     "ShujoshiText",
@@ -18,7 +18,7 @@ M = TypeVar(
     "KatsuyoText",
     "FixedKatsuyoText",
     # 以下はINonKatsuyoTextの実装クラス
-    "JoshiText",
+    "Kakujoshi",
     "TaigenText",
     "FukujoshiText",
     "ShujoshiText",
@@ -254,8 +254,8 @@ class FixedKatsuyoText(IKatsuyoTextSource, IKatsuyoTextAppendant["FixedKatsuyoTe
             if type(post) is not ShujoshiText:  # 特殊な活用系の場合
                 return post.merge(self)
             return ShujoshiText(gokan=str(self) + post.gokan)
-        elif isinstance(post, JoshiText):
-            return JoshiText(gokan=str(self) + post.gokan)
+        elif isinstance(post, Kakujoshi):
+            return Kakujoshi(gokan=str(self) + post.gokan)
         elif isinstance(post, KatsuyoText):
             return KatsuyoText(
                 gokan=str(self) + post.gokan,
@@ -315,8 +315,8 @@ class INonKatsuyoText(IKatsuyoTextSource, IKatsuyoTextAppendant[M]):
             if type(post) is not ShujoshiText:  # 特殊な活用系の場合
                 return post.merge(self)
             return ShujoshiText(gokan=str(self) + post.gokan)
-        elif isinstance(post, JoshiText):
-            return JoshiText(gokan=str(self) + post.gokan)
+        elif isinstance(post, Kakujoshi):
+            return Kakujoshi(gokan=str(self) + post.gokan)
         elif isinstance(post, KatsuyoText):
             return KatsuyoText(
                 gokan=str(self) + post.gokan,
@@ -371,7 +371,7 @@ class HojoKatsuyoText(KatsuyoText):
         if isinstance(pre, FixedKatsuyoText):
             return pre + self
         elif isinstance(pre, INonKatsuyoText):
-            if isinstance(pre, JoshiText):
+            if isinstance(pre, Kakujoshi):
                 # TODO 助詞の精査
                 return pre + self
 
@@ -835,7 +835,7 @@ class Rashii(IJodoushiKatsuyoText):
         if isinstance(pre, INonKatsuyoText):
             if isinstance(pre, TaigenText):
                 return pre + self.katsuyo_text
-            elif isinstance(pre, JoshiText):
+            elif isinstance(pre, Kakujoshi):
                 # TODO 助詞の精査
                 return pre + self.katsuyo_text
 
@@ -911,7 +911,7 @@ class Youda(IJodoushiKatsuyoText):
         if isinstance(pre, FixedKatsuyoText):
             return pre + self.katsuyo_text
         if isinstance(pre, INonKatsuyoText):
-            if isinstance(pre, JoshiText):
+            if isinstance(pre, Kakujoshi):
                 # TODO 助詞の精査
                 return pre + self.katsuyo_text
 
@@ -1024,7 +1024,7 @@ class TaigenText(INonKatsuyoText["TaigenText"]):
 
 
 @attrs.define(frozen=True, slots=True)
-class JoshiText(INonKatsuyoText["JoshiText"]):
+class Kakujoshi(INonKatsuyoText["Kakujoshi"]):
     """
     助詞。細かく分類せず扱うもののみをまとめる
     e.g. 格助詞,格助詞,接続助詞
@@ -1033,11 +1033,11 @@ class JoshiText(INonKatsuyoText["JoshiText"]):
     pass
 
 
-JOSHI_NI = JoshiText("に")
-JOSHI_DE = JoshiText("で")
-JOSHI_HA = JoshiText("は")
-JOSHI_DA = JoshiText("だ")
-JOSHI_NO = JoshiText("の")
+KAKUJOSHI_NI = Kakujoshi("に")
+KAKUJOSHI_DE = Kakujoshi("で")
+KAKUJOSHI_HA = Kakujoshi("は")  # TODO 係助詞に
+KAKUJOSHI_DA = Kakujoshi("だ")
+KAKUJOSHI_NO = Kakujoshi("の")
 
 # ==============================================================================
 # 副助詞

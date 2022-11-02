@@ -12,7 +12,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text import (
     FUKUZYOSHI_NOMI,
     FUKUZYOSHI_YARA,
     FUKUZYOSHI_ZUTSU,
-    JOSHI_NI,
+    KAKUJOSHI_NI,
     JODOUSHI_DA,
     JODOUSHI_TA,
     KURU,
@@ -208,8 +208,8 @@ def test_error():
             "のばかり",
         ),
         (
-            "JoshiText",
-            JOSHI_NI,
+            "Kakujoshi",
+            KAKUJOSHI_NI,
             "にばかり",
         ),
     ],
@@ -313,8 +313,8 @@ def test_FUKUZYOSHI_BAKARI(msg, katsuyo_text, expected):
             "のまで",
         ),
         (
-            "JoshiText",
-            JOSHI_NI,
+            "Kakujoshi",
+            KAKUJOSHI_NI,
             "にまで",
         ),
     ],
@@ -418,8 +418,8 @@ def test_FUKUZYOSHI_MADE(msg, katsuyo_text, expected):
             "のだけ",
         ),
         (
-            "JoshiText",
-            JOSHI_NI,
+            "Kakujoshi",
+            KAKUJOSHI_NI,
             "にだけ",
         ),
     ],
@@ -523,8 +523,8 @@ def test_FUKUZYOSHI_DAKE(msg, katsuyo_text, expected):
             "のほど",
         ),
         (
-            "JoshiText",
-            JOSHI_NI,
+            "Kakujoshi",
+            KAKUJOSHI_NI,
             "にほど",
         ),
     ],
@@ -628,8 +628,8 @@ def test_FUKUZYOSHI_HODO(msg, katsuyo_text, expected):
             "のくらい",
         ),
         (
-            "JoshiText",
-            JOSHI_NI,
+            "Kakujoshi",
+            KAKUJOSHI_NI,
             "にくらい",
         ),
     ],
@@ -733,8 +733,8 @@ def test_FUKUZYOSHI_KURAI(msg, katsuyo_text, expected):
             "のなど",
         ),
         (
-            "JoshiText",
-            JOSHI_NI,
+            "Kakujoshi",
+            KAKUJOSHI_NI,
             "になど",
         ),
     ],
@@ -838,8 +838,8 @@ def test_FUKUZYOSHI_NADO(msg, katsuyo_text, expected):
             "のなり",
         ),
         (
-            "JoshiText",
-            JOSHI_NI,
+            "Kakujoshi",
+            KAKUJOSHI_NI,
             "になり",
         ),
     ],
@@ -943,8 +943,8 @@ def test_FUKUZYOSHI_NARI(msg, katsuyo_text, expected):
             "のやら",
         ),
         (
-            "JoshiText",
-            JOSHI_NI,
+            "Kakujoshi",
+            KAKUJOSHI_NI,
             "にやら",
         ),
     ],
@@ -1048,8 +1048,8 @@ def test_FUKUZYOSHI_YARA(msg, katsuyo_text, expected):
             "のか",
         ),
         (
-            "JoshiText",
-            JOSHI_NI,
+            "Kakujoshi",
+            KAKUJOSHI_NI,
             "にか",
         ),
     ],
@@ -1153,8 +1153,8 @@ def test_FUKUZYOSHI_KA(msg, katsuyo_text, expected):
             "ののみ",
         ),
         (
-            "JoshiText",
-            JOSHI_NI,
+            "Kakujoshi",
+            KAKUJOSHI_NI,
             "にのみ",
         ),
     ],
@@ -1274,8 +1274,8 @@ def test_FUKUZYOSHI_KIRI(msg, katsuyo_text, expected):
             SHUJOSHI_NA,
         ),
         (
-            "JoshiText",
-            JOSHI_NI,
+            "Kakujoshi",
+            KAKUJOSHI_NI,
         ),
     ],
 )
@@ -1374,8 +1374,8 @@ def test_FUKUZYOSHI_ZUTSU(msg, katsuyo_text, expected):
             SHUJOSHI_NA,
         ),
         (
-            "JoshiText",
-            JOSHI_NI,
+            "Kakujoshi",
+            KAKUJOSHI_NI,
         ),
     ],
 )
@@ -1487,8 +1487,8 @@ def test_SHUJOSHI_NO(msg, katsuyo_text, expected):
             SHUJOSHI_NA,
         ),
         (
-            "JoshiText",
-            JOSHI_NI,
+            "Kakujoshi",
+            KAKUJOSHI_NI,
         ),
     ],
 )
@@ -1600,8 +1600,8 @@ def test_SHUJOSHI_NONI(msg, katsuyo_text, expected):
             SHUJOSHI_NA,
         ),
         (
-            "JoshiText",
-            JOSHI_NI,
+            "Kakujoshi",
+            KAKUJOSHI_NI,
         ),
     ],
 )
@@ -1723,8 +1723,8 @@ def test_SHUJOSHI_NA(msg, katsuyo_text, expected):
             SHUJOSHI_NO,
         ),
         (
-            "JoshiText",
-            JOSHI_NI,
+            "Kakujoshi",
+            KAKUJOSHI_NI,
         ),
     ],
 )
@@ -1828,8 +1828,8 @@ def test_SHUJOSHI_NA_error(msg, katsuyo_text):
             "のか",
         ),
         (
-            "JoshiText",
-            JOSHI_NI,
+            "Kakujoshi",
+            KAKUJOSHI_NI,
             "にか",
         ),
     ],
@@ -1933,8 +1933,8 @@ def test_SHUJOSHI_KA(msg, katsuyo_text, expected):
             "のかしら",
         ),
         (
-            "JoshiText",
-            JOSHI_NI,
+            "Kakujoshi",
+            KAKUJOSHI_NI,
             "にかしら",
         ),
     ],
