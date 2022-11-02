@@ -1032,6 +1032,7 @@ class Kakujoshi(INonKatsuyoText["Kakujoshi"]):
     pass
 
 
+# TODO 各単語に固有の活用変形の実装
 KAKUJOSHI_NI = Kakujoshi("に")
 KAKUJOSHI_DE = Kakujoshi("で")
 KAKUJOSHI_HA = Kakujoshi("は")  # TODO 係助詞に
