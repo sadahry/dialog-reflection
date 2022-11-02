@@ -9,6 +9,7 @@ A = TypeVar(
     "FixedKatsuyoText",
     # 以下はINonKatsuyoTextの実装クラス
     "Kakujoshi",
+    "Keijoshi",
     "TaigenText",
     "FukujoshiText",
     "ShujoshiText",
@@ -19,6 +20,7 @@ M = TypeVar(
     "FixedKatsuyoText",
     # 以下はINonKatsuyoTextの実装クラス
     "Kakujoshi",
+    "Keijoshi",
     "TaigenText",
     "FukujoshiText",
     "ShujoshiText",
@@ -255,7 +257,11 @@ class FixedKatsuyoText(IKatsuyoTextSource, IKatsuyoTextAppendant["FixedKatsuyoTe
                 return post.merge(self)
             return ShujoshiText(gokan=str(self) + post.gokan)
         elif isinstance(post, Kakujoshi):
+            # TODO 特殊な活用系の実装
             return Kakujoshi(gokan=str(self) + post.gokan)
+        elif isinstance(post, Keijoshi):
+            # TODO 特殊な活用系の実装
+            return Keijoshi(gokan=str(self) + post.gokan)
         elif isinstance(post, KatsuyoText):
             return KatsuyoText(
                 gokan=str(self) + post.gokan,
@@ -316,7 +322,11 @@ class INonKatsuyoText(IKatsuyoTextSource, IKatsuyoTextAppendant[M]):
                 return post.merge(self)
             return ShujoshiText(gokan=str(self) + post.gokan)
         elif isinstance(post, Kakujoshi):
+            # TODO 特殊な活用系の実装
             return Kakujoshi(gokan=str(self) + post.gokan)
+        elif isinstance(post, Keijoshi):
+            # TODO 特殊な活用系の実装
+            return Keijoshi(gokan=str(self) + post.gokan)
         elif isinstance(post, KatsuyoText):
             return KatsuyoText(
                 gokan=str(self) + post.gokan,
@@ -1019,7 +1029,7 @@ class TaigenText(INonKatsuyoText["TaigenText"]):
 # ==============================================================================
 # 格助詞
 # NOTE: 活用形が明確ではないため、用例によっては厳密な活用形とはなっていない
-# ref. https://ja.wikipedia.org/wiki/助詞
+# ref. https://ja.wikipedia.org/wiki/助詞#格助詞
 # ==============================================================================
 
 
@@ -1035,9 +1045,27 @@ class Kakujoshi(INonKatsuyoText["Kakujoshi"]):
 # TODO 各単語に固有の活用変形の実装
 KAKUJOSHI_NI = Kakujoshi("に")
 KAKUJOSHI_DE = Kakujoshi("で")
-KAKUJOSHI_HA = Kakujoshi("は")  # TODO 係助詞に
 KAKUJOSHI_DA = Kakujoshi("だ")
 KAKUJOSHI_NO = Kakujoshi("の")
+
+# ==============================================================================
+# 係助詞
+# NOTE: 活用形が明確ではないため、用例によっては厳密な活用形とはなっていない
+# ref. https://ja.wikipedia.org/wiki/助詞#係助詞
+# ==============================================================================
+
+
+@attrs.define(frozen=True, slots=True)
+class Keijoshi(INonKatsuyoText["Keijoshi"]):
+    """
+    係助詞
+    """
+
+    pass
+
+
+# TODO 各単語に固有の活用変形の実装
+KEIJOSHI_HA = Keijoshi("は")
 
 # ==============================================================================
 # 副助詞
@@ -1138,15 +1166,6 @@ class Kiri(FukujoshiText):
 
 
 FUKUZYOSHI_KIRI = Kiri("きり")
-
-# ==============================================================================
-# 係助詞
-# ref. https://ja.wikipedia.org/wiki/助詞#係助詞
-# ==============================================================================
-
-# NOTE: 係助詞は現状の係り受け解析方法では扱わない
-#       (最後の動詞/形容詞からのAppendantの解析を行うため、後に動詞/形容詞/形容動詞を
-#        伴うことの多い係助詞を解析する必要がない)
 
 # ==============================================================================
 # 終助詞
