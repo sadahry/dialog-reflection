@@ -131,6 +131,8 @@ class JaSpacyReflectionTextBuilder(ISpacyReflectionTextBuilder):
                 # the search is done from left in Japanese
                 token.lefts,
             ):
+                # NOTE: the head_token is not always the nearest token
+                #       compound/nummod tokens will have combined nouns like "50メートル走"
                 if head_token.dep_ in {"compound", "nummod"}:
                     break
                 pass
