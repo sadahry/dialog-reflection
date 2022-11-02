@@ -14,6 +14,7 @@ A = TypeVar(
     "FukujoshiText",
     "SetsuzokujoshiText",
     "ShujoshiText",
+    "JuntaijoshiText",
 )
 M = TypeVar(
     "M",
@@ -26,6 +27,7 @@ M = TypeVar(
     "FukujoshiText",
     "SetsuzokujoshiText",
     "ShujoshiText",
+    "JuntaijoshiText",
 )
 
 
@@ -267,6 +269,9 @@ class FixedKatsuyoText(IKatsuyoTextSource, IKatsuyoTextAppendant["FixedKatsuyoTe
         elif isinstance(post, SetsuzokujoshiText):
             # TODO 特殊な活用系の実装
             return SetsuzokujoshiText(gokan=str(self) + post.gokan)
+        elif isinstance(post, JuntaijoshiText):
+            # TODO 特殊な活用系の実装
+            return JuntaijoshiText(gokan=str(self) + post.gokan)
         elif isinstance(post, KatsuyoText):
             return KatsuyoText(
                 gokan=str(self) + post.gokan,
@@ -335,6 +340,9 @@ class INonKatsuyoText(IKatsuyoTextSource, IKatsuyoTextAppendant[M]):
         elif isinstance(post, SetsuzokujoshiText):
             # TODO 特殊な活用系の実装
             return SetsuzokujoshiText(gokan=str(self) + post.gokan)
+        elif isinstance(post, JuntaijoshiText):
+            # TODO 特殊な活用系の実装
+            return JuntaijoshiText(gokan=str(self) + post.gokan)
         elif isinstance(post, KatsuyoText):
             return KatsuyoText(
                 gokan=str(self) + post.gokan,
@@ -1276,3 +1284,18 @@ SHUJOSHI_KA = ShujoshiGokanText("か")
 # 終助詞「やら」は副助詞として取得されるため、ここでは定義しない
 # SHUJOSHI_YARA = ShujoshiTaigenText("やら")
 SHUJOSHI_KASHIRA = ShujoshiGokanText("かしら")
+
+# ==============================================================================
+# 準体助詞
+# NOTE: 活用形が明確ではないため、用例によっては厳密な活用形とはなっていない
+# ref. https://ja.wikipedia.org/wiki/助詞#準体助詞
+# ==============================================================================
+
+
+@attrs.define(frozen=True, slots=True)
+class JuntaijoshiText(INonKatsuyoText["JuntaijoshiText"]):
+    """
+    準体助詞
+    """
+
+    pass
