@@ -1026,8 +1026,7 @@ class TaigenText(INonKatsuyoText["TaigenText"]):
 @attrs.define(frozen=True, slots=True)
 class Kakujoshi(INonKatsuyoText["Kakujoshi"]):
     """
-    助詞。細かく分類せず扱うもののみをまとめる
-    e.g. 格助詞,格助詞,接続助詞
+    格助詞
     """
 
     pass
