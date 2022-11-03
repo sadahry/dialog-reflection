@@ -549,6 +549,17 @@ def test_spacy_katsuyo_text_detector_joshi(nlp_ja, msg, text, expected):
             "楽しみます",
             "楽しみ",
         ),
+        (
+            "助動詞「ます」",
+            "楽しんでます",
+            # 楽しんでる
+            "楽しんで",
+        ),
+        (
+            "助動詞「ます」",
+            "楽しいんです",
+            "楽しい",
+        ),
     ],
 )
 def test_spacy_katsuyo_text_detector_jodoushi(nlp_ja, msg, text, expected):
