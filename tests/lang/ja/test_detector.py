@@ -4,7 +4,7 @@ from typing import Optional
 import pytest
 import re
 
-JODOUSHI_REGEXP = re.compile(r"^助動詞-(ダ|デス)")
+JODOUSHI_REGEXP = re.compile(r"^助動詞-(ダ|デス|マス)")
 
 
 def cut_suffix_until_valid(sent) -> Optional[str]:
@@ -522,6 +522,11 @@ def test_spacy_katsuyo_text_detector_joshi(nlp_ja, msg, text, expected):
             "助動詞「です」",
             "それです",
             "それ",
+        ),
+        (
+            "助動詞「ます」",
+            "楽しみます",
+            "楽しみ",
         ),
     ],
 )
