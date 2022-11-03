@@ -1,10 +1,34 @@
 # NOTE: あくまでテスト用
 # TODO JaSpacyReflectionTextBuilder に移植
-from typing import Optional
+from typing import Optional, Union
 import pytest
 import re
+import spacy
 
-JODOUSHI_REGEXP = re.compile(r"^助動詞-(ダ|デス|マス)")
+
+class CancelledReason():
+    pass
+
+
+class UnexpectedError(CancelledReason):
+    pass
+
+
+class CancelledByToken(CancelledReason):
+    def __init__(self, token: Union[spacy.tokens.Token, str]):
+        self.token = token
+
+
+class CancelReflectionError(Exception):
+    def __init__(
+        self, *args: object, reason: CancelledReason = UnexpectedError()
+    ) -> None:
+        self.reason = reason
+        super().__init__(*args)
+
+
+INVALID_JODOUSHI_REGEXP = re.compile(r"^助動詞-(ダ|デス|マス)")
+CANCEL_JODOUSHI_REGEXP = re.compile(r"^(助動詞-ヌ|文語助動詞-ム)")
 
 
 def cut_suffix_until_valid(sent) -> Optional[str]:
@@ -26,8 +50,10 @@ def cut_suffix_until_valid(sent) -> Optional[str]:
                 # ref. https://worksapplications.github.io/sudachi.rs/python/api/sudachipy.html#sudachipy.Morpheme.part_of_speech
                 inflection = token.morph.get("Inflection")[0].split(";")
                 conjugation_type = inflection[0]
-                if JODOUSHI_REGEXP.match(conjugation_type):
+                if INVALID_JODOUSHI_REGEXP.match(conjugation_type):
                     continue
+                if CANCEL_JODOUSHI_REGEXP.match(conjugation_type):
+                    raise CancelReflectionError(reason=CancelledByToken(token))
             case "助詞-準体助詞":
                 continue
         break
@@ -566,3 +592,64 @@ def test_spacy_katsuyo_text_detector_jodoushi(nlp_ja, msg, text, expected):
     sent = next(nlp_ja(text).sents)
     result = cut_suffix_until_valid(sent)
     assert result.text == expected, msg
+
+
+@pytest.mark.parametrize(
+    "msg, text, will_cancel",
+    [
+        # ref. https://ja.wikipedia.org/wiki/助動詞_(国文法)
+        (
+            "助動詞「ず」",
+            "あらず",
+            True,
+        ),
+        (
+            "助動詞「ず」",
+            "あらずだ",
+            True,
+        ),
+        (
+            "助動詞「ず」",
+            "あらずでない",
+            False,
+        ),
+        (
+            "助動詞「ぬ」",
+            "あらぬ",
+            True,
+        ),
+        (
+            "助動詞「ぬ」",
+            "あらぬだ",
+            True,
+        ),
+        (
+            "助動詞「ん」",
+            "あらんでない",
+            False,
+        ),
+        (
+            "助動詞「ん」",
+            "あらん",
+            True,
+        ),
+        (
+            "助動詞「ん」",
+            "あらんのだ",
+            True,
+        ),
+        (
+            "助動詞「ん」",
+            "あらんでない",
+            False,
+        ),
+    ],
+)
+def test_spacy_katsuyo_text_detector_jodoushi_cancel(nlp_ja, msg, text, will_cancel):
+    sent = next(nlp_ja(text).sents)
+    if will_cancel:
+        with pytest.raises(CancelReflectionError):
+            cut_suffix_until_valid(sent)
+            assert False, msg
+    else:
+        cut_suffix_until_valid(sent)
