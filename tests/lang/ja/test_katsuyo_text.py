@@ -13,7 +13,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text import (
     FUKUZYOSHI_YARA,
     FUKUZYOSHI_ZUTSU,
     KAKUJOSHI_NI,
-    JODOUSHI_DA,
+    JODOUSHI_DA_KAKO_KANRYO,
     JODOUSHI_TA,
     KURU,
     KURU_KANJI,
@@ -1238,7 +1238,7 @@ def test_FUKUZYOSHI_NOMI(msg, katsuyo_text, expected):
         ),
         (
             "JodoushiText",
-            JODOUSHI_DA,
+            JODOUSHI_DA_KAKO_KANRYO,
             "だきり",  # e.g. 遊んだきり
         ),
         (

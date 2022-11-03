@@ -272,7 +272,7 @@ class KakoKanryo(IKatsuyoTextHelper):
             if isinstance(pre.katsuyo, k.GodanKatsuyo) and (
                 pre.katsuyo.shushi in ["ぐ", "ぬ", "ぶ", "む"]
             ):
-                return pre + kt.JODOUSHI_DA
+                return pre + kt.JODOUSHI_DA_KAKO_KANRYO
 
             return pre + kt.JODOUSHI_TA
 

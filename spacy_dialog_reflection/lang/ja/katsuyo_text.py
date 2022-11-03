@@ -412,7 +412,7 @@ class HojoKatsuyoText(KatsuyoText):
                 if isinstance(pre.katsuyo, k.GodanKatsuyo) and (
                     pre.katsuyo.shushi in ["ぐ", "ぬ", "ぶ", "む"]
                 ):
-                    return pre + Da() + self
+                    return pre + DaKakoKanryo() + self
                 return pre + Ta() + self
             elif isinstance(pre.katsuyo, k.KeiyoushiKatsuyo):
                 assert (fkt := pre.as_fkt_renyo) is not None
@@ -734,11 +734,11 @@ class Ta(IJodoushiKatsuyoText):
             )
 
 
-class Da(IJodoushiKatsuyoText):
+class DaKakoKanryo(IJodoushiKatsuyoText):
     def __init__(self):
         super().__init__(
             gokan="",
-            katsuyo=k.JODOUSHI_DA,
+            katsuyo=k.JODOUSHI_DA_KAKO_KANRYO,
         )
 
     def merge(self, pre: IKatsuyoTextSource) -> KatsuyoText:
@@ -764,7 +764,7 @@ class Da(IJodoushiKatsuyoText):
 
 
 JODOUSHI_TA = Ta()
-JODOUSHI_DA = Da()
+JODOUSHI_DA_KAKO_KANRYO = DaKakoKanryo()
 
 
 # ==============================================================================

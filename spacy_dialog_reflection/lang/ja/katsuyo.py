@@ -523,7 +523,7 @@ JODOUSHI_TA = TaKatsuyo(
     katei=FixedKatsuyo("たら"),
 )
 
-JODOUSHI_DA = TaKatsuyo(
+JODOUSHI_DA_KAKO_KANRYO = TaKatsuyo(
     mizen=FixedKatsuyo("だ"),
     shushi=FixedKatsuyo("だ"),
     rentai=FixedKatsuyo("だ"),
