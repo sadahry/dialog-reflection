@@ -304,9 +304,8 @@ class SpacyKatsuyoTextSourceDetector(IKatsuyoTextSourceDetector):
             # 名詞は形容動詞的に扱う
             # e.g. 健康 -> gokan=健康 + katsuyo=だ
             return TaigenText(gokan=src.text)
-        else:
-            warnings.warn(f"Unsupported Tag: {tag}", UserWarning)
-            return None
+
+        return None
 
 
 class SpacyKatsuyoTextAppendantsDetector(IKatsuyoTextAppendantsDetector):
