@@ -13,18 +13,22 @@ def cut_suffix_until_valid(sent) -> Optional[str]:
 
     for i in reversed(range(0, len(sent))):
         token = sent[i]
-        if token.tag_ == "助動詞":
-            # sudachiの形態素解析結果(part_of_speech)5つ目以降(活用タイプ、活用形)が格納される
-            # 品詞によっては活用タイプ、活用形が存在しないため、ここでは配列の取得のみ行う
-            # e.g. 動詞
-            # > m.part_of_speech() # => ['動詞', '一般', '*', '*', '下一段-バ行', '連用形-一般']
-            # ref. https://github.com/explosion/spaCy/blob/v3.4.1/spacy/lang/ja/__init__.py#L102
-            # ref. https://github.com/WorksApplications/SudachiPy/blob/v0.5.4/README.md
-            # > Returns the part of speech as a six-element tuple. Tuple elements are four POS levels, conjugation type and conjugation form.
-            # ref. https://worksapplications.github.io/sudachi.rs/python/api/sudachipy.html#sudachipy.Morpheme.part_of_speech
-            inflection = token.morph.get("Inflection")[0].split(";")
-            conjugation_type = inflection[0]
-            if JODOUSHI_REGEXP.match(conjugation_type):
+        tag = token.tag_
+        match tag:
+            case "助動詞":
+                # sudachiの形態素解析結果(part_of_speech)5つ目以降(活用タイプ、活用形)が格納される
+                # 品詞によっては活用タイプ、活用形が存在しないため、ここでは配列の取得のみ行う
+                # e.g. 動詞
+                # > m.part_of_speech() # => ['動詞', '一般', '*', '*', '下一段-バ行', '連用形-一般']
+                # ref. https://github.com/explosion/spaCy/blob/v3.4.1/spacy/lang/ja/__init__.py#L102
+                # ref. https://github.com/WorksApplications/SudachiPy/blob/v0.5.4/README.md
+                # > Returns the part of speech as a six-element tuple. Tuple elements are four POS levels, conjugation type and conjugation form.
+                # ref. https://worksapplications.github.io/sudachi.rs/python/api/sudachipy.html#sudachipy.Morpheme.part_of_speech
+                inflection = token.morph.get("Inflection")[0].split(";")
+                conjugation_type = inflection[0]
+                if JODOUSHI_REGEXP.match(conjugation_type):
+                    continue
+            case "助詞-準体助詞":
                 continue
         break
 
@@ -501,6 +505,23 @@ def test_spacy_katsuyo_text_detector(nlp_ja, msg, text, expected):
             "そういうことさえ",
             "そういうことさえ",
         ),
+        # ref. https://ja.wikipedia.org/wiki/助詞#準体助詞
+        (
+            "準体助詞「ん」",
+            "頑張ってるん",
+            "頑張ってる",
+        ),
+        (
+            "準体助詞「の」",
+            "頑張ってるの",
+            "頑張ってる",
+        ),
+        # NOTE: 「から」は格助詞として識別されることと、本ライブラリもそれに準ずる
+        # (
+        #     "準体助詞「から」",
+        #     "着いてから",
+        #     "着いてから",
+        # ),
     ],
 )
 def test_spacy_katsuyo_text_detector_joshi(nlp_ja, msg, text, expected):
