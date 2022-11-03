@@ -201,6 +201,12 @@ def detect_last_token(sent) -> Optional[str]:
             "麺を入れる",
             "入れる",
         ),
+        # 「いく」のみ特殊
+        (
+            "五段活用",
+            "あなたといく",
+            "いく",
+        ),
         # ref. https://ja.wikipedia.org/wiki/カ行変格活用
         (
             "カ行変格活用",
