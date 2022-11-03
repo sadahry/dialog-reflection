@@ -4,7 +4,7 @@ from typing import Optional
 import pytest
 
 
-def split_until_last_token(sent) -> Optional[str]:
+def cut_suffix_until_valid(sent) -> Optional[str]:
     if len(sent) == 0:
         return None
     return sent
@@ -269,5 +269,5 @@ def split_until_last_token(sent) -> Optional[str]:
 )
 def test_spacy_katsuyo_text_detector(nlp_ja, msg, text, expected):
     sent = next(nlp_ja(text).sents)
-    result = split_until_last_token(sent)
+    result = cut_suffix_until_valid(sent)
     assert result.text == expected, msg
