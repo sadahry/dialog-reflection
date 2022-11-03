@@ -2,12 +2,33 @@
 # TODO JaSpacyReflectionTextBuilder に移植
 from typing import Optional
 import pytest
+import re
+
+JODOUSHI_REGEXP = re.compile(r"^助動詞-(ダ|デス)")
 
 
 def cut_suffix_until_valid(sent) -> Optional[str]:
     if len(sent) == 0:
         return None
-    return sent
+
+    for i in reversed(range(0, len(sent))):
+        token = sent[i]
+        if token.tag_ == "助動詞":
+            # sudachiの形態素解析結果(part_of_speech)5つ目以降(活用タイプ、活用形)が格納される
+            # 品詞によっては活用タイプ、活用形が存在しないため、ここでは配列の取得のみ行う
+            # e.g. 動詞
+            # > m.part_of_speech() # => ['動詞', '一般', '*', '*', '下一段-バ行', '連用形-一般']
+            # ref. https://github.com/explosion/spaCy/blob/v3.4.1/spacy/lang/ja/__init__.py#L102
+            # ref. https://github.com/WorksApplications/SudachiPy/blob/v0.5.4/README.md
+            # > Returns the part of speech as a six-element tuple. Tuple elements are four POS levels, conjugation type and conjugation form.
+            # ref. https://worksapplications.github.io/sudachi.rs/python/api/sudachipy.html#sudachipy.Morpheme.part_of_speech
+            inflection = token.morph.get("Inflection")[0].split(";")
+            conjugation_type = inflection[0]
+            if JODOUSHI_REGEXP.match(conjugation_type):
+                continue
+        break
+
+    return sent[: i + 1]
 
 
 @pytest.mark.parametrize(
@@ -483,6 +504,28 @@ def test_spacy_katsuyo_text_detector(nlp_ja, msg, text, expected):
     ],
 )
 def test_spacy_katsuyo_text_detector_joshi(nlp_ja, msg, text, expected):
+    sent = next(nlp_ja(text).sents)
+    result = cut_suffix_until_valid(sent)
+    assert result.text == expected, msg
+
+
+@pytest.mark.parametrize(
+    "msg, text, expected",
+    [
+        # ref. https://ja.wikipedia.org/wiki/助動詞_(国文法)
+        (
+            "助動詞「だ」",
+            "それだ",
+            "それ",
+        ),
+        (
+            "助動詞「です」",
+            "それです",
+            "それ",
+        ),
+    ],
+)
+def test_spacy_katsuyo_text_detector_jodoushi(nlp_ja, msg, text, expected):
     sent = next(nlp_ja(text).sents)
     result = cut_suffix_until_valid(sent)
     assert result.text == expected, msg
