@@ -29,7 +29,7 @@ class CancelReflectionError(Exception):
 
 INVALID_JODOUSHI_REGEXP = re.compile(r"^助動詞-(ダ|デス|マス)")
 CANCEL_JODOUSHI_REGEXP = re.compile(r"^(助動詞-(ヌ|マイ)|文語助動詞-ム)")
-CANCEL_KATSUYO_REGEXP = re.compile(r"意志推量形")
+CANCEL_KATSUYO_REGEXP = re.compile(r"意志推量形$")
 
 
 def cut_suffix_until_valid(sent) -> Optional[str]:
