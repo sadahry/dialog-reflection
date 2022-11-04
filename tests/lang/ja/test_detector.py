@@ -6,7 +6,7 @@ import re
 import spacy
 
 
-class CancelledReason():
+class CancelledReason:
     pass
 
 
@@ -28,7 +28,7 @@ class CancelReflectionError(Exception):
 
 
 INVALID_JODOUSHI_REGEXP = re.compile(r"^助動詞-(ダ|デス|マス)")
-CANCEL_JODOUSHI_REGEXP = re.compile(r"^(助動詞-ヌ|文語助動詞-ム)")
+CANCEL_JODOUSHI_REGEXP = re.compile(r"^(助動詞-(ヌ|マイ)|文語助動詞-ム)")
 
 
 def cut_suffix_until_valid(sent) -> Optional[str]:
@@ -624,8 +624,8 @@ def test_spacy_katsuyo_text_detector_jodoushi(nlp_ja, msg, text, expected):
             True,
         ),
         (
-            "助動詞「ん」",
-            "あらんでない",
+            "助動詞「ぬ」",
+            "あらぬでない",
             False,
         ),
         (
@@ -641,6 +641,21 @@ def test_spacy_katsuyo_text_detector_jodoushi(nlp_ja, msg, text, expected):
         (
             "助動詞「ん」",
             "あらんでない",
+            False,
+        ),
+        (
+            "助動詞「まい」",
+            "あるまい",
+            True,
+        ),
+        (
+            "助動詞「まい」",
+            "あるまいのだ",
+            True,
+        ),
+        (
+            "助動詞「まい」",
+            "あるまいとのこと",
             False,
         ),
     ],
