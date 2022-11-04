@@ -29,6 +29,7 @@ class CancelReflectionError(Exception):
 
 INVALID_JODOUSHI_REGEXP = re.compile(r"^助動詞-(ダ|デス|マス)")
 CANCEL_JODOUSHI_REGEXP = re.compile(r"^(助動詞-(ヌ|マイ)|文語助動詞-ム)")
+CANCEL_KATSUYO_REGEXP = re.compile(r"意志推量形")
 
 
 def cut_suffix_until_valid(sent) -> Optional[str]:
@@ -38,18 +39,13 @@ def cut_suffix_until_valid(sent) -> Optional[str]:
     for i in reversed(range(0, len(sent))):
         token = sent[i]
         tag = token.tag_
+        conjugation_type, conjugation_form = get_conjugation(token)
+
+        if conjugation_form and CANCEL_KATSUYO_REGEXP.match(conjugation_form):
+            raise CancelReflectionError(reason=CancelledByToken(token))
+
         match tag:
             case "助動詞":
-                # sudachiの形態素解析結果(part_of_speech)5つ目以降(活用タイプ、活用形)が格納される
-                # 品詞によっては活用タイプ、活用形が存在しないため、ここでは配列の取得のみ行う
-                # e.g. 動詞
-                # > m.part_of_speech() # => ['動詞', '一般', '*', '*', '下一段-バ行', '連用形-一般']
-                # ref. https://github.com/explosion/spaCy/blob/v3.4.1/spacy/lang/ja/__init__.py#L102
-                # ref. https://github.com/WorksApplications/SudachiPy/blob/v0.5.4/README.md
-                # > Returns the part of speech as a six-element tuple. Tuple elements are four POS levels, conjugation type and conjugation form.
-                # ref. https://worksapplications.github.io/sudachi.rs/python/api/sudachipy.html#sudachipy.Morpheme.part_of_speech
-                inflection = token.morph.get("Inflection")[0].split(";")
-                conjugation_type = inflection[0]
                 if INVALID_JODOUSHI_REGEXP.match(conjugation_type):
                     continue
                 if CANCEL_JODOUSHI_REGEXP.match(conjugation_type):
@@ -59,6 +55,24 @@ def cut_suffix_until_valid(sent) -> Optional[str]:
         break
 
     return sent[: i + 1]
+
+
+def get_conjugation(token):
+    # sudachiの形態素解析結果(part_of_speech)5つ目以降(活用タイプ、活用形)が格納される
+    # 品詞によっては活用タイプ、活用形が存在しないため、ここでは配列の取得のみ行う
+    # e.g. 動詞
+    # > m.part_of_speech() # => ['動詞', '一般', '*', '*', '下一段-バ行', '連用形-一般']
+    # ref. https://github.com/explosion/spaCy/blob/v3.4.1/spacy/lang/ja/__init__.py#L102
+    # ref. https://github.com/WorksApplications/SudachiPy/blob/v0.5.4/README.md
+    # > Returns the part of speech as a six-element tuple. Tuple elements are four POS levels, conjugation type and conjugation form.
+    # ref. https://worksapplications.github.io/sudachi.rs/python/api/sudachipy.html#sudachipy.Morpheme.part_of_speech
+    inflection = token.morph.get("Inflection")
+    if not inflection:
+        return None, None
+    inflection = inflection[0].split(";")
+    conjugation_type = inflection[0]
+    conjugation_form = inflection[1]
+    return conjugation_type, conjugation_form
 
 
 @pytest.mark.parametrize(
@@ -322,6 +336,212 @@ def test_spacy_katsuyo_text_detector(nlp_ja, msg, text, expected):
     sent = next(nlp_ja(text).sents)
     result = cut_suffix_until_valid(sent)
     assert result.text == expected, msg
+
+
+@pytest.mark.parametrize(
+    "msg, text",
+    [
+        # ref, https://ja.wikipedia.org/wiki/五段活用
+        (
+            "五段活用",
+            "あなたと歩こう",
+        ),
+        (
+            "五段活用",
+            "あなたと稼ごう",
+        ),
+        (
+            "五段活用",
+            "あなたと話そ",  # う抜き
+        ),
+        (
+            "五段活用",
+            "あなたと待とう",
+        ),
+        (
+            "五段活用",
+            "あなたと死のう",
+        ),
+        (
+            "五段活用",
+            "あなたと遊ぼ",  # う抜き
+        ),
+        (
+            "五段活用",
+            "本を読もう",
+        ),
+        (
+            "五段活用",
+            "あなたと帰ろう",
+        ),
+        (
+            "五段活用",
+            "あなたと買おう",
+        ),
+        # ref, https://ja.wikipedia.org/wiki/上一段活用
+        (
+            "上一段活用",
+            "あなたと老いよう",
+        ),
+        (
+            "上一段活用",
+            "あなたと居よう",
+        ),
+        (
+            "上一段活用",
+            "あなたといよう",
+        ),
+        (
+            "上一段活用",
+            "あなたと起きよう",
+        ),
+        (
+            "上一段活用",
+            "あなたと着よう",
+        ),
+        (
+            "上一段活用",
+            "過ぎよう",
+        ),
+        (
+            "上一段活用",
+            "あなたと閉じよう",
+        ),
+        (
+            "上一段活用",
+            "あなたと落ちよう",
+        ),
+        (
+            "上一段活用",
+            "野菜を煮よう",
+        ),
+        (
+            "上一段活用",
+            "日差しを浴びよっ",  # う抜き
+            # "日差しを浴びよ",  # 命令形となるためスキップ
+        ),
+        (
+            "上一段活用",
+            "目に染みよう",
+        ),
+        (
+            "上一段活用",
+            "目を見よう",
+        ),
+        (
+            "上一段活用",
+            "下に降りよう",
+        ),
+        # ref, https://ja.wikipedia.org/wiki/下一段活用
+        (
+            "下一段活用",
+            "下に見えよう",
+        ),
+        (
+            "下一段活用",
+            "報酬を得よう",
+        ),
+        (
+            "下一段活用",
+            "罰を受けよう",
+        ),
+        (
+            "下一段活用",
+            "宣告を告げよう",
+        ),
+        (
+            "下一段活用",
+            "映像を見せよう",
+        ),
+        (
+            "下一段活用",
+            "小麦粉を混ぜよっ",  # う抜き
+            # "小麦粉を混ぜよ",  # 命令形となるためスキップ
+        ),
+        (
+            "下一段活用",
+            "小麦粉を捨てよう",
+        ),
+        (
+            "下一段活用",
+            "うどんを茹でよう",
+        ),
+        (
+            "下一段活用",
+            "出汁が出よう",
+        ),
+        (
+            "下一段活用",
+            "親戚を尋ねよう",
+        ),
+        (
+            "下一段活用",
+            "すぐに寝よう",
+        ),
+        (
+            "下一段活用",
+            "時を経よう",
+        ),
+        (
+            "下一段活用",
+            "ご飯を食べよう",
+        ),
+        (
+            "下一段活用",
+            "ご飯を求めよう",
+        ),
+        (
+            "下一段活用",
+            "麺を入れよう",
+        ),
+        # 「いく」のみ特殊
+        (
+            "五段活用",
+            "あなたと行こ",
+        ),
+        (
+            "五段活用",
+            "あなたと行こう",
+            # "あなたといこう", # 五段活用「憩う」となるためスキップ
+        ),
+        # ref. https://ja.wikipedia.org/wiki/カ行変格活用
+        (
+            "カ行変格活用",
+            "家にこよう",
+        ),
+        (
+            "カ行変格活用",
+            "家に来よ",  # う抜き
+        ),
+        # ref. https://ja.wikipedia.org/wiki/サ行変格活用
+        (
+            "サ行変格活用",
+            "軽くウォーキングしよ",
+        ),
+        (
+            "サ行変格活用",
+            "フライパンを熱しよう",
+        ),
+        (
+            "サ行変格活用",
+            "フライパンを熱そう",
+        ),
+        (
+            "サ行変格活用",
+            "影響が生じよう",
+        ),
+        # 形容詞
+        (
+            "形容詞",
+            "あなたは美しかろう",
+        ),
+    ],
+)
+def test_spacy_katsuyo_text_detector_cancel_u(nlp_ja, msg, text):
+    sent = next(nlp_ja(text).sents)
+    with pytest.raises(CancelReflectionError):
+        cut_suffix_until_valid(sent)
+        assert False, msg
 
 
 @pytest.mark.parametrize(
