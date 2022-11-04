@@ -888,3 +888,105 @@ def test_spacy_katsuyo_text_detector_jodoushi_cancel(nlp_ja, msg, text, will_can
             assert False, msg
     else:
         cut_suffix_until_valid(sent)
+
+
+@pytest.mark.parametrize(
+    "msg, text",
+    [
+        (
+            "助動詞「れる」",
+            "報われよう",
+        ),
+        (
+            "助動詞「られる」",
+            "見られよう",
+        ),
+        (
+            "助動詞「せる」",
+            "報わせよう",
+        ),
+        (
+            "助動詞「させる」",
+            "見させよう",
+        ),
+        (
+            "助動詞「ない」",
+            "見なかろう",
+        ),
+        # 意志推量形が思いつかないためスキップ
+        # (
+        #     "助動詞「ぬ」",
+        # ),
+        # (
+        #     "助動詞「ん」",
+        # ),
+        # (
+        #     "助動詞「まい」",
+        # ),
+        (
+            "助動詞「たい」",
+            "見たかろう",
+        ),
+        (
+            "助動詞「たがる」",
+            "話したがろう",  # 機械的に文法から生成
+            # 見たがろうだと不適席な係り受けとなる。稀だと判断し対応はしない
+            # # text = 見
+            # 1       見      見る    VERB    動詞-非自立可能 _       0       root    _       SpaceAfter=No|BunsetuBILabel=B|BunsetuPositionType=ROOT|Inf=上一段-マ行,連用形-一般|Reading=ミ
+            # # text = たがろう
+            # 1       たがろう        たがる  PROPN   助動詞  _       0       root    _       SpaceAfter=No|BunsetuBILabel=B|BunsetuPositionType=ROOT|NP_I|Inf=五段-ラ行,意志推量形|Reading=タガロウ
+        ),
+        # 意志推量形が思いつかないためスキップ
+        # (
+        #     "助動詞「た」",
+        # ),
+        # (
+        #     "助動詞「だ」",
+        # ),
+        (
+            "助動詞「ます」",
+            "見ましょう",
+        ),
+        (
+            "助動詞「ます」",
+            "見ましょ",  # 「う」抜き
+        ),
+        (
+            "助動詞「そうだ」",
+            "見そうだろう",
+        ),
+        (
+            "助動詞「そうだ」",
+            "見そうだろ",  # 「う」抜き
+        ),
+        (
+            "助動詞「らしい」",
+            "見るらしかろう",  # 機械的に文法から生成
+        ),
+        (
+            "助動詞「べきだ」",
+            "見るべきだろう",
+        ),
+        (
+            "助動詞「ようだ」",
+            "見るようだろう",
+        ),
+        (
+            "助動詞「だ」",
+            "見るだろう",
+        ),
+        (
+            "助動詞「です」",
+            "見るでしょう",
+        ),
+        (
+            "助動詞「です」",
+            "見るでしょ",  # 「う」抜き
+        ),
+    ],
+)
+def test_spacy_katsuyo_text_detector_jodoushi_cancel_u(nlp_ja, msg, text):
+    sent = next(nlp_ja(text).sents)
+    with pytest.raises(CancelReflectionError):
+        cut_suffix_until_valid(sent)
+        assert False, msg
