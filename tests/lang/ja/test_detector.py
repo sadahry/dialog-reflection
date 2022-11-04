@@ -373,6 +373,10 @@ def test_spacy_katsuyo_text_detector(nlp_ja, msg, text, expected):
         ),
         (
             "五段活用",
+            "あなたと話そう",
+        ),
+        (
+            "五段活用",
             "あなたと話そ",  # う抜き
         ),
         (
@@ -382,6 +386,10 @@ def test_spacy_katsuyo_text_detector(nlp_ja, msg, text, expected):
         (
             "五段活用",
             "あなたと死のう",
+        ),
+        (
+            "五段活用",
+            "あなたと遊ぼう",
         ),
         (
             "五段活用",
@@ -438,6 +446,10 @@ def test_spacy_katsuyo_text_detector(nlp_ja, msg, text, expected):
         ),
         (
             "上一段活用",
+            "日差しを浴びよう",
+        ),
+        (
+            "上一段活用",
             "日差しを浴びよっ",  # う抜き
             # "日差しを浴びよ",  # 命令形となるためスキップ
         ),
@@ -473,6 +485,10 @@ def test_spacy_katsuyo_text_detector(nlp_ja, msg, text, expected):
         (
             "下一段活用",
             "映像を見せよう",
+        ),
+        (
+            "下一段活用",
+            "小麦粉を混ぜよう",
         ),
         (
             "下一段活用",
