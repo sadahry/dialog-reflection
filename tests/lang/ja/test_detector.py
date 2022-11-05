@@ -28,7 +28,7 @@ class CancelReflectionError(Exception):
 
 
 INVALID_JODOUSHI_REGEXP = re.compile(r"^助動詞-(ダ|デス|マス)")
-CANCEL_JODOUSHI_REGEXP = re.compile(r"^(助動詞-(ヌ|マイ)|文語助動詞-ム)")
+CANCEL_JODOUSHI_REGEXP = re.compile(r"^(助動詞-(ヌ|マイ|ジャ|タイ|ドス|ナンダ|ヘン|ヤ|ヤス)|文語助動詞-ム)")
 CANCEL_KATSUYO_REGEXP = re.compile(r"意志推量形$")
 
 
@@ -914,6 +914,42 @@ def test_spacy_katsuyo_text_detector_jodoushi(nlp_ja, msg, text, expected):
             "助動詞「まい」",
             "あるまいとのこと",
             False,
+        ),
+        # 方言
+        (
+            "方言助動詞「じゃ」",
+            "そうじゃ",
+            True,
+        ),
+        (
+            "方言助動詞「たい」",
+            "そうたい",
+            True,
+        ),
+        (
+            "方言助動詞「どす」",
+            "そうなんどす",
+            True,
+        ),
+        (
+            "方言助動詞「なんだ」",
+            "知らなんだ",
+            True,
+        ),
+        (
+            "方言助動詞「へん」",
+            "知らへん",
+            True,
+        ),
+        (
+            "方言助動詞「や」",
+            "知らんのや",
+            True,
+        ),
+        (
+            "方言助動詞「やす」",
+            "おいでやす",
+            True,
         ),
     ],
 )
