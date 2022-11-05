@@ -20,7 +20,8 @@ class DialectNotSupported(CancelledReason):
 
 
 class CancelledByToken(CancelledReason):
-    def __init__(self, token: Union[spacy.tokens.Token, str]):
+    def __init__(self, sent: spacy.tokens.Span, token: Union[spacy.tokens.Token, str]):
+        self.sent = sent
         self.token = token
 
 
@@ -33,13 +34,17 @@ class ReflectionCancelled(Exception):
 
 
 INVALID_JODOUSHI_REGEXP = re.compile(r"^助動詞-(ダ|デス|マス)")
-CANCEL_JODOUSHI_REGEXP = re.compile(r"^(助動詞-(ヌ|マイ|ジャ|タイ|ドス|ナンダ|ヘン|ヤ|ヤス)|文語助動詞-ム)")
+CANCEL_JODOUSHI_REGEXP = re.compile(r"^(助動詞-(ヌ|マイ)|文語助動詞-ム)")
+CANCEL_DIALECT_JODOUSHI_REGEXP = re.compile(r"^助動詞-(ジャ|タイ|ドス|ナンダ|ヘン|ヤ|ヤス)")
 CANCEL_KATSUYO_REGEXP = re.compile(r"意志推量形$")
 INVALID_SETSUZOKUJOSHI_NORMS = {"て", "で", "から"}
-CANCEL_SETSUZOKUJOSHI_NORMS = {"きに", "けん", "すけ", "さかい", "ばってん"}
+CANCEL_DIALECT_SETSUZOKUJOSHI_NORMS = {"きに", "けん", "すけ", "さかい", "ばってん"}
+INVALID_SHUJOSHI_NORMS = {"い", "え", "さ", "ぜ", "ぞ", "や", "な", "ね"}
+CANCEL_SHUJOSHI_NORMS = {"か", "の"}
+CANCEL_DIALECT_SHUJOSHI_NORMS = {"で", "ど"}
 
 
-def cut_suffix_until_valid(sent) -> Optional[str]:
+def cut_suffix_until_valid(sent: spacy.tokens.Span) -> Optional[spacy.tokens.Span]:
     if len(sent) == 0:
         return None
 
@@ -48,26 +53,41 @@ def cut_suffix_until_valid(sent) -> Optional[str]:
         tag = token.tag_
         conjugation_type, conjugation_form = get_conjugation(token)
 
+        # break -> VALID
+        # continue -> INVALID
+        # raise -> CANCEL
+
         if conjugation_form and CANCEL_KATSUYO_REGEXP.match(conjugation_form):
-            raise ReflectionCancelled(reason=DialectNotSupported(token))
+            raise ReflectionCancelled(reason=CancelledByToken(sent, token))
 
         match tag:
             case ("感動詞-一般" | "感動詞-フィラー" | "連体詞"):
                 continue
             case ("補助記号-読点" | "補助記号-句点"):
+                if token.norm_ == "?":
+                    raise ReflectionCancelled(reason=CancelledByToken(sent, token))
                 continue
             case "助動詞":
                 if INVALID_JODOUSHI_REGEXP.match(conjugation_type):
                     continue
                 if CANCEL_JODOUSHI_REGEXP.match(conjugation_type):
-                    raise ReflectionCancelled(reason=CancelledByToken(token))
+                    raise ReflectionCancelled(reason=CancelledByToken(sent, token))
+                if CANCEL_DIALECT_JODOUSHI_REGEXP.match(conjugation_type):
+                    raise ReflectionCancelled(reason=DialectNotSupported(token))
             case "助詞-準体助詞":
                 continue
             case "助詞-接続助詞":
                 if token.norm_ in INVALID_SETSUZOKUJOSHI_NORMS:
                     continue
-                if token.norm_ in CANCEL_SETSUZOKUJOSHI_NORMS:
-                    raise ReflectionCancelled(reason=CancelledByToken(token))
+                if token.norm_ in CANCEL_DIALECT_SETSUZOKUJOSHI_NORMS:
+                    raise ReflectionCancelled(reason=DialectNotSupported(token))
+            case "助詞-終助詞":
+                if token.norm_ in INVALID_SHUJOSHI_NORMS:
+                    continue
+                if token.norm_ in CANCEL_SHUJOSHI_NORMS:
+                    raise ReflectionCancelled(reason=CancelledByToken(sent, token))
+                if token.norm_ in CANCEL_DIALECT_SHUJOSHI_NORMS:
+                    raise ReflectionCancelled(reason=DialectNotSupported(token))
         break
 
     return sent[: i + 1]
@@ -740,11 +760,6 @@ def test_spacy_katsuyo_text_detector_cancel_u(nlp_ja, msg, text):
             "それぐらい",
         ),
         (
-            "副助詞「の」",
-            "それの",
-            "それの",
-        ),
-        (
             "副助詞「など」",
             "それなど",
             "それなど",
@@ -934,6 +949,17 @@ def test_spacy_katsuyo_text_detector_cancel_u(nlp_ja, msg, text):
             "頑張りながら、",
             "頑張りながら",
         ),
+    ],
+)
+def test_spacy_katsuyo_text_detector_joshi(nlp_ja, msg, text, expected):
+    sent = next(nlp_ja(text).sents)
+    result = cut_suffix_until_valid(sent)
+    assert result.text == expected, msg
+
+
+@pytest.mark.parametrize(
+    "msg, text, expected",
+    [
         (
             "補助記号-読点",
             "遊ぶ、",
@@ -944,12 +970,179 @@ def test_spacy_katsuyo_text_detector_cancel_u(nlp_ja, msg, text):
             "遊ぶ。",
             "遊ぶ",
         ),
+        (
+            "補助記号-句点",
+            "遊ぶ！",
+            "遊ぶ",
+        ),
     ],
 )
-def test_spacy_katsuyo_text_detector_joshi(nlp_ja, msg, text, expected):
+def test_spacy_katsuyo_text_detector_kigo(nlp_ja, msg, text, expected):
     sent = next(nlp_ja(text).sents)
     result = cut_suffix_until_valid(sent)
     assert result.text == expected, msg
+
+
+@pytest.mark.parametrize(
+    "msg, text, will_cancel",
+    [
+        (
+            "補助記号-句点",
+            "遊ぶ？",
+            True,
+        ),
+        (
+            "補助記号-句点",
+            "遊ぶ？",
+            True,
+        ),
+        (
+            "補助記号-句点",
+            "遊ぶ？って尋ねた",
+            False,
+        ),
+    ],
+)
+def test_spacy_katsuyo_text_detector_kigo_cancel(nlp_ja, msg, text, will_cancel):
+    sent = next(nlp_ja(text).sents)
+    if will_cancel:
+        with pytest.raises(ReflectionCancelled):
+            cut_suffix_until_valid(sent)
+            assert False, msg
+    else:
+        cut_suffix_until_valid(sent)
+
+
+@pytest.mark.parametrize(
+    "msg, text, expected",
+    [
+        # ref. https://ja.wikipedia.org/wiki/助詞#終助詞
+        (
+            "終助詞「い」",
+            "遊ぶだろうがい",
+            "遊ぶだろうが",
+        ),
+        # 『日本語日常コーパス』に用例がないためスキップ
+        # (
+        #     "終助詞「え」",
+        # ),
+        (
+            "終助詞「さ」",
+            "知ってるさ",
+            "知ってる",
+        ),
+        (
+            "終助詞「ぜ」",
+            "知ってるぜ",
+            "知ってる",
+        ),
+        (
+            "終助詞「ぞ」",
+            "知ってるぞ",
+            "知ってる",
+        ),
+        (
+            "終助詞「な」",
+            "知ってるな",
+            "知ってる",
+        ),
+        (
+            "終助詞「ね」",
+            "知ってるね",
+            "知ってる",
+        ),
+        (
+            "終助詞「や」",
+            "わかったや",
+            "わかった",
+        ),
+    ],
+)
+def test_spacy_katsuyo_text_detector_shujoshi(nlp_ja, msg, text, expected):
+    sent = next(nlp_ja(text).sents)
+    result = cut_suffix_until_valid(sent)
+    assert result.text == expected, msg
+
+
+@pytest.mark.parametrize(
+    "msg, text, will_cancel",
+    [
+        (
+            "終助詞「か」",
+            "知ってるか",
+            True,
+        ),
+        (
+            "終助詞「の」",
+            "知ってたの",
+            True,
+        ),
+    ],
+)
+def test_spacy_katsuyo_text_detector_shujoshi_cancel(nlp_ja, msg, text, will_cancel):
+    sent = next(nlp_ja(text).sents)
+    if will_cancel:
+        with pytest.raises(ReflectionCancelled):
+            cut_suffix_until_valid(sent)
+            assert False, msg
+    else:
+        cut_suffix_until_valid(sent)
+
+
+@pytest.mark.parametrize(
+    "msg, text, will_cancel",
+    [
+        # NOTE: 厳格なチェックはしない
+        #       （e.g., 方言のあとにVALIDな品詞を追加する）
+        (
+            "方言助詞「きに」",
+            "知ってるきに",
+            True,
+        ),
+        (
+            "方言助詞「けん」",
+            "知ってるけん",
+            True,
+        ),
+        (
+            "方言助詞「すけ」",
+            "知ってるすけ",
+            True,
+        ),
+        (
+            "方言助詞「さかい」",
+            "知ってるさかい",
+            True,
+        ),
+        (
+            "方言助詞「ばってん」",
+            "知ってるばってん",
+            True,
+        ),
+        (
+            "方言助詞「で」",
+            "知ってるやで",
+            True,
+        ),
+        # 用例は存在するが形態素解析で終助詞とならないためスキップ
+        # (
+        #     "方言助詞「ど」",
+        #     "知ってるど",
+        #     True,
+        # ),
+    ],
+)
+def test_spacy_katsuyo_text_detector_joshi_dialect_cancel(
+    nlp_ja, msg, text, will_cancel
+):
+    sent = next(nlp_ja(text).sents)
+    if will_cancel:
+        with pytest.raises(ReflectionCancelled) as e:
+            cut_suffix_until_valid(sent)
+            assert False, msg
+        type(e.value.reason) is DialectNotSupported, msg
+    else:
+        cut_suffix_until_valid(sent)
 
 
 @pytest.mark.parametrize(
@@ -1054,7 +1247,24 @@ def test_spacy_katsuyo_text_detector_jodoushi(nlp_ja, msg, text, expected):
             "あるまいとのこと",
             False,
         ),
-        # 方言
+    ],
+)
+def test_spacy_katsuyo_text_detector_jodoushi_cancel(nlp_ja, msg, text, will_cancel):
+    sent = next(nlp_ja(text).sents)
+    if will_cancel:
+        with pytest.raises(ReflectionCancelled) as e:
+            cut_suffix_until_valid(sent)
+            assert False, msg
+        type(e.value.reason) is DialectNotSupported, msg
+    else:
+        cut_suffix_until_valid(sent)
+
+
+@pytest.mark.parametrize(
+    "msg, text, will_cancel",
+    [
+        # NOTE: 厳格なチェックはしない
+        #       （e.g., 方言のあとにVALIDな品詞を追加する）
         (
             "方言助動詞「じゃ」",
             "そうじゃ",
@@ -1092,7 +1302,9 @@ def test_spacy_katsuyo_text_detector_jodoushi(nlp_ja, msg, text, expected):
         ),
     ],
 )
-def test_spacy_katsuyo_text_detector_jodoushi_cancel(nlp_ja, msg, text, will_cancel):
+def test_spacy_katsuyo_text_detector_jodoushi_dialect_cancel(
+    nlp_ja, msg, text, will_cancel
+):
     sent = next(nlp_ja(text).sents)
     if will_cancel:
         with pytest.raises(ReflectionCancelled):
@@ -1202,45 +1414,3 @@ def test_spacy_katsuyo_text_detector_jodoushi_cancel_u(nlp_ja, msg, text):
     with pytest.raises(ReflectionCancelled):
         cut_suffix_until_valid(sent)
         assert False, msg
-
-
-@pytest.mark.parametrize(
-    "msg, text, will_cancel",
-    [
-        # NOTE: 厳格なチェックはしない
-        #       （e.g., 方言のあとにVALIDな品詞を追加する）
-        (
-            "方言助詞「きに」",
-            "知らんきに",
-            True,
-        ),
-        (
-            "方言助詞「けん」",
-            "知らんけん",
-            True,
-        ),
-        (
-            "方言助詞「すけ」",
-            "知らんすけ",
-            True,
-        ),
-        (
-            "方言助詞「さかい」",
-            "知らんさかい",
-            True,
-        ),
-        (
-            "方言助詞「ばってん」",
-            "知らんばってん",
-            True,
-        ),
-    ],
-)
-def test_spacy_katsuyo_text_detector_joshi_cancel(nlp_ja, msg, text, will_cancel):
-    sent = next(nlp_ja(text).sents)
-    if will_cancel:
-        with pytest.raises(ReflectionCancelled):
-            cut_suffix_until_valid(sent)
-            assert False, msg
-    else:
-        cut_suffix_until_valid(sent)
