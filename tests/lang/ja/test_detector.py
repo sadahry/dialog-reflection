@@ -35,6 +35,7 @@ class ReflectionCancelled(Exception):
 INVALID_JODOUSHI_REGEXP = re.compile(r"^助動詞-(ダ|デス|マス)")
 CANCEL_JODOUSHI_REGEXP = re.compile(r"^(助動詞-(ヌ|マイ|ジャ|タイ|ドス|ナンダ|ヘン|ヤ|ヤス)|文語助動詞-ム)")
 CANCEL_KATSUYO_REGEXP = re.compile(r"意志推量形$")
+INVALID_SETSUZOKU_NORMS = {"けれど", "けど", "が", "し", "て", "と", "ど"}
 
 
 def cut_suffix_until_valid(sent) -> Optional[str]:
@@ -52,6 +53,8 @@ def cut_suffix_until_valid(sent) -> Optional[str]:
         match tag:
             case ("感動詞-一般" | "感動詞-フィラー" | "連体詞"):
                 continue
+            case ("補助記号-読点" | "補助記号-句点"):
+                continue
             case "助動詞":
                 if INVALID_JODOUSHI_REGEXP.match(conjugation_type):
                     continue
@@ -59,6 +62,9 @@ def cut_suffix_until_valid(sent) -> Optional[str]:
                     raise ReflectionCancelled(reason=CancelledByToken(token))
             case "助詞-準体助詞":
                 continue
+            case "助詞-接続助詞":
+                if token.norm_ in INVALID_SETSUZOKU_NORMS:
+                    continue
         break
 
     return sent[: i + 1]
@@ -833,6 +839,37 @@ def test_spacy_katsuyo_text_detector_cancel_u(nlp_ja, msg, text):
         #     "着いてから",
         #     "着いてから",
         # ),
+        # ref, https://ja.wikipedia.org/wiki/助詞#接続助詞
+        (
+            "接続助詞「ば」",
+            "頑張ってれば",
+            "頑張ってれば",
+        ),
+        (
+            "接続助詞「ても」",
+            "頑張っても",
+            "頑張っても",
+        ),
+        (
+            "接続助詞「ところで」",
+            "頑張ったところで",
+            "頑張ったところで",
+        ),
+        (
+            "接続助詞「けれど」",
+            "頑張ったけれど",
+            "頑張った",
+        ),
+        (
+            "補助記号-読点",
+            "遊ぶ、",
+            "遊ぶ",
+        ),
+        (
+            "補助記号-句点",
+            "遊ぶ。",
+            "遊ぶ",
+        ),
     ],
 )
 def test_spacy_katsuyo_text_detector_joshi(nlp_ja, msg, text, expected):
