@@ -35,10 +35,10 @@ class ReflectionCancelled(Exception):
 
 INVALID_JODOUSHI_REGEXP = re.compile(r"^助動詞-(ダ|デス|マス)")
 CANCEL_JODOUSHI_REGEXP = re.compile(r"^(助動詞-(ヌ|マイ)|文語助動詞-ム)")
-CANCEL_DIALECT_JODOUSHI_REGEXP = re.compile(r"^助動詞-(ジャ|タイ|ドス|ナンダ|ヘン|ヤ|ヤス)")
+DIALECT_JODOUSHI_REGEXP = re.compile(r"^助動詞-(ジャ|タイ|ドス|ナンダ|ヘン|ヤ|ヤス)")
 CANCEL_KATSUYO_REGEXP = re.compile(r"意志推量形$")
 INVALID_SETSUZOKUJOSHI_NORMS = {"て", "で", "から"}
-CANCEL_DIALECT_SETSUZOKUJOSHI_NORMS = {"きに", "けん", "すけ", "さかい", "ばってん"}
+DIALECT_SETSUZOKUJOSHI_NORMS = {"きに", "けん", "すけ", "さかい", "ばってん"}
 INVALID_SHUJOSHI_NORMS = {
     "い",
     "え",
@@ -55,7 +55,7 @@ INVALID_SHUJOSHI_NORMS = {
     "じゃん",
 }
 CANCEL_SHUJOSHI_NORMS = {"か", "の", "かしら"}
-CANCEL_DIALECT_SHUJOSHI_NORMS = {
+DIALECT_SHUJOSHI_NORMS = {
     "で",
     "ど",
     "ラ",
@@ -101,7 +101,7 @@ def cut_suffix_until_valid(sent: spacy.tokens.Span) -> Optional[spacy.tokens.Spa
                     continue
                 if CANCEL_JODOUSHI_REGEXP.match(conjugation_type):
                     raise ReflectionCancelled(reason=CancelledByToken(sent, token))
-                if CANCEL_DIALECT_JODOUSHI_REGEXP.match(conjugation_type):
+                if DIALECT_JODOUSHI_REGEXP.match(conjugation_type):
                     raise ReflectionCancelled(reason=DialectNotSupported(token))
             case "助詞-準体助詞":
                 continue
@@ -109,7 +109,7 @@ def cut_suffix_until_valid(sent: spacy.tokens.Span) -> Optional[spacy.tokens.Spa
                 # 接続助詞はINVALIDにすべきか微妙。現状は会話破綻を減らすためVALIDとしている。
                 # if token.norm_ in INVALID_SETSUZOKUJOSHI_NORMS:
                 #     continue
-                # if token.norm_ in CANCEL_DIALECT_SETSUZOKUJOSHI_NORMS:
+                # if token.norm_ in DIALECT_SETSUZOKUJOSHI_NORMS:
                 #     raise ReflectionCancelled(reason=DialectNotSupported(token))
                 break
             case "助詞-終助詞":
@@ -117,7 +117,7 @@ def cut_suffix_until_valid(sent: spacy.tokens.Span) -> Optional[spacy.tokens.Spa
                     continue
                 if token.norm_ in CANCEL_SHUJOSHI_NORMS:
                     raise ReflectionCancelled(reason=CancelledByToken(sent, token))
-                if token.norm_ in CANCEL_DIALECT_SHUJOSHI_NORMS:
+                if token.norm_ in DIALECT_SHUJOSHI_NORMS:
                     raise ReflectionCancelled(reason=DialectNotSupported(token))
         break
 
