@@ -19,7 +19,7 @@ class CancelledByToken(CancelledReason):
         self.token = token
 
 
-class CancelReflectionError(Exception):
+class ReflectionCancelled(Exception):
     def __init__(
         self, *args: object, reason: CancelledReason = UnexpectedError()
     ) -> None:
@@ -42,14 +42,14 @@ def cut_suffix_until_valid(sent) -> Optional[str]:
         conjugation_type, conjugation_form = get_conjugation(token)
 
         if conjugation_form and CANCEL_KATSUYO_REGEXP.match(conjugation_form):
-            raise CancelReflectionError(reason=CancelledByToken(token))
+            raise ReflectionCancelled(reason=CancelledByToken(token))
 
         match tag:
             case "助動詞":
                 if INVALID_JODOUSHI_REGEXP.match(conjugation_type):
                     continue
                 if CANCEL_JODOUSHI_REGEXP.match(conjugation_type):
-                    raise CancelReflectionError(reason=CancelledByToken(token))
+                    raise ReflectionCancelled(reason=CancelledByToken(token))
             case "助詞-準体助詞":
                 continue
         break
@@ -576,7 +576,7 @@ def test_spacy_katsuyo_text_detector(nlp_ja, msg, text, expected):
 )
 def test_spacy_katsuyo_text_detector_cancel_u(nlp_ja, msg, text):
     sent = next(nlp_ja(text).sents)
-    with pytest.raises(CancelReflectionError):
+    with pytest.raises(ReflectionCancelled):
         cut_suffix_until_valid(sent)
         assert False, msg
 
@@ -956,7 +956,7 @@ def test_spacy_katsuyo_text_detector_jodoushi(nlp_ja, msg, text, expected):
 def test_spacy_katsuyo_text_detector_jodoushi_cancel(nlp_ja, msg, text, will_cancel):
     sent = next(nlp_ja(text).sents)
     if will_cancel:
-        with pytest.raises(CancelReflectionError):
+        with pytest.raises(ReflectionCancelled):
             cut_suffix_until_valid(sent)
             assert False, msg
     else:
@@ -1060,6 +1060,6 @@ def test_spacy_katsuyo_text_detector_jodoushi_cancel(nlp_ja, msg, text, will_can
 )
 def test_spacy_katsuyo_text_detector_jodoushi_cancel_u(nlp_ja, msg, text):
     sent = next(nlp_ja(text).sents)
-    with pytest.raises(CancelReflectionError):
+    with pytest.raises(ReflectionCancelled):
         cut_suffix_until_valid(sent)
         assert False, msg
