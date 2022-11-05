@@ -39,9 +39,38 @@ CANCEL_DIALECT_JODOUSHI_REGEXP = re.compile(r"^助動詞-(ジャ|タイ|ドス|�
 CANCEL_KATSUYO_REGEXP = re.compile(r"意志推量形$")
 INVALID_SETSUZOKUJOSHI_NORMS = {"て", "で", "から"}
 CANCEL_DIALECT_SETSUZOKUJOSHI_NORMS = {"きに", "けん", "すけ", "さかい", "ばってん"}
-INVALID_SHUJOSHI_NORMS = {"い", "え", "さ", "ぜ", "ぞ", "や", "な", "ね"}
-CANCEL_SHUJOSHI_NORMS = {"か", "の"}
-CANCEL_DIALECT_SHUJOSHI_NORMS = {"で", "ど"}
+INVALID_SHUJOSHI_NORMS = {
+    "い",
+    "え",
+    "さ",
+    "ぜ",
+    "ぞ",
+    "や",
+    "な",
+    "ね",
+    "よ",
+    "わ",
+    "もの",
+    "よん",
+    "じゃん",
+}
+CANCEL_SHUJOSHI_NORMS = {"か", "の", "かしら"}
+CANCEL_DIALECT_SHUJOSHI_NORMS = {
+    "で",
+    "ど",
+    "ラ",
+    "かし",
+    "ぞい",
+    "たい",
+    "ちょ",
+    "てん",
+    "ねん",
+    "のう",
+    "のん",
+    "ばい",
+    "ばや",
+    "べい",
+}
 
 
 def cut_suffix_until_valid(sent: spacy.tokens.Span) -> Optional[spacy.tokens.Span]:
@@ -861,6 +890,10 @@ def test_spacy_katsuyo_text_detector_cancel_u(nlp_ja, msg, text):
         # ),
         # ref, https://ja.wikipedia.org/wiki/助詞#接続助詞
         # ref. http://sudachi.s3-website-ap-northeast-1.amazonaws.com/sudachidict-raw/20221021/small_lex.zip
+        # ・仮定の順接「ば」「ても」「ところで」「たって」 ・仮定の逆説「と」「ど」「とて」「とも」
+        # ・確定の順接「ので」「から」「て」「で」 ・並列「し」「なり」「たり」
+        # ・確定の逆接「けれど」「けど※2」「が」「のに※3」「ものの」「いえども」
+        # ・するとすぐに「や※3」 ・「まま※3」 ・動作の並行「ながら」「つつ」
         (
             "接続助詞「が」",
             "頑張ったが、",
@@ -1055,8 +1088,40 @@ def test_spacy_katsuyo_text_detector_kigo_cancel(nlp_ja, msg, text, will_cancel)
         ),
         (
             "終助詞「や」",
-            "わかったや",
+            "どうしようもないや",
+            "どうしようもない",
+        ),
+        (
+            "終助詞「よ」",
+            "わかったよ",
             "わかった",
+        ),
+        (
+            "終助詞「わ」",
+            "わかったわ",
+            "わかった",
+        ),
+        # 終助詞としての用例が存在しない。ただ副助詞的に「かも」が取れる
+        # 文章としてはVALIDなので現状は取り除かない
+        (
+            "助詞「かも」",
+            "知ってるかも",
+            "知ってるかも",
+        ),
+        (
+            "終助詞「もの」",
+            "わかってるもん",
+            "わかってる",
+        ),
+        (
+            "終助詞「よん」",
+            "わかってるよん",
+            "わかってる",
+        ),
+        (
+            "終助詞「じゃん」",
+            "わかってるじゃん",
+            "わかってる",
         ),
     ],
 )
@@ -1077,6 +1142,11 @@ def test_spacy_katsuyo_text_detector_shujoshi(nlp_ja, msg, text, expected):
         (
             "終助詞「の」",
             "知ってたの",
+            True,
+        ),
+        (
+            "終助詞「かしら」",
+            "知ってたかしら",
             True,
         ),
     ],
@@ -1132,6 +1202,87 @@ def test_spacy_katsuyo_text_detector_shujoshi_cancel(nlp_ja, msg, text, will_can
         # (
         #     "方言助詞「ど」",
         #     "知ってるど",
+        #     True,
+        # ),
+        (
+            "方言助詞「ラ」",
+            "すごいら",
+            True,
+        ),
+        # 用例が存在しないためスキップ
+        # (
+        #     "方言助詞「哉」",
+        #     "知ってる哉",
+        #     True,
+        # ),
+        # https://chunagon.ninjal.ac.jp/cejc/permalink?unit=short&position=T007_005a,12160
+        (
+            "方言助詞「かし」",
+            "帰っちゃうかし",
+            True,
+        ),
+        # 用例が存在しないためスキップ
+        # (
+        #     "方言助詞「くさ」",
+        #     "知ってるくさ",
+        #     True,
+        # ),
+        (
+            "方言助詞「ぞい」",
+            "知ってるぞい",
+            True,
+        ),
+        # 用例が存在しないためスキップ
+        # (
+        #     "方言助詞「たい」",
+        #     "頑張るたい",
+        #     True,
+        # ),
+        # 用例が存在しないためスキップ
+        # (
+        #     "方言助詞「ちょ」",
+        #     "頑張るちょ",
+        #     True,
+        # ),
+        (
+            "方言助詞「てん」",
+            "びっくりしててん",
+            True,
+        ),
+        (
+            "方言助詞「ねん」",
+            "びっくりしてんねん",
+            True,
+        ),
+        (
+            "方言助詞「のう」",
+            "びっくりしてんのう",
+            True,
+        ),
+        (
+            "方言助詞「のん」",
+            "びっくりしてんのん",
+            True,
+        ),
+        (
+            "方言助詞「ばい」",
+            "びっくりするばい",
+            True,
+        ),
+        (
+            "方言助詞「ばや」",
+            "いかんばや",
+            True,
+        ),
+        (
+            "方言助詞「べい」",
+            "いかんべ",
+            True,
+        ),
+        # 用例が存在しないためスキップ
+        # (
+        #     "方言助詞「もが」",
+        #     "頑張るもが",
         #     True,
         # ),
     ],
