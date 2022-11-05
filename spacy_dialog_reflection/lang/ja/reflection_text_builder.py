@@ -61,6 +61,7 @@ class JaSpacyReflectionTextBuilder(ISpacyReflectionTextBuilder):
             "どっち",
             "幾ら",
             "幾つ",
+            "?",
         },
         finalize_build_suffix: Callable[
             [IKatsuyoTextSource], str

@@ -188,6 +188,16 @@ class TestReflectionBuilder:
                 "行き",
                 "not extract last sentence いくつ",
             ),
+            (
+                "こんにちは。今日は旅行に行きました。 どうでしょう？",
+                "行き",
+                "not extract last sentence ？",
+            ),
+            (
+                "こんにちは。今日は旅行に行きました。 どうでしょう?",
+                "行き",
+                "not extract last sentence ?",
+            ),
         ],
     )
     @pytest.mark.filterwarnings("ignore:sent has wh_word")
