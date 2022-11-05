@@ -37,7 +37,6 @@ INVALID_JODOUSHI_REGEXP = re.compile(r"^助動詞-(ダ|デス|マス)")
 CANCEL_JODOUSHI_REGEXP = re.compile(r"^(助動詞-(ヌ|マイ)|文語助動詞-ム)")
 CANCEL_DIALECT_JODOUSHI_REGEXP = re.compile(r"^助動詞-(ジャ|タイ|ドス|ナンダ|ヘン|ヤ|ヤス)")
 CANCEL_KATSUYO_REGEXP = re.compile(r"意志推量形$")
-INVALID_SETSUZOKUJOSHI_NORMS = {"て", "で", "から"}
 CANCEL_DIALECT_SETSUZOKUJOSHI_NORMS = {"きに", "けん", "すけ", "さかい", "ばってん"}
 INVALID_SHUJOSHI_NORMS = {"い", "え", "さ", "ぜ", "ぞ", "や", "な", "ね"}
 CANCEL_SHUJOSHI_NORMS = {"か", "の"}
@@ -77,8 +76,6 @@ def cut_suffix_until_valid(sent: spacy.tokens.Span) -> Optional[spacy.tokens.Spa
             case "助詞-準体助詞":
                 continue
             case "助詞-接続助詞":
-                if token.norm_ in INVALID_SETSUZOKUJOSHI_NORMS:
-                    continue
                 if token.norm_ in CANCEL_DIALECT_SETSUZOKUJOSHI_NORMS:
                     raise ReflectionCancelled(reason=DialectNotSupported(token))
             case "助詞-終助詞":
@@ -872,12 +869,12 @@ def test_spacy_katsuyo_text_detector_cancel_u(nlp_ja, msg, text):
         (
             "接続助詞「て」",
             "頑張って、",
-            "頑張っ",
+            "頑張って",
         ),
         (
             "接続助詞「で」",
             "遊んで、",
-            "遊ん",
+            "遊んで",
         ),
         (
             "接続助詞「と」",
@@ -902,7 +899,7 @@ def test_spacy_katsuyo_text_detector_cancel_u(nlp_ja, msg, text):
         (
             "接続助詞「から」",
             "頑張るから、",
-            "頑張る",
+            "頑張るから",
         ),
         (
             "接続助詞「つつ」",
