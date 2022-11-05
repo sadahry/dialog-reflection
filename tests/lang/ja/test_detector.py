@@ -50,6 +50,8 @@ def cut_suffix_until_valid(sent) -> Optional[str]:
             raise ReflectionCancelled(reason=DialectNotSupported(token))
 
         match tag:
+            case ("感動詞-一般" | "感動詞-フィラー" | "連体詞"):
+                continue
             case "助動詞":
                 if INVALID_JODOUSHI_REGEXP.match(conjugation_type):
                     continue
@@ -78,6 +80,10 @@ def get_conjugation(token):
     conjugation_type = inflection[0]
     conjugation_form = inflection[1]
     return conjugation_type, conjugation_form
+
+
+# NOTE: 形態素解析のように正しく文書を分離することが目的ではないため
+#       正しく文章が切断されていることまでを確認する
 
 
 @pytest.mark.parametrize(
@@ -355,6 +361,23 @@ def get_conjugation(token):
             "接尾辞-形状詞的",
             "田中だらけ",
             "田中だらけ",
+        ),
+        # 稀なケースであるため、機械的に文法から生成
+        # 連体詞
+        (
+            "連体詞",
+            "全然あるその",
+            "全然ある",
+        ),
+        (
+            "接頭辞",
+            "いや超",
+            "いや超",
+        ),
+        (
+            "感動詞",
+            "そういうことほら",
+            "そういうこと",
         ),
     ],
 )
