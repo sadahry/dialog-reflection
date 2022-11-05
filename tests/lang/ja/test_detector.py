@@ -14,6 +14,11 @@ class UnexpectedError(CancelledReason):
     pass
 
 
+class DialectNotSupported(CancelledReason):
+    def __init__(self, token: Union[spacy.tokens.Token, str]):
+        self.token = token
+
+
 class CancelledByToken(CancelledReason):
     def __init__(self, token: Union[spacy.tokens.Token, str]):
         self.token = token
@@ -42,7 +47,7 @@ def cut_suffix_until_valid(sent) -> Optional[str]:
         conjugation_type, conjugation_form = get_conjugation(token)
 
         if conjugation_form and CANCEL_KATSUYO_REGEXP.match(conjugation_form):
-            raise ReflectionCancelled(reason=CancelledByToken(token))
+            raise ReflectionCancelled(reason=DialectNotSupported(token))
 
         match tag:
             case "助動詞":
