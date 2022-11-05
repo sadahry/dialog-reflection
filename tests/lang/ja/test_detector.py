@@ -35,7 +35,8 @@ class ReflectionCancelled(Exception):
 INVALID_JODOUSHI_REGEXP = re.compile(r"^助動詞-(ダ|デス|マス)")
 CANCEL_JODOUSHI_REGEXP = re.compile(r"^(助動詞-(ヌ|マイ|ジャ|タイ|ドス|ナンダ|ヘン|ヤ|ヤス)|文語助動詞-ム)")
 CANCEL_KATSUYO_REGEXP = re.compile(r"意志推量形$")
-INVALID_SETSUZOKU_NORMS = {"けれど", "けど", "が", "し", "て", "と", "ど"}
+INVALID_SETSUZOKU_NORMS = {"て", "で", "から"}
+CANCEL_SETSUZOKU_NORMS = {"きに", "けん", "すけ", "さかい", "ばってん"}
 
 
 def cut_suffix_until_valid(sent) -> Optional[str]:
@@ -63,6 +64,8 @@ def cut_suffix_until_valid(sent) -> Optional[str]:
             case "助詞-準体助詞":
                 continue
             case "助詞-接続助詞":
+                if token.norm_ in CANCEL_SETSUZOKU_NORMS:
+                    raise ReflectionCancelled(reason=CancelledByToken(token))
                 if token.norm_ in INVALID_SETSUZOKU_NORMS:
                     continue
         break
@@ -840,25 +843,96 @@ def test_spacy_katsuyo_text_detector_cancel_u(nlp_ja, msg, text):
         #     "着いてから",
         # ),
         # ref, https://ja.wikipedia.org/wiki/助詞#接続助詞
+        # ref. http://sudachi.s3-website-ap-northeast-1.amazonaws.com/sudachidict-raw/20221021/small_lex.zip
+        (
+            "接続助詞「が」",
+            "頑張ったが、",
+            "頑張ったが",
+        ),
+        (
+            "接続助詞「し」",
+            "頑張ったし、",
+            "頑張ったし",
+        ),
+        (
+            "接続助詞「て」",
+            "頑張って、",
+            "頑張っ",
+        ),
+        (
+            "接続助詞「で」",
+            "遊んで、",
+            "遊ん",
+        ),
+        (
+            "接続助詞「と」",
+            "頑張ると、",
+            "頑張ると",
+        ),
+        (
+            "接続助詞「ど」",
+            "頑張れど、",
+            "頑張れど",
+        ),
+        (
+            "接続助詞「に」",
+            "頑張ってるのに、",
+            "頑張ってるのに",
+        ),
         (
             "接続助詞「ば」",
             "頑張ってれば",
             "頑張ってれば",
         ),
         (
-            "接続助詞「ても」",
-            "頑張っても",
-            "頑張っても",
+            "接続助詞「から」",
+            "頑張るから、",
+            "頑張る",
         ),
         (
-            "接続助詞「ところで」",
-            "頑張ったところで",
-            "頑張ったところで",
+            "接続助詞「つつ」",
+            "頑張りつつ",
+            "頑張りつつ",
+        ),
+        (
+            "接続助詞「ては」",
+            "頑張っては、",
+            "頑張っては",  # 「ては」では接続助詞となりづらかったため追加
+        ),
+        (
+            "接続助詞「ては」",
+            "頑張っちゃあ、",
+            "頑張っちゃあ",  # 「ては」では接続助詞となりづらかったため追加
+        ),
+        (
+            "接続助詞「とて」",
+            "頑張ったとて、",
+            "頑張ったとて",
+        ),
+        (
+            "接続助詞「とも」",
+            "何をしようとも、",
+            "何をしようとも",  # 終助詞になる
+        ),
+        (
+            "接続助詞「なり」",
+            "頑張るなり、",
+            "頑張るなり",
         ),
         (
             "接続助詞「けれど」",
+            "頑張ったけれど、",
             "頑張ったけれど",
-            "頑張った",
+        ),
+        (
+            "接続助詞「たって」",
+            "頑張ったって、",
+            "頑張ったって",
+        ),
+        (
+            "接続助詞「ながら」",
+            "頑張りながら、",
+            "頑張りながら",
         ),
         (
             "補助記号-読点",
@@ -1128,3 +1202,45 @@ def test_spacy_katsuyo_text_detector_jodoushi_cancel_u(nlp_ja, msg, text):
     with pytest.raises(ReflectionCancelled):
         cut_suffix_until_valid(sent)
         assert False, msg
+
+
+@pytest.mark.parametrize(
+    "msg, text, will_cancel",
+    [
+        # NOTE: 厳格なチェックはしない
+        #       （e.g., 方言のあとにVALIDな品詞を追加する）
+        (
+            "方言助詞「きに」",
+            "知らんきに",
+            True,
+        ),
+        (
+            "方言助詞「けん」",
+            "知らんけん",
+            True,
+        ),
+        (
+            "方言助詞「すけ」",
+            "知らんすけ",
+            True,
+        ),
+        (
+            "方言助詞「さかい」",
+            "知らんさかい",
+            True,
+        ),
+        (
+            "方言助詞「ばってん」",
+            "知らんばってん",
+            True,
+        ),
+    ],
+)
+def test_spacy_katsuyo_text_detector_joshi_cancel(nlp_ja, msg, text, will_cancel):
+    sent = next(nlp_ja(text).sents)
+    if will_cancel:
+        with pytest.raises(ReflectionCancelled):
+            cut_suffix_until_valid(sent)
+            assert False, msg
+    else:
+        cut_suffix_until_valid(sent)
