@@ -54,6 +54,9 @@ INVALID_SHUJOSHI_NORMS = {
     "よん",
     "じゃん",
 }
+INVALID_FUKUJOSHI_NORMS = {
+    "って",
+}
 CANCEL_SHUJOSHI_NORMS = {"か", "の", "かしら"}
 DIALECT_SHUJOSHI_NORMS = {
     "で",
@@ -119,6 +122,9 @@ def cut_suffix_until_valid(sent: spacy.tokens.Span) -> Optional[spacy.tokens.Spa
                     raise ReflectionCancelled(reason=CancelledByToken(sent, token))
                 if token.norm_ in DIALECT_SHUJOSHI_NORMS:
                     raise ReflectionCancelled(reason=DialectNotSupported(token))
+            case "助詞-副助詞":
+                if token.norm_ in INVALID_FUKUJOSHI_NORMS:
+                    continue
         break
 
     return sent[: i + 1]
@@ -839,6 +845,12 @@ def test_spacy_katsuyo_text_detector_cancel_u(nlp_ja, msg, text):
             "副助詞「や」",
             "あれやそれや",
             "あれやそれや",
+        ),
+        # 例外的なケース
+        (
+            "副助詞「って」",
+            "それって",
+            "それ",
         ),
         # ref. https://ja.wikipedia.org/wiki/助詞#係助詞
         (
