@@ -35,7 +35,7 @@ class ReflectionCancelled(Exception):
 
 INVALID_JODOUSHI_REGEXP = re.compile(r"^助動詞-(ダ|デス|マス)")
 CANCEL_JODOUSHI_REGEXP = re.compile(r"^(助動詞-(ヌ|マイ)|文語助動詞-ム)")
-DIALECT_JODOUSHI_REGEXP = re.compile(r"^助動詞-(ジャ|タイ|ドス|ナンダ|ヘン|ヤ|ヤス)")
+DIALECT_JODOUSHI_REGEXP = re.compile(r"^助動詞-(ジャ|ドス|ナンダ|ヘン|ヤ|ヤス)")
 CANCEL_KATSUYO_REGEXP = re.compile(r"意志推量形$")
 INVALID_SETSUZOKUJOSHI_NORMS = {"て", "で", "から"}
 DIALECT_SETSUZOKUJOSHI_NORMS = {"きに", "けん", "すけ", "さかい", "ばってん"}
@@ -1245,12 +1245,6 @@ def test_spacy_katsuyo_text_detector_shujoshi_cancel(nlp_ja, msg, text, will_can
         ),
         # 用例が存在しないためスキップ
         # (
-        #     "方言助詞「たい」",
-        #     "頑張るたい",
-        #     True,
-        # ),
-        # 用例が存在しないためスキップ
-        # (
         #     "方言助詞「ちょ」",
         #     "頑張るちょ",
         #     True,
@@ -1315,6 +1309,72 @@ def test_spacy_katsuyo_text_detector_joshi_dialect_cancel(
     "msg, text, expected",
     [
         # ref. https://ja.wikipedia.org/wiki/助動詞_(国文法)
+        (
+            "助動詞「れる」",
+            "報われる",
+            "報われる",
+        ),
+        (
+            "助動詞「られる」",
+            "見られる",
+            "見られる",
+        ),
+        (
+            "助動詞「せる」",
+            "報わせる",
+            "報わせる",
+        ),
+        (
+            "助動詞「させる」",
+            "見させる",
+            "見させる",
+        ),
+        (
+            "助動詞「ない」",
+            "見ない",
+            "見ない",
+        ),
+        (
+            "助動詞「たい」",
+            "見たい",
+            "見たい",
+        ),
+        (
+            "助動詞「たがる」",
+            "話したがる",
+            "話したがる",
+        ),
+        (
+            "助動詞「た」",
+            "見た",
+            "見た",
+        ),
+        (
+            "助動詞「だ」",
+            "読んだ",
+            "読んだ",
+        ),
+        (
+            "助動詞「そうだ」",
+            "見そうだ",
+            "見そう",  # 「だ」が抜ける
+        ),
+        (
+            "助動詞「らしい」",
+            "見るらしい",
+            "見るらしい",
+        ),
+        (
+            "助動詞「べきだ」",
+            "見るべきだ",
+            "見るべき",  # 「だ」が抜ける
+        ),
+        (
+            "助動詞「ようだ」",
+            "見るようだ",
+            "見るよう",  # 「だ」が抜ける
+        ),
+        # INVALID
         (
             "助動詞「だ」",
             "それだ",
@@ -1434,11 +1494,6 @@ def test_spacy_katsuyo_text_detector_jodoushi_cancel(nlp_ja, msg, text, will_can
         (
             "方言助動詞「じゃ」",
             "そうじゃ",
-            True,
-        ),
-        (
-            "方言助動詞「たい」",
-            "そうたい",
             True,
         ),
         (
