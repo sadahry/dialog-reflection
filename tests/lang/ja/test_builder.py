@@ -4,7 +4,7 @@ from typing import Tuple, Optional
 import pytest
 import re
 import spacy
-from test_detector import cut_suffix_until_valid
+from tests.lang.ja.test_detector import cut_suffix_until_valid
 
 # 体言的に語尾を扱う品詞
 TAIGEN_SUFFIX_REGEXP = re.compile(r".*(名|代名|形状|助)詞")

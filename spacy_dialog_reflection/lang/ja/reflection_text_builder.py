@@ -1,4 +1,3 @@
-from itertools import takewhile
 from typing import Callable, Set
 from spacy_dialog_reflection.lang.ja.katsuyo import KeiyoudoushiKatsuyo
 from spacy_dialog_reflection.lang.ja.katsuyo_text import (
@@ -21,6 +20,10 @@ import traceback
 import re
 import warnings
 import spacy
+
+# TODO あとでちゃんと実装
+from tests.lang.ja.test_builder import build
+from tests.lang.ja.test_detector import cut_suffix_until_valid
 
 
 def finalize_build_suffix_default(katsuyo_text: IKatsuyoTextSource) -> str:
@@ -149,15 +152,8 @@ class JaSpacyReflectionTextBuilder(ISpacyReflectionTextBuilder):
         self,
         tokens: spacy.tokens.Span,
     ) -> str:
-        bottom_token = self._extract_bottom_token(tokens)
-        prefix_tokens = takewhile(lambda t: t.i < bottom_token.i, tokens)
-
-        reflection_text = ""
-        reflection_text += "".join(map(lambda t: t.text, prefix_tokens))
-        # build suffix in other method
-        # suffix(=root in Japanese) should be placed carefully in Japanese
-        reflection_text += self._build_suffix(bottom_token)
-        return reflection_text
+        cut_tokens = cut_suffix_until_valid(tokens)
+        return build(cut_tokens)
 
     def _extract_bottom_token(
         self,
@@ -189,7 +185,7 @@ class JaSpacyReflectionTextBuilder(ISpacyReflectionTextBuilder):
                     UserWarning,
                 )
 
-            return self.finalize_build_suffix(katsuyo_text)
+            return build(katsuyo_text)
         except BaseException:
             type_, value, traceback_ = sys.exc_info()
             # ReflectionTextErrorでwrapしてinstant_reflection_textを残す
