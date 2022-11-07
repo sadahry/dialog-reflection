@@ -20,6 +20,7 @@ rm -rf $cache_dir
 mkdir -p $cache_dir
 
 # create user dictionary
+# ファイルの読み込みが後になるほど（降順に）ユーザー辞書の優先順位が高い
 
 user_dicts=""
 for file in `ls dicts`
