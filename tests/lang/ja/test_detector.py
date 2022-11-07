@@ -1386,6 +1386,11 @@ def test_spacy_katsuyo_text_detector_joshi_dialect_cancel(
             "それ",
         ),
         (
+            "助動詞「です」",
+            "楽しいんです",
+            "楽しい",
+        ),
+        (
             "助動詞「ます」",
             "楽しみます",
             "楽しみ",
@@ -1395,11 +1400,6 @@ def test_spacy_katsuyo_text_detector_joshi_dialect_cancel(
             "楽しんでます",
             # 楽しんでる
             "楽しんで",
-        ),
-        (
-            "助動詞「ます」",
-            "楽しいんです",
-            "楽しい",
         ),
     ],
 )
