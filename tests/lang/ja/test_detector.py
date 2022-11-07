@@ -107,9 +107,7 @@ INVALID_FUKUJOSHI_NORMS = {
     "って",  # 終助詞的に扱われる用例が多いためVALIDに
 }
 VALID_FUKUJOSHI_NORMS: Set[str] = set()
-INVALID_KEIJOSHI_NORMS = {
-    "も",  # 終助詞的に扱われる用例が多いためVALIDに
-}
+INVALID_KEIJOSHI_NORMS: Set[str] = set()
 VALID_KEIJOSHI_NORMS: Set[str] = set()
 INVALID_KAKUOSHI_NORMS: Set[str] = set()
 VALID_KAKUOSHI_NORMS: Set[str] = set()
@@ -175,14 +173,6 @@ def cut_suffix_until_valid(sent: spacy.tokens.Span) -> Optional[spacy.tokens.Spa
                 # 未登録はCANCEL
                 raise ReflectionCancelled(reason=CancelledByToken(sent, token))
             case "助詞-副助詞":
-                # ================================================================
-                # 例外処理
-                # TODO ユーザー辞書での対応(spaCyモデルの再学習を含め)を実現する
-                # ================================================================
-                if sent[i].norm_ == "か":
-                    if len(sent) > i + 1 and sent[i + 1].norm_ == "も":
-                        return sent[: i + 2]
-
                 if token.norm_ in INVALID_FUKUJOSHI_NORMS:
                     continue
                 # VALID判定候補がない場合は無条件でVALIDに
@@ -203,14 +193,6 @@ def cut_suffix_until_valid(sent: spacy.tokens.Span) -> Optional[spacy.tokens.Spa
                 # 未登録はCANCEL
                 raise ReflectionCancelled(reason=CancelledByToken(sent, token))
             case "助詞-格助詞":
-                # ================================================================
-                # 例外処理
-                # TODO ユーザー辞書での対応(spaCyモデルの再学習を含め)を実現する
-                # ================================================================
-                if sent[i].norm_ == "で":
-                    if len(sent) > i + 1 and sent[i + 1].norm_ == "も":
-                        return sent[: i + 2]
-
                 if token.norm_ in INVALID_KAKUOSHI_NORMS:
                     continue
                 # VALID判定候補がない場合は無条件でVALIDに
@@ -769,9 +751,6 @@ def test_spacy_katsuyo_text_detector_with_no_error_as_conjugation_form(
             "それって",
             "それ",
         ),
-        # 他との兼ね合いで正しく取得できない
-        # 出力時に例外的に処理する。
-        # TODO ユーザー辞書での対応(spaCyモデルの再学習を含め)を実現する
         (
             "副助詞「かも」",
             "知ってるかも",
@@ -786,16 +765,13 @@ def test_spacy_katsuyo_text_detector_with_no_error_as_conjugation_form(
         (
             "係助詞「も」",
             "そういうことも",
-            "そういうこと",  # 終助詞的に扱われる用例が多いためVALIDに
+            "そういうことも",
         ),
         (
             "係助詞「こそ」",
             "そういうことこそ",
             "そういうことこそ",
         ),
-        # 他との兼ね合いで正しく取得できない
-        # 出力時に例外的に処理する。
-        # TODO ユーザー辞書での対応(spaCyモデルの再学習を含め)を実現する
         (
             "係助詞「でも」",
             "そういうことでも",
