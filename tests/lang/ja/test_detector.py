@@ -54,6 +54,7 @@ DIALECT_JODOUSHI_TYPES = {
     "助動詞-ヤス",
 }
 INVALID_SETSUZOKUJOSHI_NORMS = {"が", "し", "て", "で", "に", "から", "けど", "けれど"}
+VALID_SETSUZOKUJOSHI_NORMS = {"と", "ど", "ば", "つつ", "ては", "とも", "とて", "なり", "たって", "ながら"}
 DIALECT_SETSUZOKUJOSHI_NORMS = {"きに", "けん", "すけ", "さかい", "ばってん"}
 INVALID_SHUJOSHI_NORMS = {
     "い",
@@ -113,24 +114,27 @@ def cut_suffix_until_valid(sent: spacy.tokens.Span) -> Optional[spacy.tokens.Spa
                     raise ReflectionCancelled(reason=CancelledByToken(sent, token))
                 continue
             case "助動詞":
+                if conjugation_type in INVALID_JODOUSHI_TYPES:
+                    continue
                 if "助動詞" not in conjugation_type:
                     break
                 if conjugation_type in VALID_JODOUSHI_TYPES:
                     break
-                if conjugation_type in INVALID_JODOUSHI_TYPES:
-                    continue
                 if conjugation_type in DIALECT_JODOUSHI_TYPES:
                     raise ReflectionCancelled(reason=DialectNotSupported(token))
-                # 未登録の助動詞はCANCEL
+                # 未登録はCANCEL
                 raise ReflectionCancelled(reason=CancelledByToken(sent, token))
             case "助詞-準体助詞":
                 continue
             case "助詞-接続助詞":
                 if token.norm_ in INVALID_SETSUZOKUJOSHI_NORMS:
                     continue
+                if token.norm_ in VALID_SETSUZOKUJOSHI_NORMS:
+                    break
                 if token.norm_ in DIALECT_SETSUZOKUJOSHI_NORMS:
                     raise ReflectionCancelled(reason=DialectNotSupported(token))
-                break
+                # 未登録はCANCEL
+                raise ReflectionCancelled(reason=CancelledByToken(sent, token))
             case "助詞-終助詞":
                 if token.norm_ in INVALID_SHUJOSHI_NORMS:
                     continue
