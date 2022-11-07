@@ -9,6 +9,10 @@ $ poetry install
 $ poetry run python examples/interactive_ja.py
 ```
 
+## How to Use
+
+(WIP)
+
 ## Dicts
 
 (TBD)
