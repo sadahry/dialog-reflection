@@ -4,9 +4,12 @@ from typing import Tuple, Optional
 import pytest
 import re
 import spacy
+from test_detector import cut_suffix_until_valid
 
-
-TAIGEN_REGEXP = re.compile(r".*(名|代名|形状|助)詞")
+# 体言的に語尾を扱う品詞
+TAIGEN_SUFFIX_REGEXP = re.compile(r".*(名|代名|形状|助)詞")
+# 文語助動詞は、語尾を扱う際は体言的に扱う
+TAIGEN_TYPE_SUFFIX_REGEXP = re.compile(r".*文語助動詞")
 
 
 def build(sent: spacy.tokens.Span) -> str:
@@ -16,10 +19,16 @@ def build(sent: spacy.tokens.Span) -> str:
     last_token = sent[-1]
 
     tag = last_token.tag_
+    conjugation_type, _ = get_conjugation(last_token)
 
-    suffix = "なんですね" if TAIGEN_REGEXP.match(tag) else "んですね"
+    is_taigen = TAIGEN_SUFFIX_REGEXP.match(tag)
+    if conjugation_type is not None:
+        is_taigen = is_taigen or TAIGEN_TYPE_SUFFIX_REGEXP.match(conjugation_type)
 
-    return sent[:-1].text + last_token.lemma_ + suffix
+    last_text = last_token.text if is_taigen else last_token.lemma_
+    suffix = "なんですね" if is_taigen else "んですね"
+
+    return sent[:-1].text + last_text + suffix
 
 
 def get_conjugation(token: spacy.tokens.Token) -> Tuple[Optional[str], Optional[str]]:
@@ -491,4 +500,105 @@ def test_spacy_katsuyo_text_detector_setsuzokujoshi(nlp_ja, msg, text, expected)
     # 形態素解析の簡易化のために付与していた読点「、」を除去
     sent = sent[:-1]
     result = build(sent)
+    assert result == expected, msg
+
+
+@pytest.mark.parametrize(
+    "msg, text, expected",
+    [
+        # ref. https://ja.wikipedia.org/wiki/助動詞_(国文法)
+        (
+            "助動詞「れる」",
+            "報われる",
+            "報われるんですね",
+        ),
+        (
+            "助動詞「られる」",
+            "見られる",
+            "見られるんですね",
+        ),
+        (
+            "助動詞「せる」",
+            "報わせる",
+            "報わせるんですね",
+        ),
+        (
+            "助動詞「させる」",
+            "見させる",
+            "見させるんですね",
+        ),
+        (
+            "助動詞「ない」",
+            "見ない",
+            "見ないんですね",
+        ),
+        (
+            "助動詞「たい」",
+            "見たい",
+            "見たいんですね",
+        ),
+        (
+            "助動詞「たがる」",
+            "話したがる",
+            "話したがるんですね",
+        ),
+        (
+            "助動詞「た」",
+            "見た",
+            "見たんですね",
+        ),
+        (
+            "助動詞「だ」",
+            "読んだ",
+            "読んだんですね",
+        ),
+        (
+            "助動詞「そうだ」",
+            "見そうだ",
+            "見そうなんですね",  # 「だ」が抜ける
+        ),
+        (
+            "助動詞「らしい」",
+            "見るらしい",
+            "見るらしいんですね",
+        ),
+        (
+            "助動詞「べきだ」",
+            "見るべきだ",
+            "見るべきなんですね",  # 「だ」が抜ける
+        ),
+        (
+            "助動詞「ようだ」",
+            "見るようだ",
+            "見るようなんですね",  # 「だ」が抜ける
+        ),
+        # INVALIDなのでデータが抜ける
+        (
+            "助動詞「だ」",
+            "それだ",
+            "それなんですね",
+        ),
+        (
+            "助動詞「です」",
+            "それです",
+            "それなんですね",
+        ),
+        (
+            "助動詞「ます」",
+            "楽しみます",
+            "楽しむんですね",
+        ),
+        (
+            "助動詞「ます」",
+            "楽しいんです",
+            "楽しいんですね",
+        ),
+    ],
+)
+def test_spacy_katsuyo_text_detector_jodoushi(nlp_ja, msg, text, expected):
+    sent = next(nlp_ja(text).sents)
+    # 助動詞の場合、文末調整を行ってから処理したほうが
+    # 末尾の「んですね」が正しく付与されるためテストでもそうする
+    tokens = cut_suffix_until_valid(sent)
+    result = build(tokens)
     assert result == expected, msg
