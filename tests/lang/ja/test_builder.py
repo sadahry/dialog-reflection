@@ -563,11 +563,6 @@ def test_spacy_katsuyo_text_detector_setsuzokujoshi(nlp_ja, msg, text, expected)
             "見るらしいんですね。",
         ),
         (
-            "助動詞「べきだ」",
-            "見るべきだ",
-            "見るべきなんですね。",  # 「だ」が抜ける
-        ),
-        (
             "助動詞「ようだ」",
             "見るようだ",
             "見るようなんですね。",  # 「だ」が抜ける

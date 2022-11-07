@@ -34,7 +34,7 @@ class ReflectionCancelled(Exception):
 
 
 INVALID_JODOUSHI_REGEXP = re.compile(r"^助動詞-(ダ|デス|マス)")
-CANCEL_JODOUSHI_REGEXP = re.compile(r"^(助動詞-(ヌ|マイ)|文語助動詞-ム)")
+CANCEL_JODOUSHI_REGEXP = re.compile(r"^(助動詞-(ヌ|マイ)|文語助動詞-(ム|ベシ))")
 DIALECT_JODOUSHI_REGEXP = re.compile(r"^助動詞-(ジャ|ドス|ナンダ|ヘン|ヤ|ヤス)")
 CANCEL_KATSUYO_REGEXP = re.compile(r"意志推量形$")
 INVALID_SETSUZOKUJOSHI_NORMS = {"て", "で", "から"}
@@ -1365,11 +1365,6 @@ def test_spacy_katsuyo_text_detector_joshi_dialect_cancel(
             "見るらしい",
         ),
         (
-            "助動詞「べきだ」",
-            "見るべきだ",
-            "見るべき",  # 「だ」が抜ける
-        ),
-        (
             "助動詞「ようだ」",
             "見るようだ",
             "見るよう",  # 「だ」が抜ける
@@ -1456,6 +1451,21 @@ def test_spacy_katsuyo_text_detector_jodoushi(nlp_ja, msg, text, expected):
         (
             "助動詞「ん」",
             "あらんでない",
+            False,
+        ),
+        (
+            "助動詞「べし」",
+            "あるべし",
+            True,
+        ),
+        (
+            "助動詞「ん」",
+            "あるべきだ",
+            True,
+        ),
+        (
+            "助動詞「ん」",
+            "あるべきでない",
             False,
         ),
         (
