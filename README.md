@@ -24,7 +24,7 @@ $ poetry run python examples/interactive_ja.py
 ```console
 # NOTE: spaCyモデルの再学習が必要
 
-<< EXAMPLE 辞書のみ追加した場合
+<< EXAMPLE ユーザー辞書に「かも」を追加した例
 
 % ginza -m ja_core_news_sm
 そういうことかも
