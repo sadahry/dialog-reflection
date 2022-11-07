@@ -152,8 +152,8 @@ class JaSpacyReflectionTextBuilder(ISpacyReflectionTextBuilder):
         self,
         tokens: spacy.tokens.Span,
     ) -> str:
-        cut_tokens = cut_suffix_until_valid(tokens)
-        return build(cut_tokens)
+        _tokens = cut_suffix_until_valid(tokens)
+        return build(_tokens)
 
     def _extract_bottom_token(
         self,
