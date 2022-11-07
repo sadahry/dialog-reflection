@@ -111,7 +111,7 @@ INVALID_KEIJOSHI_NORMS = {
     "も",  # 終助詞的に扱われる用例が多いためVALIDに
 }
 VALID_KEIJOSHI_NORMS: Set[str] = set()
-INVALID_KAKUOSHI_NORMS = {}
+INVALID_KAKUOSHI_NORMS: Set[str] = set()
 VALID_KAKUOSHI_NORMS: Set[str] = set()
 
 
