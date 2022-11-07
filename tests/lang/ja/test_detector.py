@@ -2,7 +2,6 @@
 # TODO JaSpacyReflectionTextBuilder に移植
 from typing import Optional, Union
 import pytest
-import re
 import spacy
 
 
@@ -33,9 +32,27 @@ class ReflectionCancelled(Exception):
         super().__init__(*args)
 
 
-INVALID_JODOUSHI_REGEXP = re.compile(r"^助動詞-(ダ|デス|マス)")
-CANCEL_JODOUSHI_REGEXP = re.compile(r"^(助動詞-(ヌ|マイ)|文語助動詞-(ム|ベシ))")
-DIALECT_JODOUSHI_REGEXP = re.compile(r"^助動詞-(ジャ|ドス|ナンダ|ヘン|ヤ|ヤス)")
+INVALID_JODOUSHI_TYPES = {
+    "助動詞-ダ",
+    "助動詞-デス",
+    "助動詞-マス",
+}
+VALID_JODOUSHI_TYPES = {
+    "助動詞-タ",
+    "助動詞-タイ",
+    "助動詞-ナイ",
+    "助動詞-レル",
+    "助動詞-ラシイ",
+}
+# 網羅はしない。あくまでWARNINGとして出すため
+DIALECT_JODOUSHI_TYPES = {
+    "助動詞-ジャ",
+    "助動詞-ドス",
+    "助動詞-ナンダ",
+    "助動詞-ヘン",
+    "助動詞-ヤ",
+    "助動詞-ヤス",
+}
 INVALID_SETSUZOKUJOSHI_NORMS = {"が", "し", "て", "で", "に", "から", "けど", "けれど"}
 DIALECT_SETSUZOKUJOSHI_NORMS = {"きに", "けん", "すけ", "さかい", "ばってん"}
 INVALID_SHUJOSHI_NORMS = {
@@ -96,12 +113,16 @@ def cut_suffix_until_valid(sent: spacy.tokens.Span) -> Optional[spacy.tokens.Spa
                     raise ReflectionCancelled(reason=CancelledByToken(sent, token))
                 continue
             case "助動詞":
-                if INVALID_JODOUSHI_REGEXP.match(conjugation_type):
+                if "助動詞" not in conjugation_type:
+                    break
+                if conjugation_type in VALID_JODOUSHI_TYPES:
+                    break
+                if conjugation_type in INVALID_JODOUSHI_TYPES:
                     continue
-                if CANCEL_JODOUSHI_REGEXP.match(conjugation_type):
-                    raise ReflectionCancelled(reason=CancelledByToken(sent, token))
-                if DIALECT_JODOUSHI_REGEXP.match(conjugation_type):
+                if conjugation_type in DIALECT_JODOUSHI_TYPES:
                     raise ReflectionCancelled(reason=DialectNotSupported(token))
+                # 未登録の助動詞はCANCEL
+                raise ReflectionCancelled(reason=CancelledByToken(sent, token))
             case "助詞-準体助詞":
                 continue
             case "助詞-接続助詞":
@@ -1283,12 +1304,12 @@ def test_spacy_katsuyo_text_detector_jodoushi(nlp_ja, msg, text, expected):
             True,
         ),
         (
-            "助動詞「ん」",
+            "助動詞「べし」",
             "あるべきだ",
             True,
         ),
         (
-            "助動詞「ん」",
+            "助動詞「べし」",
             "あるべきでない",
             False,
         ),
