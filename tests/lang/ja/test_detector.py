@@ -1,6 +1,6 @@
 # NOTE: あくまでテスト用
 # TODO JaSpacyReflectionTextBuilder に移植
-from typing import Optional, Union
+from typing import Optional, Union, Set
 import pytest
 import spacy
 
@@ -54,7 +54,20 @@ DIALECT_JODOUSHI_TYPES = {
     "助動詞-ヤス",
 }
 INVALID_SETSUZOKUJOSHI_NORMS = {"が", "し", "て", "で", "に", "から", "けど", "けれど"}
-VALID_SETSUZOKUJOSHI_NORMS = {"と", "ど", "ば", "つつ", "ては", "とも", "とて", "なり", "たって", "ながら"}
+VALID_SETSUZOKUJOSHI_NORMS: Set[str] = {
+    "と",
+    "ど",
+    "ば",
+    "つつ",
+    "ては",
+    "とも",
+    "とて",
+    "なり",
+    "たって",
+    "ながら",
+    "し",  # 終助詞的に扱われる用例が多いためVALIDに
+    "というか",  # TODO ユーザー辞書での対応(spaCyモデルの再学習を含め)を実現する
+}
 DIALECT_SETSUZOKUJOSHI_NORMS = {"きに", "けん", "すけ", "さかい", "ばってん"}
 INVALID_SHUJOSHI_NORMS = {
     "い",
@@ -71,10 +84,7 @@ INVALID_SHUJOSHI_NORMS = {
     "よん",
     "じゃん",
 }
-INVALID_FUKUJOSHI_NORMS = {
-    "って",
-}
-VALID_SHUJOSHI_NORMS = {
+VALID_SHUJOSHI_NORMS: Set[str] = {
     "とも",  # 接続助詞「とも」の代用
 }
 DIALECT_SHUJOSHI_NORMS = {
@@ -93,6 +103,16 @@ DIALECT_SHUJOSHI_NORMS = {
     "ばや",
     "べい",
 }
+INVALID_FUKUJOSHI_NORMS = {
+    "って",  # 終助詞的に扱われる用例が多いためVALIDに
+}
+VALID_FUKUJOSHI_NORMS: Set[str] = set()
+INVALID_KEIJOSHI_NORMS = {
+    "も",  # 終助詞的に扱われる用例が多いためVALIDに
+}
+VALID_KEIJOSHI_NORMS: Set[str] = set()
+INVALID_KAKUOSHI_NORMS = {}
+VALID_KAKUOSHI_NORMS: Set[str] = set()
 
 
 def cut_suffix_until_valid(sent: spacy.tokens.Span) -> Optional[spacy.tokens.Span]:
@@ -109,16 +129,20 @@ def cut_suffix_until_valid(sent: spacy.tokens.Span) -> Optional[spacy.tokens.Spa
         # raise -> CANCEL
 
         match tag:
-            case ("感動詞-一般" | "感動詞-フィラー" | "連体詞"):
+            case ("感動詞-一般" | "感動詞-フィラー" | "連体詞" | "助詞-準体助詞" | "補助記号-読点"):
                 continue
-            case ("補助記号-読点" | "補助記号-句点"):
+            case ("補助記号-句点"):
                 if token.norm_ == "?":
                     raise ReflectionCancelled(reason=CancelledByToken(sent, token))
                 continue
             case "助動詞":
                 if conjugation_type in INVALID_JODOUSHI_TYPES:
                     continue
+                # 助動詞以外の活用型は用言としてVALIDに
                 if "助動詞" not in conjugation_type:
+                    break
+                # VALID判定候補がない場合は無条件でVALIDに
+                if not VALID_JODOUSHI_TYPES:
                     break
                 if conjugation_type in VALID_JODOUSHI_TYPES:
                     break
@@ -126,11 +150,12 @@ def cut_suffix_until_valid(sent: spacy.tokens.Span) -> Optional[spacy.tokens.Spa
                     raise ReflectionCancelled(reason=DialectNotSupported(token))
                 # 未登録はCANCEL
                 raise ReflectionCancelled(reason=CancelledByToken(sent, token))
-            case "助詞-準体助詞":
-                continue
             case "助詞-接続助詞":
                 if token.norm_ in INVALID_SETSUZOKUJOSHI_NORMS:
                     continue
+                # VALID判定候補がない場合は無条件でVALIDに
+                if not VALID_SETSUZOKUJOSHI_NORMS:
+                    break
                 if token.norm_ in VALID_SETSUZOKUJOSHI_NORMS:
                     break
                 if token.norm_ in DIALECT_SETSUZOKUJOSHI_NORMS:
@@ -140,6 +165,9 @@ def cut_suffix_until_valid(sent: spacy.tokens.Span) -> Optional[spacy.tokens.Spa
             case "助詞-終助詞":
                 if token.norm_ in INVALID_SHUJOSHI_NORMS:
                     continue
+                # VALID判定候補がない場合は無条件でVALIDに
+                if not VALID_SHUJOSHI_NORMS:
+                    break
                 if token.norm_ in VALID_SHUJOSHI_NORMS:
                     break
                 if token.norm_ in DIALECT_SHUJOSHI_NORMS:
@@ -147,8 +175,53 @@ def cut_suffix_until_valid(sent: spacy.tokens.Span) -> Optional[spacy.tokens.Spa
                 # 未登録はCANCEL
                 raise ReflectionCancelled(reason=CancelledByToken(sent, token))
             case "助詞-副助詞":
+                # ================================================================
+                # 例外処理
+                # TODO ユーザー辞書での対応(spaCyモデルの再学習を含め)を実現する
+                # ================================================================
+                if sent[i].norm_ == "か":
+                    if len(sent) > i + 1 and sent[i + 1].norm_ == "も":
+                        return sent[: i + 2]
+
                 if token.norm_ in INVALID_FUKUJOSHI_NORMS:
                     continue
+                # VALID判定候補がない場合は無条件でVALIDに
+                if not VALID_FUKUJOSHI_NORMS:
+                    break
+                if token.norm_ in VALID_FUKUJOSHI_NORMS:
+                    continue
+                # 未登録はCANCEL
+                raise ReflectionCancelled(reason=CancelledByToken(sent, token))
+            case "助詞-係助詞":
+                if token.norm_ in INVALID_KEIJOSHI_NORMS:
+                    continue
+                # VALID判定候補がない場合は無条件でVALIDに
+                if not VALID_KEIJOSHI_NORMS:
+                    break
+                if token.norm_ in VALID_KEIJOSHI_NORMS:
+                    continue
+                # 未登録はCANCEL
+                raise ReflectionCancelled(reason=CancelledByToken(sent, token))
+            case "助詞-格助詞":
+                # ================================================================
+                # 例外処理
+                # TODO ユーザー辞書での対応(spaCyモデルの再学習を含め)を実現する
+                # ================================================================
+                if sent[i].norm_ == "で":
+                    if len(sent) > i + 1 and sent[i + 1].norm_ == "も":
+                        return sent[: i + 2]
+
+                if token.norm_ in INVALID_KAKUOSHI_NORMS:
+                    continue
+                # VALID判定候補がない場合は無条件でVALIDに
+                if not VALID_KAKUOSHI_NORMS:
+                    break
+                if token.norm_ in VALID_KAKUOSHI_NORMS:
+                    continue
+                # 未登録はCANCEL
+                raise ReflectionCancelled(reason=CancelledByToken(sent, token))
+
+        # その他はVALIDに
         break
 
     return sent[: i + 1]
@@ -696,6 +769,14 @@ def test_spacy_katsuyo_text_detector_with_no_error_as_conjugation_form(
             "それって",
             "それ",
         ),
+        # 他との兼ね合いで正しく取得できない
+        # 出力時に例外的に処理する。
+        # TODO ユーザー辞書での対応(spaCyモデルの再学習を含め)を実現する
+        (
+            "副助詞「かも」",
+            "知ってるかも",
+            "知ってるかも",
+        ),
         # ref. https://ja.wikipedia.org/wiki/助詞#係助詞
         (
             "係助詞「は」",
@@ -705,13 +786,16 @@ def test_spacy_katsuyo_text_detector_with_no_error_as_conjugation_form(
         (
             "係助詞「も」",
             "そういうことも",
-            "そういうことも",
+            "そういうこと",  # 終助詞的に扱われる用例が多いためVALIDに
         ),
         (
             "係助詞「こそ」",
             "そういうことこそ",
             "そういうことこそ",
         ),
+        # 他との兼ね合いで正しく取得できない
+        # 出力時に例外的に処理する。
+        # TODO ユーザー辞書での対応(spaCyモデルの再学習を含め)を実現する
         (
             "係助詞「でも」",
             "そういうことでも",
@@ -961,13 +1045,6 @@ def test_spacy_katsuyo_text_detector_kigo_cancel(nlp_ja, msg, text, will_cancel)
             "終助詞「わ」",
             "わかったわ",
             "わかった",
-        ),
-        # 終助詞としての用例が存在しない。ただ副助詞的に「かも」が取れる
-        # 文章としてはVALIDなので現状は取り除かない
-        (
-            "助詞「かも」",
-            "知ってるかも",
-            "知ってるかも",
         ),
         (
             "終助詞「もの」",
