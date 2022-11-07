@@ -74,7 +74,9 @@ INVALID_SHUJOSHI_NORMS = {
 INVALID_FUKUJOSHI_NORMS = {
     "って",
 }
-CANCEL_SHUJOSHI_NORMS = {"か", "の", "かしら"}
+VALID_SHUJOSHI_NORMS = {
+    "とも",  # 接続助詞「とも」の代用
+}
 DIALECT_SHUJOSHI_NORMS = {
     "で",
     "ど",
@@ -138,10 +140,12 @@ def cut_suffix_until_valid(sent: spacy.tokens.Span) -> Optional[spacy.tokens.Spa
             case "助詞-終助詞":
                 if token.norm_ in INVALID_SHUJOSHI_NORMS:
                     continue
-                if token.norm_ in CANCEL_SHUJOSHI_NORMS:
-                    raise ReflectionCancelled(reason=CancelledByToken(sent, token))
+                if token.norm_ in VALID_SHUJOSHI_NORMS:
+                    break
                 if token.norm_ in DIALECT_SHUJOSHI_NORMS:
                     raise ReflectionCancelled(reason=DialectNotSupported(token))
+                # 未登録はCANCEL
+                raise ReflectionCancelled(reason=CancelledByToken(sent, token))
             case "助詞-副助詞":
                 if token.norm_ in INVALID_FUKUJOSHI_NORMS:
                     continue
