@@ -146,7 +146,7 @@ class JaSpacyReflectionTextBuilder(ISpacyReflectionTextBuilder):
             return token
 
         head_token = _extract_head_token(root)
-        return root.doc[head_token.i :]
+        return root.sent[head_token.i :]
 
     def _build_text(
         self,
@@ -185,7 +185,7 @@ class JaSpacyReflectionTextBuilder(ISpacyReflectionTextBuilder):
                     UserWarning,
                 )
 
-            return build(katsuyo_text)
+            return self.finalize_build_suffix(katsuyo_text)
         except BaseException:
             type_, value, traceback_ = sys.exc_info()
             # ReflectionTextErrorでwrapしてinstant_reflection_textを残す
