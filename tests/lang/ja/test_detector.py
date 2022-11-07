@@ -36,7 +36,7 @@ class ReflectionCancelled(Exception):
 INVALID_JODOUSHI_REGEXP = re.compile(r"^助動詞-(ダ|デス|マス)")
 CANCEL_JODOUSHI_REGEXP = re.compile(r"^(助動詞-(ヌ|マイ)|文語助動詞-(ム|ベシ))")
 DIALECT_JODOUSHI_REGEXP = re.compile(r"^助動詞-(ジャ|ドス|ナンダ|ヘン|ヤ|ヤス)")
-INVALID_SETSUZOKUJOSHI_NORMS = {"て", "で", "から"}
+INVALID_SETSUZOKUJOSHI_NORMS = {"が", "し", "て", "で", "に", "から", "けど", "けれど"}
 DIALECT_SETSUZOKUJOSHI_NORMS = {"きに", "けん", "すけ", "さかい", "ばってん"}
 INVALID_SHUJOSHI_NORMS = {
     "い",
@@ -105,11 +105,10 @@ def cut_suffix_until_valid(sent: spacy.tokens.Span) -> Optional[spacy.tokens.Spa
             case "助詞-準体助詞":
                 continue
             case "助詞-接続助詞":
-                # 接続助詞はINVALIDにすべきか微妙。現状は会話破綻を減らすためVALIDとしている。
-                # if token.norm_ in INVALID_SETSUZOKUJOSHI_NORMS:
-                #     continue
-                # if token.norm_ in DIALECT_SETSUZOKUJOSHI_NORMS:
-                #     raise ReflectionCancelled(reason=DialectNotSupported(token))
+                if token.norm_ in INVALID_SETSUZOKUJOSHI_NORMS:
+                    continue
+                if token.norm_ in DIALECT_SETSUZOKUJOSHI_NORMS:
+                    raise ReflectionCancelled(reason=DialectNotSupported(token))
                 break
             case "助詞-終助詞":
                 if token.norm_ in INVALID_SHUJOSHI_NORMS:
@@ -725,22 +724,27 @@ def test_spacy_katsuyo_text_detector_with_no_error_as_conjugation_form(
         (
             "接続助詞「が」",
             "頑張ったが、",
-            "頑張ったが",
+            "頑張った",
         ),
         (
             "接続助詞「し」",
             "頑張ったし、",
-            "頑張ったし",
+            "頑張った",
         ),
         (
             "接続助詞「て」",
             "頑張って、",
-            "頑張って",
+            "頑張っ",
         ),
         (
             "接続助詞「で」",
             "遊んで、",
-            "遊んで",
+            "遊ん",
+        ),
+        (
+            "接続助詞「ので」",
+            "頑張るので、",
+            "頑張る",
         ),
         (
             "接続助詞「と」",
@@ -753,11 +757,6 @@ def test_spacy_katsuyo_text_detector_with_no_error_as_conjugation_form(
             "頑張れど",
         ),
         (
-            "接続助詞「に」",
-            "頑張ってるのに、",
-            "頑張ってるのに",
-        ),
-        (
             "接続助詞「ば」",
             "頑張ってれば",
             "頑張ってれば",
@@ -765,7 +764,12 @@ def test_spacy_katsuyo_text_detector_with_no_error_as_conjugation_form(
         (
             "接続助詞「から」",
             "頑張るから、",
-            "頑張るから",
+            "頑張る",
+        ),
+        (
+            "接続助詞「けど」",
+            "頑張るけど、",
+            "頑張る",
         ),
         (
             "接続助詞「つつ」",
@@ -800,7 +804,7 @@ def test_spacy_katsuyo_text_detector_with_no_error_as_conjugation_form(
         (
             "接続助詞「けれど」",
             "頑張ったけれど、",
-            "頑張ったけれど",
+            "頑張った",
         ),
         (
             "接続助詞「たって」",
@@ -883,7 +887,7 @@ def test_spacy_katsuyo_text_detector_kigo_cancel(nlp_ja, msg, text, will_cancel)
         (
             "終助詞「い」",
             "遊ぶだろうがい",
-            "遊ぶだろうが",
+            "遊ぶ",
         ),
         # 『日本語日常コーパス』に用例がないためスキップ
         # (
@@ -951,6 +955,11 @@ def test_spacy_katsuyo_text_detector_kigo_cancel(nlp_ja, msg, text, will_cancel)
             "わかってるじゃん",
             "わかってる",
         ),
+        (
+            "終助詞「のに」",
+            "頑張ってるのに",
+            "頑張ってるのに",
+        ),
     ],
 )
 def test_spacy_katsuyo_text_detector_shujoshi(nlp_ja, msg, text, expected):
@@ -994,33 +1003,31 @@ def test_spacy_katsuyo_text_detector_shujoshi_cancel(nlp_ja, msg, text, will_can
     [
         # NOTE: 厳格なチェックはしない
         #       （e.g., 方言のあとにVALIDな品詞を追加する）
-        # 接続助詞はINVALIDにすべきか微妙。現状は会話破綻を減らすためVALIDとしている。
-        # そのためテストケースをスキップ
-        # (
-        #     "方言助詞「きに」",
-        #     "知ってるきに",
-        #     True,
-        # ),
-        # (
-        #     "方言助詞「けん」",
-        #     "知ってるけん",
-        #     True,
-        # ),
-        # (
-        #     "方言助詞「すけ」",
-        #     "知ってるすけ",
-        #     True,
-        # ),
-        # (
-        #     "方言助詞「さかい」",
-        #     "知ってるさかい",
-        #     True,
-        # ),
-        # (
-        #     "方言助詞「ばってん」",
-        #     "知ってるばってん",
-        #     True,
-        # ),
+        (
+            "方言助詞「きに」",
+            "知ってるきに",
+            True,
+        ),
+        (
+            "方言助詞「けん」",
+            "知ってるけん",
+            True,
+        ),
+        (
+            "方言助詞「すけ」",
+            "知ってるすけ",
+            True,
+        ),
+        (
+            "方言助詞「さかい」",
+            "知ってるさかい",
+            True,
+        ),
+        (
+            "方言助詞「ばってん」",
+            "知ってるばってん",
+            True,
+        ),
         (
             "方言助詞「で」",
             "知ってるやで",
