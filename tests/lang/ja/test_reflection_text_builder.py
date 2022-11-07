@@ -292,6 +292,11 @@ class TestReflectionBuilder:
                 "対人恐怖症を克服する。",
                 "with compound",
             ),
+            (
+                "難しいんですよね。それが。",
+                "難しいんですよね。",
+                "rootが不適切なため前文が参照される",
+            ),
         ],
     )
     def test_extract_tokens_with_nearest_heads(
