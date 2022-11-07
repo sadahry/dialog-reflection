@@ -36,7 +36,6 @@ class ReflectionCancelled(Exception):
 INVALID_JODOUSHI_REGEXP = re.compile(r"^助動詞-(ダ|デス|マス)")
 CANCEL_JODOUSHI_REGEXP = re.compile(r"^(助動詞-(ヌ|マイ)|文語助動詞-(ム|ベシ))")
 DIALECT_JODOUSHI_REGEXP = re.compile(r"^助動詞-(ジャ|ドス|ナンダ|ヘン|ヤ|ヤス)")
-CANCEL_KATSUYO_REGEXP = re.compile(r"意志推量形$")
 INVALID_SETSUZOKUJOSHI_NORMS = {"て", "で", "から"}
 DIALECT_SETSUZOKUJOSHI_NORMS = {"きに", "けん", "すけ", "さかい", "ばってん"}
 INVALID_SHUJOSHI_NORMS = {
@@ -83,14 +82,11 @@ def cut_suffix_until_valid(sent: spacy.tokens.Span) -> Optional[spacy.tokens.Spa
     for i in reversed(range(0, len(sent))):
         token = sent[i]
         tag = token.tag_
-        conjugation_type, conjugation_form = get_conjugation(token)
+        conjugation_type, _ = get_conjugation(token)
 
         # break -> VALID
         # continue -> INVALID
         # raise -> CANCEL
-
-        if conjugation_form and CANCEL_KATSUYO_REGEXP.match(conjugation_form):
-            raise ReflectionCancelled(reason=CancelledByToken(sent, token))
 
         match tag:
             case ("感動詞-一般" | "感動詞-フィラー" | "連体詞"):
@@ -455,223 +451,44 @@ def test_spacy_katsuyo_text_detector(nlp_ja, msg, text, expected):
 @pytest.mark.parametrize(
     "msg, text",
     [
-        # ref, https://ja.wikipedia.org/wiki/五段活用
         (
-            "五段活用",
-            "あなたと歩こう",
+            "未然形",
+            "あなたと歩かない",
         ),
         (
-            "五段活用",
-            "あなたと稼ごう",
+            "連用形",
+            "あなたと歩き始める",
         ),
         (
-            "五段活用",
-            "あなたと話そう",
+            "終止形",
+            "あなたと歩く。",
         ),
         (
-            "五段活用",
-            "あなたと話そ",  # う抜き
+            "連体形",
+            "あなたと歩くため",
         ),
         (
-            "五段活用",
-            "あなたと待とう",
+            "仮定形",
+            "あなたと歩けば",
         ),
         (
-            "五段活用",
-            "あなたと死のう",
+            "命令形",
+            "あなたが歩けよな",
         ),
         (
-            "五段活用",
-            "あなたと遊ぼう",
-        ),
-        (
-            "五段活用",
-            "あなたと遊ぼ",  # う抜き
-        ),
-        (
-            "五段活用",
-            "本を読もう",
-        ),
-        (
-            "五段活用",
-            "あなたと帰ろう",
-        ),
-        (
-            "五段活用",
-            "あなたと買おう",
-        ),
-        # ref, https://ja.wikipedia.org/wiki/上一段活用
-        (
-            "上一段活用",
-            "あなたと老いよう",
-        ),
-        (
-            "上一段活用",
-            "あなたと居よう",
-        ),
-        (
-            "上一段活用",
-            "あなたといよう",
-        ),
-        (
-            "上一段活用",
-            "あなたと起きよう",
-        ),
-        (
-            "上一段活用",
-            "あなたと着よう",
-        ),
-        (
-            "上一段活用",
-            "過ぎよう",
-        ),
-        (
-            "上一段活用",
-            "あなたと閉じよう",
-        ),
-        (
-            "上一段活用",
-            "あなたと落ちよう",
-        ),
-        (
-            "上一段活用",
-            "野菜を煮よう",
-        ),
-        (
-            "上一段活用",
-            "日差しを浴びよう",
-        ),
-        (
-            "上一段活用",
-            "日差しを浴びよっ",  # う抜き
-            # "日差しを浴びよ",  # 命令形となるためスキップ
-        ),
-        (
-            "上一段活用",
-            "目に染みよう",
-        ),
-        (
-            "上一段活用",
-            "目を見よう",
-        ),
-        (
-            "上一段活用",
-            "下に降りよう",
-        ),
-        # ref, https://ja.wikipedia.org/wiki/下一段活用
-        (
-            "下一段活用",
-            "下に見えよう",
-        ),
-        (
-            "下一段活用",
-            "報酬を得よう",
-        ),
-        (
-            "下一段活用",
-            "罰を受けよう",
-        ),
-        (
-            "下一段活用",
-            "宣告を告げよう",
-        ),
-        (
-            "下一段活用",
-            "映像を見せよう",
-        ),
-        (
-            "下一段活用",
-            "小麦粉を混ぜよう",
-        ),
-        (
-            "下一段活用",
-            "小麦粉を混ぜよっ",  # う抜き
-            # "小麦粉を混ぜよ",  # 命令形となるためスキップ
-        ),
-        (
-            "下一段活用",
-            "小麦粉を捨てよう",
-        ),
-        (
-            "下一段活用",
-            "うどんを茹でよう",
-        ),
-        (
-            "下一段活用",
-            "出汁が出よう",
-        ),
-        (
-            "下一段活用",
-            "親戚を尋ねよう",
-        ),
-        (
-            "下一段活用",
-            "すぐに寝よう",
-        ),
-        (
-            "下一段活用",
-            "時を経よう",
-        ),
-        (
-            "下一段活用",
-            "ご飯を食べよう",
-        ),
-        (
-            "下一段活用",
-            "ご飯を求めよう",
-        ),
-        (
-            "下一段活用",
-            "麺を入れよう",
-        ),
-        # 「いく」のみ特殊
-        (
-            "五段活用",
-            "あなたと行こ",
-        ),
-        (
-            "五段活用",
-            "あなたと行こう",
-            # "あなたといこう", # 五段活用「憩う」となるためスキップ
-        ),
-        # ref. https://ja.wikipedia.org/wiki/カ行変格活用
-        (
-            "カ行変格活用",
-            "家にこよう",
-        ),
-        (
-            "カ行変格活用",
-            "家に来よ",  # う抜き
-        ),
-        # ref. https://ja.wikipedia.org/wiki/サ行変格活用
-        (
-            "サ行変格活用",
-            "軽くウォーキングしよ",
-        ),
-        (
-            "サ行変格活用",
-            "フライパンを熱しよう",
-        ),
-        (
-            "サ行変格活用",
-            "フライパンを熱そう",
-        ),
-        (
-            "サ行変格活用",
-            "影響が生じよう",
-        ),
-        # 形容詞
-        (
-            "形容詞",
-            "あなたは美しかろう",
+            "意志推量形",
+            "あなたと歩こうか",
         ),
     ],
 )
-def test_spacy_katsuyo_text_detector_cancel_u(nlp_ja, msg, text):
+def test_spacy_katsuyo_text_detector_with_no_error_as_conjugation_form(
+    nlp_ja, msg, text
+):
     sent = next(nlp_ja(text).sents)
-    with pytest.raises(ReflectionCancelled):
-        cut_suffix_until_valid(sent)
-        assert False, msg
+    # 活用形を取り出しやすくするために付与した単語を除く
+    tokens = sent[:-1]
+    tokens = cut_suffix_until_valid(tokens)
+    assert tokens is not None, msg
 
 
 @pytest.mark.parametrize(
@@ -1543,105 +1360,3 @@ def test_spacy_katsuyo_text_detector_jodoushi_dialect_cancel(
             assert False, msg
     else:
         cut_suffix_until_valid(sent)
-
-
-@pytest.mark.parametrize(
-    "msg, text",
-    [
-        (
-            "助動詞「れる」",
-            "報われよう",
-        ),
-        (
-            "助動詞「られる」",
-            "見られよう",
-        ),
-        (
-            "助動詞「せる」",
-            "報わせよう",
-        ),
-        (
-            "助動詞「させる」",
-            "見させよう",
-        ),
-        (
-            "助動詞「ない」",
-            "見なかろう",
-        ),
-        # 意志推量形が思いつかないためスキップ
-        # (
-        #     "助動詞「ぬ」",
-        # ),
-        # (
-        #     "助動詞「ん」",
-        # ),
-        # (
-        #     "助動詞「まい」",
-        # ),
-        (
-            "助動詞「たい」",
-            "見たかろう",
-        ),
-        (
-            "助動詞「たがる」",
-            "話したがろう",  # 機械的に文法から生成
-            # 見たがろうだと不適席な係り受けとなる。稀だと判断し対応はしない
-            # # text = 見
-            # 1       見      見る    VERB    動詞-非自立可能 _       0       root    _       SpaceAfter=No|BunsetuBILabel=B|BunsetuPositionType=ROOT|Inf=上一段-マ行,連用形-一般|Reading=ミ
-            # # text = たがろう
-            # 1       たがろう        たがる  PROPN   助動詞  _       0       root    _       SpaceAfter=No|BunsetuBILabel=B|BunsetuPositionType=ROOT|NP_I|Inf=五段-ラ行,意志推量形|Reading=タガロウ
-        ),
-        # 意志推量形が思いつかないためスキップ
-        # (
-        #     "助動詞「た」",
-        # ),
-        # (
-        #     "助動詞「だ」",
-        # ),
-        (
-            "助動詞「ます」",
-            "見ましょう",
-        ),
-        (
-            "助動詞「ます」",
-            "見ましょ",  # 「う」抜き
-        ),
-        (
-            "助動詞「そうだ」",
-            "見そうだろう",
-        ),
-        (
-            "助動詞「そうだ」",
-            "見そうだろ",  # 「う」抜き
-        ),
-        (
-            "助動詞「らしい」",
-            "見るらしかろう",  # 機械的に文法から生成
-        ),
-        (
-            "助動詞「べきだ」",
-            "見るべきだろう",
-        ),
-        (
-            "助動詞「ようだ」",
-            "見るようだろう",
-        ),
-        (
-            "助動詞「だ」",
-            "見るだろう",
-        ),
-        (
-            "助動詞「です」",
-            "見るでしょう",
-        ),
-        (
-            "助動詞「です」",
-            "見るでしょ",  # 「う」抜き
-        ),
-    ],
-)
-def test_spacy_katsuyo_text_detector_jodoushi_cancel_u(nlp_ja, msg, text):
-    sent = next(nlp_ja(text).sents)
-    with pytest.raises(ReflectionCancelled):
-        cut_suffix_until_valid(sent)
-        assert False, msg
