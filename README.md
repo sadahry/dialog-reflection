@@ -2,6 +2,13 @@
 
 A library for dialog systems that attempt to respond to messages as Reflective Listening.
 
+## Demo
+
+```
+$ poetry install
+$ poetry run python examples/interactive_ja.py
+```
+
 ## Dicts
 
 (TBD)
