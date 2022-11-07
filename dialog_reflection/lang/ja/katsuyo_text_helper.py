@@ -2,8 +2,8 @@ from collections.abc import Callable
 from typing import Optional
 import abc
 import sys
-import spacy_dialog_reflection.lang.ja.katsuyo as k
-import spacy_dialog_reflection.lang.ja.katsuyo_text as kt
+import dialog_reflection.lang.ja.katsuyo as k
+import dialog_reflection.lang.ja.katsuyo_text as kt
 
 
 class IKatsuyoTextHelper(kt.IKatsuyoTextAppendant[kt.M]):

@@ -1,12 +1,12 @@
 import re
 import pytest
-from spacy_dialog_reflection.lang.ja.katsuyo_text import (
+from dialog_reflection.lang.ja.katsuyo_text import (
     KURU,
     KatsuyoText,
     TaigenText,
     KatsuyoTextError,
 )
-from spacy_dialog_reflection.lang.ja.katsuyo import (
+from dialog_reflection.lang.ja.katsuyo import (
     GODAN_BA_GYO,
     GODAN_GA_GYO,
     GODAN_IKU,
@@ -27,7 +27,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo import (
     SHIMO_ICHIDAN,
 )
 
-from spacy_dialog_reflection.lang.ja.katsuyo_text_helper import (
+from dialog_reflection.lang.ja.katsuyo_text_helper import (
     IKatsuyoTextHelper,
     Denbun,
     HikyoReizi,
@@ -42,7 +42,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text_helper import (
     KakoKanryo,
     Youtai,
 )
-from spacy_dialog_reflection.lang.ja.katsuyo_text_builder import (
+from dialog_reflection.lang.ja.katsuyo_text_builder import (
     SpacyKatsuyoTextBuilder,
 )
 

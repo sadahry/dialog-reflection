@@ -1,5 +1,5 @@
 import pytest
-from spacy_dialog_reflection.lang.ja.katsuyo_text import (
+from dialog_reflection.lang.ja.katsuyo_text import (
     FUKUZYOSHI_BAKARI,
     FUKUZYOSHI_DAKE,
     FUKUZYOSHI_HODO,
@@ -21,7 +21,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text import (
     KatsuyoTextError,
     TaigenText,
 )
-from spacy_dialog_reflection.lang.ja.katsuyo import (
+from dialog_reflection.lang.ja.katsuyo import (
     GODAN_BA_GYO,
     GODAN_GA_GYO,
     GODAN_IKU,
@@ -41,10 +41,10 @@ from spacy_dialog_reflection.lang.ja.katsuyo import (
     SA_GYO_HENKAKU_ZURU,
     SHIMO_ICHIDAN,
 )
-from spacy_dialog_reflection.lang.ja.katsuyo_text_detector import (
+from dialog_reflection.lang.ja.katsuyo_text_detector import (
     SpacyKatsuyoTextAppendantsDetector,
 )
-from spacy_dialog_reflection.lang.ja.katsuyo_text_helper import (
+from dialog_reflection.lang.ja.katsuyo_text_helper import (
     IKatsuyoTextHelper,
     Denbun,
     HikyoReizi,
@@ -59,7 +59,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text_helper import (
     Hitei,
     Youtai,
 )
-from spacy_dialog_reflection.lang.ja.katsuyo_text_builder import SpacyKatsuyoTextBuilder
+from dialog_reflection.lang.ja.katsuyo_text_builder import SpacyKatsuyoTextBuilder
 
 
 @pytest.fixture(scope="session")

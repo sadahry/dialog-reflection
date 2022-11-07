@@ -1,5 +1,5 @@
 from typing import Any, Optional, List, Tuple
-from spacy_dialog_reflection.lang.ja.katsuyo_text import (
+from dialog_reflection.lang.ja.katsuyo_text import (
     SHUJOSHI_KA,
     SHUJOSHI_KASHIRA,
     SHUJOSHI_NA,
@@ -22,7 +22,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text import (
     FUKUZYOSHI_KIRI,
     FUKUZYOSHI_YARA,
 )
-from spacy_dialog_reflection.lang.ja.katsuyo_text_helper import (
+from dialog_reflection.lang.ja.katsuyo_text_helper import (
     Denbun,
     HikyoReizi,
     Hitei,
@@ -36,7 +36,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text_helper import (
     KibouOthers,
     Youtai,
 )
-from spacy_dialog_reflection.lang.ja.katsuyo_text_detector import (
+from dialog_reflection.lang.ja.katsuyo_text_detector import (
     IKatsuyoTextSourceDetector,
     IKatsuyoTextAppendantsDetector,
     SpacyKatsuyoTextAppendantsDetector,

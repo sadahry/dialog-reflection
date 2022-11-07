@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "spacy-dialog-reflection"
+name = "dialog-reflection"
 version = "0.1.0"
 description = "A library for dialog systems that attempt to respond to messages as Reflective Listening."
 authors = ["Sadahiro YOSHIKAWA"]

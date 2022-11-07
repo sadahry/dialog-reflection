@@ -1,7 +1,7 @@
 import pytest
-from spacy_dialog_reflection.reflection_text_builder import ReflectionTextError
-from spacy_dialog_reflection.reflector import SpacyReflector
-from spacy_dialog_reflection.lang.ja.reflection_text_builder import (
+from dialog_reflection.reflection_text_builder import ReflectionTextError
+from dialog_reflection.reflector import SpacyReflector
+from dialog_reflection.lang.ja.reflection_text_builder import (
     JaSpacyReflectionTextBuilder,
 )
 

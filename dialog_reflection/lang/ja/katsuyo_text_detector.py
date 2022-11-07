@@ -1,6 +1,6 @@
 from typing import Any, Optional, List, Set, Tuple, Type
 from itertools import dropwhile
-from spacy_dialog_reflection.lang.ja.katsuyo import (
+from dialog_reflection.lang.ja.katsuyo import (
     GODAN_BA_GYO,
     GODAN_GA_GYO,
     GODAN_IKU,
@@ -18,7 +18,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo import (
     SA_GYO_HENKAKU_ZURU,
     SHIMO_ICHIDAN,
 )
-from spacy_dialog_reflection.lang.ja.katsuyo_text import (
+from dialog_reflection.lang.ja.katsuyo_text import (
     KURU,
     KURU_KANJI,
     FukujoshiText,
@@ -31,7 +31,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text import (
     ShujoshiText,
     TaigenText,
 )
-from spacy_dialog_reflection.lang.ja.katsuyo_text_helper import (
+from dialog_reflection.lang.ja.katsuyo_text_helper import (
     IKatsuyoTextHelper,
     Denbun,
     HikyoReizi,
@@ -423,7 +423,7 @@ class SpacyKatsuyoTextAppendantsDetector(IKatsuyoTextAppendantsDetector):
         left = candidate.doc[candidate.i - 1]
         # 動詞判定
         if left.tag_.startswith("動詞"):
-            # @ref: https://github.com/sadahry/spacy-dialog-reflection/blob/6a56bd3378daee41a30bc7bb50b8de6c063a8437/spacy_dialog_reflection/lang/ja/katsuyo_text_detector.py#L136-L144
+            # @ref: https://github.com/sadahry/spacy-dialog-reflection/blob/6a56bd3378daee41a30bc7bb50b8de6c063a8437/dialog_reflection/lang/ja/katsuyo_text_detector.py#L136-L144
             inflection = left.morph.get("Inflection")[0].split(";")
             katsuyo_type = inflection[1]
             if "連用形" in katsuyo_type:
@@ -432,7 +432,7 @@ class SpacyKatsuyoTextAppendantsDetector(IKatsuyoTextAppendantsDetector):
                 return self.try_get_helper(Denbun)
         # 形容詞判定
         if "形容詞" in left.tag_:
-            # @ref: https://github.com/sadahry/spacy-dialog-reflection/blob/6a56bd3378daee41a30bc7bb50b8de6c063a8437/spacy_dialog_reflection/lang/ja/katsuyo_text_detector.py#L136-L144
+            # @ref: https://github.com/sadahry/spacy-dialog-reflection/blob/6a56bd3378daee41a30bc7bb50b8de6c063a8437/dialog_reflection/lang/ja/katsuyo_text_detector.py#L136-L144
             inflection = left.morph.get("Inflection")[0].split(";")
             katsuyo_type = inflection[1]
             if "語幹" in katsuyo_type:

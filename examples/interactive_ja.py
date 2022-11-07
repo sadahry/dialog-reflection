@@ -5,8 +5,8 @@ import time
 import sys
 dir = sys.path[0]
 sys.path.append(dir + "/../")
-from spacy_dialog_reflection.lang.ja.reflection_text_builder import JaSpacyReflector # noqa: E402,E261
-# from spacy_dialog_reflection import SpacyReflector
+from dialog_reflection.lang.ja.reflection_text_builder import JaSpacyReflector # noqa: E402,E261
+# from dialog_reflection import SpacyReflector
 # fmt: on
 
 refactor = JaSpacyReflector(model="ja_ginza")

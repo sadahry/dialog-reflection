@@ -1,7 +1,7 @@
 import abc
 import spacy
 
-from spacy_dialog_reflection.reflection_text_builder import ISpacyReflectionTextBuilder
+from dialog_reflection.reflection_text_builder import ISpacyReflectionTextBuilder
 
 
 class IReflector(abc.ABC):

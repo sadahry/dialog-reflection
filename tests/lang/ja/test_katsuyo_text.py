@@ -1,5 +1,5 @@
 import pytest
-from spacy_dialog_reflection.lang.ja.katsuyo_text import (
+from dialog_reflection.lang.ja.katsuyo_text import (
     FUKUZYOSHI_BAKARI,
     FUKUZYOSHI_DAKE,
     FUKUZYOSHI_HODO,
@@ -27,7 +27,7 @@ from spacy_dialog_reflection.lang.ja.katsuyo_text import (
     KatsuyoTextError,
     TaigenText,
 )
-from spacy_dialog_reflection.lang.ja.katsuyo import (
+from dialog_reflection.lang.ja.katsuyo import (
     GODAN_BA_GYO,
     GODAN_KA_GYO,
     GODAN_SA_GYO,

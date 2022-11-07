@@ -1,18 +1,18 @@
 from typing import Callable, Set
-from spacy_dialog_reflection.lang.ja.katsuyo import KeiyoudoushiKatsuyo
-from spacy_dialog_reflection.lang.ja.katsuyo_text import (
+from dialog_reflection.lang.ja.katsuyo import KeiyoudoushiKatsuyo
+from dialog_reflection.lang.ja.katsuyo_text import (
     FukujoshiText,
     IKatsuyoTextSource,
     TaigenText,
 )
-from spacy_dialog_reflection.reflection_text_builder import (
+from dialog_reflection.reflection_text_builder import (
     ReflectionTextError,
 )
-from spacy_dialog_reflection.reflector import (
+from dialog_reflection.reflector import (
     ISpacyReflectionTextBuilder,
     SpacyReflector,
 )
-from spacy_dialog_reflection.lang.ja.katsuyo_text_builder import (
+from dialog_reflection.lang.ja.katsuyo_text_builder import (
     SpacyKatsuyoTextBuilder,
 )
 import sys

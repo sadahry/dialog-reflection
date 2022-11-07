@@ -1,7 +1,7 @@
 from typing import Optional, Union, TypeVar, Generic, NewType
 import attrs
 import abc
-import spacy_dialog_reflection.lang.ja.katsuyo as k
+import dialog_reflection.lang.ja.katsuyo as k
 
 A = TypeVar(
     "A",
