@@ -241,6 +241,45 @@ class TestReflectionBuilder:
 
         assert isinstance(e.value.reason, WhTokenNotSupported), assert_message
 
+    def test_extract_root_token_error(
+        self,
+        nlp_ja,
+        builder: JaPlainReflectionTextBuilder,
+    ):
+        """
+        _extract_root_tokenでエラーとなりテキストを返すかをテストする
+        """
+        # rootが副詞の場合はエラーとなる想定
+        text = "そう"
+        doc = nlp_ja(text)
+        assert doc[0].tag_ == "副詞"
+        func = builder._extract_root_token
+        with pytest.raises(ReflectionCancelled) as e:
+            func(doc)
+
+        assert isinstance(e.value.reason, NoValidSentence)
+        assert e.value.reason.doc is not None
+        assert text in e.value.reason.doc.text, "e has doc when error"
+
+    @pytest.mark.filterwarnings(r"ignore:.*Traceback")
+    def test_safe_build_catch_error(
+        self,
+        nlp_ja,
+        builder: JaPlainReflectionTextBuilder,
+    ):
+        """
+        safe_buildがエラー時にもテキストを返すかをテストする
+        """
+        # textが空の場合はエラーとなる想定
+        text = ""
+        doc = nlp_ja(text)
+
+        result = builder.safe_build(doc)
+
+        # rootの選出時にエラーとなるはずなので、エラー用テキストを返す想定
+        excepted = builder.message_when_error
+        assert result == excepted
+
     @pytest.mark.parametrize(
         "text, expected, assert_message",
         [
@@ -314,42 +353,3 @@ class TestReflectionBuilder:
         tokens = builder._extract_tokens_with_nearest_heads(root)
         result = "".join(map(lambda t: t.text, tokens))
         assert result == expected, assert_message
-
-    def test_extract_root_token_error(
-        self,
-        nlp_ja,
-        builder: JaPlainReflectionTextBuilder,
-    ):
-        """
-        _extract_root_tokenでエラーとなりテキストを返すかをテストする
-        """
-        # rootが副詞の場合はエラーとなる想定
-        text = "そう"
-        doc = nlp_ja(text)
-        assert doc[0].tag_ == "副詞"
-        func = builder._extract_root_token
-        with pytest.raises(ReflectionCancelled) as e:
-            func(doc)
-
-        assert isinstance(e.value.reason, NoValidSentence)
-        assert e.value.reason.doc is not None
-        assert text in e.value.reason.doc.text, "e has doc when error"
-
-    @pytest.mark.filterwarnings(r"ignore:.*Traceback")
-    def test_safe_build_catch_error(
-        self,
-        nlp_ja,
-        builder: JaPlainReflectionTextBuilder,
-    ):
-        """
-        safe_buildがエラー時にもテキストを返すかをテストする
-        """
-        # textが空の場合はエラーとなる想定
-        text = ""
-        doc = nlp_ja(text)
-
-        result = builder.safe_build(doc)
-
-        # rootの選出時にエラーとなるはずなので、エラー用テキストを返す想定
-        excepted = builder.message_when_error
-        assert result == excepted
