@@ -1,4 +1,4 @@
-from dialog_reflection.reflection_cancelled import (
+from dialog_reflection.cancelled_reason import (
     ICancelledReason,
 )
 import spacy

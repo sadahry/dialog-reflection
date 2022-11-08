@@ -1,6 +1,8 @@
 from typing import Set
 from dialog_reflection.reflection_cancelled import (
     ReflectionCancelled,
+)
+from dialog_reflection.cancelled_reason import (
     NoValidSentence,
 )
 from dialog_reflection.reflector import (

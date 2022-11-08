@@ -1,6 +1,8 @@
 from typing import Any
 from dialog_reflection.reflection_cancelled import (
     ReflectionCancelled,
+)
+from dialog_reflection.cancelled_reason import (
     NoValidSentence,
 )
 import abc
