@@ -99,8 +99,8 @@ class JaSpacyPlainReflectionTextBuilder(ISpacyReflectionTextBuilder):
             return token
 
         head_token = _extract_head_token(root)
-        # TODO テスト強化
-        return root.sent[head_token.i :]
+        last_token_of_root_sent = root.sent[-1]
+        return root.doc[head_token.i : last_token_of_root_sent.i + 1]
 
     def build_text(
         self,

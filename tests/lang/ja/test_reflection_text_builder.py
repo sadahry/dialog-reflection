@@ -329,6 +329,11 @@ class TestReflectionBuilder:
                 "難しいんですよね。",
                 "rootが不適切なため前文が参照される",
             ),
+            (
+                "その話ですね。難しいんですよね。それが。",
+                "難しいんですよね。",
+                "rootが不適切なため前文が参照される",
+            ),
         ],
     )
     def test_extract_tokens_with_nearest_heads(
