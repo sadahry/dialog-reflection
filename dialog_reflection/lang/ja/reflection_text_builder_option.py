@@ -152,13 +152,13 @@ class JaSpacyPlainTextBuilderOption:
     # For Error Handling
     # ========================================================================
     fn_message_when_error: ExceptionToText = lambda _: "そうなんですね。"
+    fn_suffix_ambiguous: TokensToText = (
+        lambda tokens: tokens[-1].sent.root.text + "、ですか。"
+    )
     fn_message_cancelled_by_token: TokenToText = (
         lambda token: "そう思うんですね。" if token.norm_ in {"か", "の", "かしら"} else "そうなんですね。"
     )
     fn_message_when_wh_token: WhTokenNotSupportedToText = lambda _: "んー。"
     fn_message_dialect_not_supported: DialectNotSupportedToText = (
         lambda _: "すみません、方言はわからない言葉が多いです。出来れば標準語でお願いします。"
-    )
-    fn_suffix_ambiguous: TokensToText = (
-        lambda tokens: tokens[-1].sent.root.text + "、ですか。"
     )
