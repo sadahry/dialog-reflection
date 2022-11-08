@@ -43,7 +43,8 @@ class JaPlainReflectionTextBuilder(ISpacyReflectionTextBuilder):
         taigen_suffix_regexp: str = ".*(名|代名|形状|助)詞",
     ) -> None:
         # TODO 柔軟に設定できるようにする
-        self.suffix = "んですね。"
+        self.suffix_taigen = "なんですね。"
+        self.suffix_yougen = "んですね。"
         self.suffix_ambiguous = "、ですか。"
         self.message_when_error = "そうなんですね。"
         self.message_when_wh_token = "んー。"
@@ -144,7 +145,7 @@ class JaPlainReflectionTextBuilder(ISpacyReflectionTextBuilder):
         is_taigen = self.taigen_suffix_pattern.match(tag) is not None
 
         last_text = last_token.text if is_taigen else last_token.lemma_
-        suffix = "なんですね。" if is_taigen else "んですね。"
+        suffix = self.suffix_taigen if is_taigen else self.suffix_yougen
 
         return sent[:-1].text + last_text + suffix
 
