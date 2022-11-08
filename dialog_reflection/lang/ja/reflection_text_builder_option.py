@@ -156,7 +156,10 @@ class JaSpacyPlainTextBuilderOption:
         lambda tokens: tokens[-1].sent.root.text + "、ですか。"
     )
     fn_message_cancelled_by_token: TokenToText = (
-        lambda token: "そう思うんですね。" if token.norm_ in {"か", "の", "かしら"} else "そうなんですね。"
+        # 少しでもバリエーションを増やすため、用例の多いケースに例外的に対応
+        lambda token: token.doc[token.sent.root.i :].text + "、と。"
+        if token.tag_ == "助詞-終助詞" and token.norm_ in {"か", "の", "かしら"}
+        else "そうなんですね。"
     )
     fn_message_when_wh_token: WhTokenNotSupportedToText = lambda _: "んー。"
     fn_message_dialect_not_supported: DialectNotSupportedToText = (
