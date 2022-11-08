@@ -1,12 +1,10 @@
 import time
 
 # fmt: off
-# TODO パッケージが完成したら消して、以下のように書き換える
 import sys
 dir = sys.path[0]
 sys.path.append(dir + "/../")
 from dialog_reflection.lang.ja.reflector import JaSpacyReflector # noqa: E402,E261
-# from dialog_reflection import SpacyReflector
 # fmt: on
 
 refactor = JaSpacyReflector(model="ja_ginza")
@@ -21,4 +19,4 @@ while True:
     start = time.time()
     response = refactor.reflect(message)
     end = time.time()
-    print(f"システム: {refactor.reflect(message)} ({end - start:.3f} sec)")
+    print(f"システム: {response} ({end - start:.3f} sec)")
