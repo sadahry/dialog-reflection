@@ -1,11 +1,6 @@
 import time
 
-# fmt: off
-import sys
-dir = sys.path[0]
-sys.path.append(dir + "/../")
-from dialog_reflection.lang.ja.reflector import JaSpacyReflector # noqa: E402,E261
-# fmt: on
+from dialog_reflection.lang.ja.reflector import JaSpacyReflector  # noqa: E402,E261
 
 refactor = JaSpacyReflector(model="ja_ginza")
 
