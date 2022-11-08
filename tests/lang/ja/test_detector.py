@@ -117,7 +117,11 @@ def cut_suffix_until_valid(sent: spacy.tokens.Span) -> Optional[spacy.tokens.Spa
     if len(sent) == 0:
         return None
 
-    for i in reversed(range(0, len(sent))):
+    for i in reversed(range(-1, len(sent))):
+        # 最後のtokenがcontinueだった場合、Noneを返す
+        if i == -1:
+            return None
+
         token = sent[i]
         tag = token.tag_
         conjugation_type, _ = get_conjugation(token)
@@ -225,6 +229,18 @@ def get_conjugation(token):
     conjugation_type = inflection[0]
     conjugation_form = inflection[1]
     return conjugation_type, conjugation_form
+
+
+def test_no_sentence(nlp_ja):
+    sent = next(nlp_ja("あ").sents)
+    tokens = cut_suffix_until_valid(sent[:0])
+    assert tokens is None, "tokens is None when empy sentence"
+
+
+def test_cut_all_sentence(nlp_ja):
+    sent = next(nlp_ja("ほら").sents)
+    tokens = cut_suffix_until_valid(sent)
+    assert tokens is None, "tokens is None when empy sentence"
 
 
 # NOTE: 形態素解析のように正しく文書を分離することが目的ではないため
