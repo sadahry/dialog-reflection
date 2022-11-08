@@ -1,6 +1,7 @@
 from typing import Set
 from dialog_reflection.reflection_text_builder import (
     ReflectionCancelled,
+    ICancelledReason,
     NoValidSentence,
 )
 from dialog_reflection.reflector import (
@@ -13,6 +14,15 @@ import spacy
 # TODO あとでちゃんと実装
 from tests.lang.ja.test_builder import build
 from tests.lang.ja.test_detector import cut_suffix_until_valid
+
+
+class WhTokenNotSupported(ICancelledReason):
+    def __init__(self, doc: spacy.tokens.Doc, wh_token: spacy.tokens.Token):
+        self.doc = doc
+        self.wh_token = wh_token
+
+    def __str__(self):
+        return f"5W1H Token Not Supported. doc: {self.doc} wh_token: {self.wh_token}"
 
 
 class JaSpacyReflectionTextBuilder(ISpacyReflectionTextBuilder):
@@ -43,6 +53,7 @@ class JaSpacyReflectionTextBuilder(ISpacyReflectionTextBuilder):
         self.suffix = "んですね。"
         self.suffix_ambiguous = "、ですか。"
         self.message_when_error = "そうなんですね。"
+        self.message_when_wh_token = "んー。"
         self.allowed_root_pos_tags = allowed_root_pos_tags
         self.forbidden_wh_norms = forbidden_wh_norms
 
@@ -64,15 +75,22 @@ class JaSpacyReflectionTextBuilder(ISpacyReflectionTextBuilder):
         """
         # search from the latest sent in Japanese
         sents = reversed(list(doc.sents))
+        wh_token = None
         for sent in sents:
+            # check wh_token
+            _wh_token = next(
+                filter(lambda x: x.norm_ in self.forbidden_wh_norms, sent), None
+            )
+            if _wh_token:
+                wh_token = _wh_token if wh_token is None else wh_token
+                warnings.warn(f"sent has wh_word: {wh_token} in {sent}", UserWarning)
+                continue
+            # check pos_tag
             if sent.root.pos_ in self.allowed_root_pos_tags:
-                wh_word = next(
-                    filter(lambda x: x.norm_ in self.forbidden_wh_norms, sent), None
-                )
-                if wh_word:
-                    warnings.warn(f"sent has wh_word: {wh_word} {sent}", UserWarning)
-                    continue
                 return sent.root
+
+        if wh_token:
+            raise ReflectionCancelled(WhTokenNotSupported(doc, wh_token))
 
         raise ReflectionCancelled(
             reason=NoValidSentence(
@@ -132,6 +150,8 @@ class JaSpacyReflectionTextBuilder(ISpacyReflectionTextBuilder):
                     if not sents:
                         return self.message_when_error
                     return sents[-1].root.text + self.suffix_ambiguous
+                case WhTokenNotSupported():
+                    return self.message_when_wh_token  # 固定
 
         return self.message_when_error
 

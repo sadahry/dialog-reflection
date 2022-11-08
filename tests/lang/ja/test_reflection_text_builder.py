@@ -6,6 +6,7 @@ from dialog_reflection.reflection_text_builder import (
 from dialog_reflection.reflector import SpacyReflector
 from dialog_reflection.lang.ja.reflection_text_builder import (
     JaSpacyReflectionTextBuilder,
+    WhTokenNotSupported,
 )
 
 
@@ -186,11 +187,11 @@ class TestReflectionBuilder:
         "text, assert_message",
         [
             (
-                "どうなんでしょうね。",
+                "とてもなんでしょうね。",
                 "cannot extract one sentence not in ROOT_POS_SET",
             ),
             (
-                "あれはどうでしょうね。あれじゃどうにも。",
+                "あれはとてもでしょうね。あれじゃこうでも。",
                 "cannot extract sentences not in ROOT_POS_SET",
             ),
         ],
@@ -204,9 +205,41 @@ class TestReflectionBuilder:
         assert_message,
     ):
         doc = nlp_ja(text)
-        with pytest.raises(ReflectionCancelled):
+        with pytest.raises(ReflectionCancelled) as e:
             builder._extract_root_token(doc)
-            assert False, assert_message
+
+        assert isinstance(e.value.reason, NoValidSentence), assert_message
+
+    @pytest.mark.parametrize(
+        "text, assert_message",
+        [
+            (
+                "どうでしょうね。",
+                "has WH in one sentence",
+            ),
+            (
+                "あれはとてもでしょうね。あれじゃどうしようにも。",
+                "has WH in last sentence",
+            ),
+            (
+                "どうしてこうなんでしょうね。これじゃどうにも。",
+                "has WH in both sentences",
+            ),
+        ],
+    )
+    @pytest.mark.filterwarnings("ignore:sent has wh_word")
+    def test_wh_token_not_supported(
+        self,
+        nlp_ja,
+        builder: JaSpacyReflectionTextBuilder,
+        text,
+        assert_message,
+    ):
+        doc = nlp_ja(text)
+        with pytest.raises(ReflectionCancelled) as e:
+            builder._extract_root_token(doc)
+
+        assert isinstance(e.value.reason, WhTokenNotSupported), assert_message
 
     @pytest.mark.parametrize(
         "text, expected, assert_message",
@@ -291,7 +324,7 @@ class TestReflectionBuilder:
         _build_suffixでエラーとなりテキストを返すケース
         """
         # rootが副詞の場合はエラーとなる想定
-        text = "どう"
+        text = "そう"
         doc = nlp_ja(text)
         assert doc[0].tag_ == "副詞"
         func = builder._extract_root_token
@@ -312,11 +345,8 @@ class TestReflectionBuilder:
         safe_buildでエラーとならないでテキストを返すケース
         """
         # rootが副詞の場合はエラーとなる想定
-        text = "どう"
+        text = ""
         doc = nlp_ja(text)
-
-        root = next(doc.sents).root
-        assert root.tag_ == "副詞"
 
         result = builder.safe_build(doc)
 
