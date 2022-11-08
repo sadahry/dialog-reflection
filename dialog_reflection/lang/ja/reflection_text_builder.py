@@ -25,7 +25,7 @@ class WhTokenNotSupported(ICancelledReason):
         return f"5W1H Token Not Supported. doc: {self.doc} wh_token: {self.wh_token}"
 
 
-class JaSpacyReflectionTextBuilder(ISpacyReflectionTextBuilder):
+class JaPlainReflectionTextBuilder(ISpacyReflectionTextBuilder):
     def __init__(
         self,
         # restrict root pos tags to facilitate handling of suffixes in Japanese
@@ -160,7 +160,7 @@ class JaSpacyReflector(SpacyReflector):
     def __init__(
         self,
         model: str,  # need to be installed
-        builder: JaSpacyReflectionTextBuilder = JaSpacyReflectionTextBuilder(),
+        builder: JaPlainReflectionTextBuilder = JaPlainReflectionTextBuilder(),
     ) -> None:
         nlp = spacy.load(model)
         super().__init__(nlp, builder)

@@ -1,5 +1,5 @@
 # NOTE: あくまでテスト用
-# TODO JaSpacyReflectionTextBuilder に移植
+# TODO JaPlainReflectionTextBuilder に移植
 from typing import Optional, Union, Set
 import pytest
 import spacy

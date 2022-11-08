@@ -5,14 +5,14 @@ from dialog_reflection.reflection_text_builder import (
 )
 from dialog_reflection.reflector import SpacyReflector
 from dialog_reflection.lang.ja.reflection_text_builder import (
-    JaSpacyReflectionTextBuilder,
+    JaPlainReflectionTextBuilder,
     WhTokenNotSupported,
 )
 
 
 @pytest.fixture(scope="session")
 def builder():
-    return JaSpacyReflectionTextBuilder()
+    return JaPlainReflectionTextBuilder()
 
 
 @pytest.fixture(scope="session")
@@ -41,7 +41,7 @@ class TestReflectionBuilder:
     def test_no_sentence(
         self,
         nlp_ja,
-        builder: JaSpacyReflectionTextBuilder,
+        builder: JaPlainReflectionTextBuilder,
         text,
         assert_message,
     ):
@@ -174,7 +174,7 @@ class TestReflectionBuilder:
     def test_extract_root_token(
         self,
         nlp_ja,
-        builder: JaSpacyReflectionTextBuilder,
+        builder: JaPlainReflectionTextBuilder,
         text,
         expected,
         assert_message,
@@ -200,7 +200,7 @@ class TestReflectionBuilder:
     def test_select_no_sentence(
         self,
         nlp_ja,
-        builder: JaSpacyReflectionTextBuilder,
+        builder: JaPlainReflectionTextBuilder,
         text,
         assert_message,
     ):
@@ -231,7 +231,7 @@ class TestReflectionBuilder:
     def test_wh_token_not_supported(
         self,
         nlp_ja,
-        builder: JaSpacyReflectionTextBuilder,
+        builder: JaPlainReflectionTextBuilder,
         text,
         assert_message,
     ):
@@ -304,7 +304,7 @@ class TestReflectionBuilder:
     def test_extract_tokens_with_nearest_heads(
         self,
         nlp_ja,
-        builder: JaSpacyReflectionTextBuilder,
+        builder: JaPlainReflectionTextBuilder,
         text,
         expected,
         assert_message,
@@ -318,7 +318,7 @@ class TestReflectionBuilder:
     def test_build_suffix_error(
         self,
         nlp_ja,
-        builder: JaSpacyReflectionTextBuilder,
+        builder: JaPlainReflectionTextBuilder,
     ):
         """
         _build_suffixでエラーとなりテキストを返すケース
@@ -339,7 +339,7 @@ class TestReflectionBuilder:
     def test_safe_build_catch_error(
         self,
         nlp_ja,
-        builder: JaSpacyReflectionTextBuilder,
+        builder: JaPlainReflectionTextBuilder,
     ):
         """
         safe_buildでエラーとならないでテキストを返すケース
