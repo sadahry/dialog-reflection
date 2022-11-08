@@ -315,13 +315,13 @@ class TestReflectionBuilder:
         result = "".join(map(lambda t: t.text, tokens))
         assert result == expected, assert_message
 
-    def test_build_suffix_error(
+    def test_extract_root_token_error(
         self,
         nlp_ja,
         builder: JaPlainReflectionTextBuilder,
     ):
         """
-        _build_suffixでエラーとなりテキストを返すケース
+        _extract_root_tokenでエラーとなりテキストを返すかをテストする
         """
         # rootが副詞の場合はエラーとなる想定
         text = "そう"
@@ -333,7 +333,7 @@ class TestReflectionBuilder:
 
         assert isinstance(e.value.reason, NoValidSentence)
         assert e.value.reason.doc is not None
-        assert text in e.value.reason.doc.text, "エラー時にはdocをeに含める"
+        assert text in e.value.reason.doc.text, "e has doc when error"
 
     @pytest.mark.filterwarnings(r"ignore:.*Traceback")
     def test_safe_build_catch_error(
@@ -342,9 +342,9 @@ class TestReflectionBuilder:
         builder: JaPlainReflectionTextBuilder,
     ):
         """
-        safe_buildでエラーとならないでテキストを返すケース
+        safe_buildがエラー時にもテキストを返すかをテストする
         """
-        # rootが副詞の場合はエラーとなる想定
+        # textが空の場合はエラーとなる想定
         text = ""
         doc = nlp_ja(text)
 
