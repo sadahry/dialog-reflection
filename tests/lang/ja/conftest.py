@@ -1,13 +1,13 @@
 from dialog_reflection.reflector import SpacyReflector
 from dialog_reflection.lang.ja.reflection_text_builder import (
-    JaPlainReflectionTextBuilder,
+    JaSpacyPlainReflectionTextBuilder,
 )
 import pytest
 
 
 @pytest.fixture(scope="session")
 def builder():
-    return JaPlainReflectionTextBuilder()
+    return JaSpacyPlainReflectionTextBuilder()
 
 
 @pytest.fixture(scope="session")

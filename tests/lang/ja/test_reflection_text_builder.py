@@ -3,21 +3,10 @@ from dialog_reflection.reflection_text_builder import (
     ReflectionCancelled,
     NoValidSentence,
 )
-from dialog_reflection.reflector import SpacyReflector
 from dialog_reflection.lang.ja.reflection_text_builder import (
-    JaPlainReflectionTextBuilder,
+    JaSpacyPlainReflectionTextBuilder,
     WhTokenNotSupported,
 )
-
-
-@pytest.fixture(scope="session")
-def builder():
-    return JaPlainReflectionTextBuilder()
-
-
-@pytest.fixture(scope="session")
-def reflector(nlp_ja, builder):
-    return SpacyReflector(nlp_ja, builder)
 
 
 def test_work_well(reflector):
@@ -41,7 +30,7 @@ class TestReflectionBuilder:
     def test_no_sentence(
         self,
         nlp_ja,
-        builder: JaPlainReflectionTextBuilder,
+        builder: JaSpacyPlainReflectionTextBuilder,
         text,
         assert_message,
     ):
@@ -174,7 +163,7 @@ class TestReflectionBuilder:
     def test_extract_root_token(
         self,
         nlp_ja,
-        builder: JaPlainReflectionTextBuilder,
+        builder: JaSpacyPlainReflectionTextBuilder,
         text,
         expected,
         assert_message,
@@ -200,7 +189,7 @@ class TestReflectionBuilder:
     def test_select_no_sentence(
         self,
         nlp_ja,
-        builder: JaPlainReflectionTextBuilder,
+        builder: JaSpacyPlainReflectionTextBuilder,
         text,
         assert_message,
     ):
@@ -231,7 +220,7 @@ class TestReflectionBuilder:
     def test_wh_token_not_supported(
         self,
         nlp_ja,
-        builder: JaPlainReflectionTextBuilder,
+        builder: JaSpacyPlainReflectionTextBuilder,
         text,
         assert_message,
     ):
@@ -244,7 +233,7 @@ class TestReflectionBuilder:
     def test_extract_root_token_error(
         self,
         nlp_ja,
-        builder: JaPlainReflectionTextBuilder,
+        builder: JaSpacyPlainReflectionTextBuilder,
     ):
         """
         _extract_root_tokenでエラーとなりテキストを返すかをテストする
@@ -265,7 +254,7 @@ class TestReflectionBuilder:
     def test_safe_build_catch_error(
         self,
         nlp_ja,
-        builder: JaPlainReflectionTextBuilder,
+        builder: JaSpacyPlainReflectionTextBuilder,
     ):
         """
         safe_buildがエラー時にもテキストを返すかをテストする
@@ -277,7 +266,9 @@ class TestReflectionBuilder:
         result = builder.safe_build(doc)
 
         # rootの選出時にエラーとなるはずなので、エラー用テキストを返す想定
-        excepted = builder.message_when_error
+        # 適当なエラーを含める
+        e = Exception("test")
+        excepted = builder.op.fn_message_when_error(e)
         assert result == excepted
 
     @pytest.mark.parametrize(
@@ -343,7 +334,7 @@ class TestReflectionBuilder:
     def test_extract_tokens_with_nearest_heads(
         self,
         nlp_ja,
-        builder: JaPlainReflectionTextBuilder,
+        builder: JaSpacyPlainReflectionTextBuilder,
         text,
         expected,
         assert_message,
