@@ -5,7 +5,7 @@ import time
 import sys
 dir = sys.path[0]
 sys.path.append(dir + "/../")
-from dialog_reflection.lang.ja.reflection_text_builder import JaSpacyReflector # noqa: E402,E261
+from dialog_reflection.lang.ja.reflector import JaSpacyReflector # noqa: E402,E261
 # from dialog_reflection import SpacyReflector
 # fmt: on
 

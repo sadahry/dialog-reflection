@@ -6,7 +6,6 @@ from dialog_reflection.reflection_text_builder import (
 )
 from dialog_reflection.reflector import (
     ISpacyReflectionTextBuilder,
-    SpacyReflector,
 )
 import warnings
 import spacy
@@ -154,13 +153,3 @@ class JaPlainReflectionTextBuilder(ISpacyReflectionTextBuilder):
                     return self.message_when_wh_token  # 固定
 
         return self.message_when_error
-
-
-class JaSpacyReflector(SpacyReflector):
-    def __init__(
-        self,
-        model: str,  # need to be installed
-        builder: JaPlainReflectionTextBuilder = JaPlainReflectionTextBuilder(),
-    ) -> None:
-        nlp = spacy.load(model)
-        super().__init__(nlp, builder)
