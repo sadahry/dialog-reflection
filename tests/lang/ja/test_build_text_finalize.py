@@ -1,46 +1,5 @@
-# NOTE: あくまでテスト用
-# TODO JaPlainReflectionTextBuilder に移植
-from typing import Tuple, Optional
 import pytest
-import re
-import spacy
 from tests.lang.ja.test_detector import cut_suffix_until_valid
-
-# 体言的に語尾を扱う品詞
-TAIGEN_SUFFIX_REGEXP = re.compile(r".*(名|代名|形状|助)詞")
-
-
-def build(sent: spacy.tokens.Span) -> str:
-    if len(sent) == 0:
-        return ""
-
-    last_token = sent[-1]
-
-    tag = last_token.tag_
-    is_taigen = TAIGEN_SUFFIX_REGEXP.match(tag)
-
-    last_text = last_token.text if is_taigen else last_token.lemma_
-    suffix = "なんですね。" if is_taigen else "んですね。"
-
-    return sent[:-1].text + last_text + suffix
-
-
-def get_conjugation(token: spacy.tokens.Token) -> Tuple[Optional[str], Optional[str]]:
-    # sudachiの形態素解析結果(part_of_speech)5つ目以降(活用タイプ、活用形)が格納される
-    # 品詞によっては活用タイプ、活用形が存在しないため、ここでは配列の取得のみ行う
-    # e.g. 動詞
-    # > m.part_of_speech() # => ['動詞', '一般', '*', '*', '下一段-バ行', '連用形-一般']
-    # ref. https://github.com/explosion/spaCy/blob/v3.4.1/spacy/lang/ja/__init__.py#L102
-    # ref. https://github.com/WorksApplications/SudachiPy/blob/v0.5.4/README.md
-    # > Returns the part of speech as a six-element tuple. Tuple elements are four POS levels, conjugation type and conjugation form.
-    # ref. https://worksapplications.github.io/sudachi.rs/python/api/sudachipy.html#sudachipy.Morpheme.part_of_speech
-    inflection = token.morph.get("Inflection")
-    if not inflection:
-        return None, None
-    inflection = inflection[0].split(";")
-    conjugation_type = inflection[0]
-    conjugation_form = inflection[1]
-    return conjugation_type, conjugation_form
 
 
 # NOTE: 形態素解析のように正しく文書を分離することが目的ではないため
@@ -171,9 +130,9 @@ def get_conjugation(token: spacy.tokens.Token) -> Tuple[Optional[str], Optional[
         # ),
     ],
 )
-def test_spacy_katsuyo_text_detector(nlp_ja, msg, text, expected):
+def test_spacy_katsuyo_text_detector(nlp_ja, builder, msg, text, expected):
     sent = next(nlp_ja(text).sents)
-    result = build(sent)
+    result = builder._finalize(sent)
     assert result == expected, msg
 
 
@@ -387,9 +346,9 @@ def test_spacy_katsuyo_text_detector(nlp_ja, msg, text, expected):
         ),
     ],
 )
-def test_spacy_katsuyo_text_detector_joshi(nlp_ja, msg, text, expected):
+def test_spacy_katsuyo_text_detector_joshi(nlp_ja, builder, msg, text, expected):
     sent = next(nlp_ja(text).sents)
-    result = build(sent)
+    result = builder._finalize(sent)
     assert result == expected, msg
 
 
@@ -489,11 +448,13 @@ def test_spacy_katsuyo_text_detector_joshi(nlp_ja, msg, text, expected):
         ),
     ],
 )
-def test_spacy_katsuyo_text_detector_setsuzokujoshi(nlp_ja, msg, text, expected):
+def test_spacy_katsuyo_text_detector_setsuzokujoshi(
+    nlp_ja, builder, msg, text, expected
+):
     sent = next(nlp_ja(text).sents)
     # 形態素解析の簡易化のために付与していた読点「、」を除去
     sent = sent[:-1]
-    result = build(sent)
+    result = builder._finalize(sent)
     assert result == expected, msg
 
 
@@ -584,10 +545,10 @@ def test_spacy_katsuyo_text_detector_setsuzokujoshi(nlp_ja, msg, text, expected)
         ),
     ],
 )
-def test_spacy_katsuyo_text_detector_jodoushi(nlp_ja, msg, text, expected):
+def test_spacy_katsuyo_text_detector_jodoushi(nlp_ja, builder, msg, text, expected):
     sent = next(nlp_ja(text).sents)
     # 助動詞の場合、文末調整を行ってから処理したほうが
     # 末尾の「んですね」が正しく付与されるためテストでもそうする
     tokens = cut_suffix_until_valid(sent)
-    result = build(tokens)
+    result = builder._finalize(tokens)
     assert result == expected, msg

@@ -1,27 +1,20 @@
 from typing import Set
-from dialog_reflection.reflection_text_builder import (
+from dialog_reflection.reflection_cancelled import (
     ReflectionCancelled,
-    ICancelledReason,
     NoValidSentence,
 )
 from dialog_reflection.reflector import (
     ISpacyReflectionTextBuilder,
 )
+from dialog_reflection.lang.ja.cancelled_reason import (
+    WhTokenNotSupported,
+)
+import re
 import warnings
 import spacy
 
 # TODO あとでちゃんと実装
-from tests.lang.ja.test_builder import build
 from tests.lang.ja.test_detector import cut_suffix_until_valid
-
-
-class WhTokenNotSupported(ICancelledReason):
-    def __init__(self, doc: spacy.tokens.Doc, wh_token: spacy.tokens.Token):
-        self.doc = doc
-        self.wh_token = wh_token
-
-    def __str__(self):
-        return f"5W1H Token Not Supported. doc: {self.doc} wh_token: {self.wh_token}"
 
 
 class JaPlainReflectionTextBuilder(ISpacyReflectionTextBuilder):
@@ -47,6 +40,7 @@ class JaPlainReflectionTextBuilder(ISpacyReflectionTextBuilder):
             "幾つ",
             "?",
         },
+        taigen_suffix_regexp: str = ".*(名|代名|形状|助)詞",
     ) -> None:
         # TODO 柔軟に設定できるようにする
         self.suffix = "んですね。"
@@ -55,6 +49,7 @@ class JaPlainReflectionTextBuilder(ISpacyReflectionTextBuilder):
         self.message_when_wh_token = "んー。"
         self.allowed_root_pos_tags = allowed_root_pos_tags
         self.forbidden_wh_norms = forbidden_wh_norms
+        self.taigen_suffix_pattern = re.compile(taigen_suffix_regexp)
 
     def extract_tokens(
         self,
@@ -137,7 +132,21 @@ class JaPlainReflectionTextBuilder(ISpacyReflectionTextBuilder):
         # TODO tokenがないときの対処
         # if _tokens is None:
         #     return self.message_when_error
-        return build(_tokens)
+        return self._finalize(_tokens)
+
+    def _finalize(self, sent: spacy.tokens.Span) -> str:
+        if len(sent) == 0:
+            return ""
+
+        last_token = sent[-1]
+
+        tag = last_token.tag_
+        is_taigen = self.taigen_suffix_pattern.match(tag) is not None
+
+        last_text = last_token.text if is_taigen else last_token.lemma_
+        suffix = "なんですね。" if is_taigen else "んですね。"
+
+        return sent[:-1].text + last_text + suffix
 
     def build_instead_of_error(self, e: BaseException) -> str:
         if isinstance(e, ReflectionCancelled):
