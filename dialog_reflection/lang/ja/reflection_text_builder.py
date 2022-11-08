@@ -1,38 +1,18 @@
-from typing import Callable, Set
-from dialog_reflection.lang.ja.katsuyo import KeiyoudoushiKatsuyo
-from dialog_reflection.lang.ja.katsuyo_text import (
-    FukujoshiText,
-    IKatsuyoTextSource,
-    TaigenText,
-)
+from typing import Set
 from dialog_reflection.reflection_text_builder import (
-    ReflectionTextError,
+    ReflectionCancelled,
+    NoValidSentence,
 )
 from dialog_reflection.reflector import (
     ISpacyReflectionTextBuilder,
     SpacyReflector,
 )
-from dialog_reflection.lang.ja.katsuyo_text_builder import (
-    SpacyKatsuyoTextBuilder,
-)
-import sys
-import traceback
-import re
 import warnings
 import spacy
 
 # TODO あとでちゃんと実装
 from tests.lang.ja.test_builder import build
 from tests.lang.ja.test_detector import cut_suffix_until_valid
-
-
-def finalize_build_suffix_default(katsuyo_text: IKatsuyoTextSource) -> str:
-    if isinstance(katsuyo_text, (TaigenText, FukujoshiText)) or (
-        type(katsuyo_text.katsuyo) is KeiyoudoushiKatsuyo
-    ):
-        return katsuyo_text.gokan + "なんですね。"
-
-    return str(katsuyo_text) + "んですね。"
 
 
 class JaSpacyReflectionTextBuilder(ISpacyReflectionTextBuilder):
@@ -42,14 +22,6 @@ class JaSpacyReflectionTextBuilder(ISpacyReflectionTextBuilder):
         # root: -VERB (29585; 52% instances), -NOUN (19528; 34% instances), -ADJ (3807; 7% instances), -PROPN (1508; 3% instances), -NUM (953; 2% instances), ...
         # https://universaldependencies.org/treebanks/ja_bccwj/ja_bccwj-dep-root.html
         allowed_root_pos_tags: Set[str] = {"VERB", "NOUN", "PROPN", "ADJ", "NUM"},
-        # NOTE: Will not use pos tags when build text in Japanese
-        #       extract source token with tag instead
-        allowed_bottom_token_tags: Set[str] = {
-            "動詞",  # VERB
-            "名詞",  # NOUN & PROPN
-            "形容詞",  # ADJ
-            "形状詞",  # ADJ
-        },
         forbidden_wh_norms: Set[str] = {
             "何",
             "何故",
@@ -66,32 +38,21 @@ class JaSpacyReflectionTextBuilder(ISpacyReflectionTextBuilder):
             "幾つ",
             "?",
         },
-        finalize_build_suffix: Callable[
-            [IKatsuyoTextSource], str
-        ] = finalize_build_suffix_default,
     ) -> None:
         # TODO 柔軟に設定できるようにする
-        self.word_ending = "んですね。"
-        self.word_ending_unpersed = "、ですか。"
-        self.message_when_not_valid_doc = "続けてください。"
-        self.text_builder = SpacyKatsuyoTextBuilder()
+        self.suffix = "んですね。"
+        self.suffix_ambiguous = "、ですか。"
+        self.message_when_error = "そうなんですね。"
         self.allowed_root_pos_tags = allowed_root_pos_tags
-        self.allowed_tag_pattern = self._build_allowed_tag_pattern(
-            allowed_bottom_token_tags
-        )
         self.forbidden_wh_norms = forbidden_wh_norms
-        self.finalize_build_suffix = finalize_build_suffix
 
-    def _build_allowed_tag_pattern(self, allowed_root_tags: Set[str]) -> re.Pattern:
-        # e.g. /^動詞.*|^名詞.*|^形容詞.*|^形状詞.*/
-        return re.compile(r"^" + r".*|^".join(allowed_root_tags) + r".*")
-
-    def build(self, doc: spacy.tokens.Doc) -> str:
-        if doc.text.strip() == "":
-            raise ReflectionTextError("EMPTY DOC")
+    def extract_tokens(
+        self,
+        doc: spacy.tokens.Doc,
+    ) -> spacy.tokens.Span:
         root = self._extract_root_token(doc)
-        reflection_tokens = self._extract_tokens_with_nearest_heads(root)
-        return self._build_text(reflection_tokens)
+        tokens = self._extract_tokens_with_nearest_heads(root)
+        return tokens
 
     def _extract_root_token(
         self,
@@ -113,9 +74,12 @@ class JaSpacyReflectionTextBuilder(ISpacyReflectionTextBuilder):
                     continue
                 return sent.root
 
-        raise ReflectionTextError(
-            f"NO VALID SENTENSES IN DOC: '{doc}' "
-            f"ALLOWED_ROOT_POS_TAGS: ({self.allowed_root_pos_tags})"
+        raise ReflectionCancelled(
+            reason=NoValidSentence(
+                message=f"No Valid Sentenses In Doc: '{doc}' "
+                f"ALLOWED_ROOT_POS_TAGS: ({self.allowed_root_pos_tags})",
+                doc=doc,
+            )
         )
 
     def _extract_tokens_with_nearest_heads(
@@ -148,57 +112,28 @@ class JaSpacyReflectionTextBuilder(ISpacyReflectionTextBuilder):
         head_token = _extract_head_token(root)
         return root.sent[head_token.i :]
 
-    def _build_text(
+    def build_text(
         self,
         tokens: spacy.tokens.Span,
     ) -> str:
         _tokens = cut_suffix_until_valid(tokens)
+        # TODO tokenがないときの対処
+        # if _tokens is None:
+        #     return self.message_when_error
         return build(_tokens)
 
-    def _extract_bottom_token(
-        self,
-        tokens: spacy.tokens.Span,
-    ) -> spacy.tokens.Token:
-        for token in reversed(tokens):
-            if self.allowed_tag_pattern.match(token.tag_):
-                return token
-
-        raise ReflectionTextError(
-            f"NO VALID TOKENS IN SPAN: '{tokens}' "
-            f"ALLOWED_TAG_PATTERN: ({self.allowed_tag_pattern})"
-        )
-
-    def _build_suffix(
-        self,
-        bottom_token: spacy.tokens.Token,
-    ) -> str:
-        try:
-            # use whole sent to build katsuyo_text
-            sent = bottom_token.sent
-
-            # supress `has_error` warning as `_`
-            katsuyo_text, _ = self.text_builder.build(sent=sent, src=bottom_token)
-
-            if katsuyo_text is None:
-                raise Exception(
-                    f"unsupported parse. bottom_token: {bottom_token} sent: {sent}",
-                    UserWarning,
-                )
-
-            return self.finalize_build_suffix(katsuyo_text)
-        except BaseException:
-            type_, value, traceback_ = sys.exc_info()
-            # ReflectionTextErrorでwrapしてinstant_reflection_textを残す
-            instant_reflection_text = str(sent.root) + self.word_ending_unpersed
-            raise ReflectionTextError(
-                traceback.format_exception(type_, value, traceback_),
-                instant_reflection_text=instant_reflection_text,
-            )
-
     def build_instead_of_error(self, e: BaseException) -> str:
-        if isinstance(e, ReflectionTextError) and e.instant_reflection_text is not None:
-            return e.instant_reflection_text
-        return self.message_when_not_valid_doc
+        if isinstance(e, ReflectionCancelled):
+            match e.reason:
+                case NoValidSentence():
+                    if e.reason.doc is None:
+                        return self.message_when_error
+                    sents = list(e.reason.doc.sents)
+                    if not sents:
+                        return self.message_when_error
+                    return sents[-1].root.text + self.suffix_ambiguous
+
+        return self.message_when_error
 
 
 class JaSpacyReflector(SpacyReflector):

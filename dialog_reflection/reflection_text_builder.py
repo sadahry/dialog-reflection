@@ -1,15 +1,34 @@
 from typing import Any, Optional
 import abc
-import spacy
+import sys
+import traceback
 import warnings
+import spacy
 
 
-class ReflectionTextError(ValueError):
+class ICancelledReason:
+    pass
+
+
+class NoValidSentence(ICancelledReason):
     def __init__(
-        self, *args: object, instant_reflection_text: Optional[str] = None
-    ) -> None:
-        self.instant_reflection_text = instant_reflection_text
-        super().__init__(*args)
+        self, message: Optional[str] = None, doc: Optional[spacy.tokens.Doc] = None
+    ):
+        self.message = message
+        self.doc = doc
+
+    def __str__(self):
+        if self.message:
+            return self.message
+        return f"No Valid Sentence in doc: {self.doc}"
+
+
+class ReflectionCancelled(ValueError):
+    def __init__(self, reason: ICancelledReason) -> None:
+        self.reason = reason
+
+    def __str__(self):
+        return f"Reflection Cancelled. reason: {self.reason}"
 
 
 class IReflectionTextBuilder(abc.ABC):
@@ -21,8 +40,10 @@ class IReflectionTextBuilder(abc.ABC):
         try:
             return self.build(doc)
         except BaseException as e:
+            type_, value, traceback_ = sys.exc_info()
             warnings.warn(
-                f"Failed to build reflection text: {type(e)} {e}", UserWarning
+                "\n".join(traceback.format_exception(type_, value, traceback_)),
+                UserWarning,
             )
             return self.build_instead_of_error(e)
 
@@ -30,7 +51,7 @@ class IReflectionTextBuilder(abc.ABC):
     def build(self, doc: Any) -> str:
         """
         build reflection message from valid doc.
-        raise `ReflectionTextValidationError` if the doc is not valid.
+        raise `ReflectionCancelled` if the doc is not valid.
         """
         raise NotImplementedError()
 
@@ -47,8 +68,18 @@ class ISpacyReflectionTextBuilder(IReflectionTextBuilder):
     def safe_build(self, doc: spacy.tokens.Doc) -> str:
         return super().safe_build(doc)
 
-    @abc.abstractmethod
     def build(self, doc: spacy.tokens.Doc) -> str:
+        if doc.text.strip() == "":
+            raise ReflectionCancelled(reason=NoValidSentence(message="Empty Doc"))
+        tokens = self.extract_tokens(doc)
+        return self.build_text(tokens)
+
+    @abc.abstractmethod
+    def extract_tokens(self, doc: spacy.tokens.Doc) -> spacy.tokens.Span:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def build_text(self, doc: spacy.tokens.Span) -> str:
         raise NotImplementedError()
 
     @abc.abstractmethod

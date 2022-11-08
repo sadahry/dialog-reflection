@@ -1,5 +1,8 @@
 import pytest
-from dialog_reflection.reflection_text_builder import ReflectionTextError
+from dialog_reflection.reflection_text_builder import (
+    ReflectionCancelled,
+    NoValidSentence,
+)
 from dialog_reflection.reflector import SpacyReflector
 from dialog_reflection.lang.ja.reflection_text_builder import (
     JaSpacyReflectionTextBuilder,
@@ -26,40 +29,6 @@ class TestReflectionBuilder:
     """Test of ReflectionBuilder private methods"""
 
     @pytest.mark.parametrize(
-        "tag, will_be_allowed",
-        [
-            # VERB
-            ("動詞-一般", True),
-            # NOUN
-            ("名詞-普通名詞-一般", True),
-            # PROPN
-            ("名詞-固有名詞-人名-姓", True),
-            # ADJ
-            ("形容詞-非自立可能", True),
-            # ADJ
-            ("形状詞-一般", True),
-            # PRON
-            ("代名詞", False),
-            # AUX
-            ("助動詞", False),
-            # PART
-            ("助詞-終助詞", False),
-        ],
-    )
-    @pytest.mark.filterwarnings("ignore:empty text")
-    def test_default_allowed_tag_pattern(
-        self,
-        builder: JaSpacyReflectionTextBuilder,
-        tag,
-        will_be_allowed,
-    ):
-        ptn = builder.allowed_tag_pattern
-        if will_be_allowed:
-            assert ptn.search(tag)
-        else:
-            assert not ptn.search(tag)
-
-    @pytest.mark.parametrize(
         "text, assert_message",
         [
             ("", "empty text should be error"),
@@ -76,7 +45,7 @@ class TestReflectionBuilder:
         assert_message,
     ):
         doc = nlp_ja(text)
-        with pytest.raises(ReflectionTextError):
+        with pytest.raises(ReflectionCancelled):
             builder.build(doc)
             assert False, assert_message
 
@@ -235,7 +204,7 @@ class TestReflectionBuilder:
         assert_message,
     ):
         doc = nlp_ja(text)
-        with pytest.raises(ReflectionTextError):
+        with pytest.raises(ReflectionCancelled):
             builder._extract_root_token(doc)
             assert False, assert_message
 
@@ -313,133 +282,6 @@ class TestReflectionBuilder:
         result = "".join(map(lambda t: t.text, tokens))
         assert result == expected, assert_message
 
-    @pytest.mark.parametrize(
-        "text, expected, assert_message",
-        [
-            (
-                "今日は旅行へ行った。",
-                "行っ",
-                "sample sentence 動詞",
-            ),
-            (
-                "いくなら学校かな。",
-                "学校",
-                "sample sentence 名詞-普通名詞",
-            ),
-            (
-                "いくなら首里城かな。",
-                "首里",
-                "sample sentence 名詞-固有名詞",
-            ),
-            (
-                "今日は楽しかった。",
-                "楽しかっ",
-                "sample sentence 形容詞",
-            ),
-            (
-                "今日は充実だ。",
-                "充実",
-                "sample sentence 形状詞",
-            ),
-            (
-                "明日の休日はどうかな。",
-                "休日",
-                "ignore かな",
-            ),
-            (
-                "そんなの笑っちゃいますもの。",
-                "笑っ",
-                "ignore もの",
-            ),
-        ],
-    )
-    def test_extract_bottom_token(
-        self,
-        nlp_ja,
-        builder: JaSpacyReflectionTextBuilder,
-        text,
-        expected,
-        assert_message,
-    ):
-        doc = nlp_ja(text)
-        sent = next(doc.sents)
-        bottom = builder._extract_bottom_token(sent)
-        assert bottom.text == expected, assert_message
-
-    def test_extract_bottom_token_error(
-        self,
-        nlp_ja,
-        builder: JaSpacyReflectionTextBuilder,
-    ):
-        doc = nlp_ja("アレはどうかな。")
-        sent = next(doc.sents)
-        with pytest.raises(ReflectionTextError):
-            builder._extract_bottom_token(sent)
-
-    @pytest.mark.parametrize(
-        "text, expected, assert_message",
-        [
-            (
-                "今日は旅行へ行った。",
-                "行ったんですね。",
-                "sample sentence",
-            ),
-            (
-                "社員をする。",
-                "するんですね。",
-                "obj dependency",
-            ),
-            (
-                "民間の社員をする。",
-                "するんですね。",
-                "obj dependency multi-word",
-            ),
-            (
-                "今年から社員をする。",
-                "するんですね。",
-                "obj dependency does not extract distant dependencies",
-            ),
-            (
-                "働く。",
-                "働くんですね。",
-                "no dependencies",
-            ),
-            (
-                "今日が繁忙期だ。",
-                "繁忙期なんですね。",
-                "ADJ parse",
-            ),
-            (
-                "今日が繁忙期。",
-                "繁忙期なんですね。",
-                "NOUN parse",
-            ),
-            (
-                "今年は繁忙期なだけだ。",
-                "繁忙期なだけなんですね。",
-                "FUKUJOSHI + ADJ parse",
-            ),
-            (
-                "今年は繁忙期だけだ。",
-                "繁忙期だけなんですね。",
-                "FUKUJOSHI + NOUN parse",
-            ),
-        ],
-    )
-    def test_build_suffix(
-        self,
-        nlp_ja,
-        builder: JaSpacyReflectionTextBuilder,
-        text,
-        expected,
-        assert_message,
-    ):
-        root = next(nlp_ja(text).sents).root
-        func = builder._build_suffix
-        text = func(root)
-        assert text == expected, assert_message
-
-    @pytest.mark.filterwarnings("ignore:Unsupported Tag")
     def test_build_suffix_error(
         self,
         nlp_ja,
@@ -450,17 +292,17 @@ class TestReflectionBuilder:
         """
         # rootが副詞の場合はエラーとなる想定
         text = "どう"
-        root = next(nlp_ja(text).sents).root
-        assert root.tag_ == "副詞"
-        func = builder._build_suffix
-        with pytest.raises(ReflectionTextError) as e:
-            func(root)
+        doc = nlp_ja(text)
+        assert doc[0].tag_ == "副詞"
+        func = builder._extract_root_token
+        with pytest.raises(ReflectionCancelled) as e:
+            func(doc)
 
-        # エラー時には元rootの文字列を含んだ状態で返す想定
-        excepted = text + builder.word_ending_unpersed
-        assert e.value.instant_reflection_text == excepted
+        assert isinstance(e.value.reason, NoValidSentence)
+        assert e.value.reason.doc is not None
+        assert text in e.value.reason.doc.text, "エラー時にはdocをeに含める"
 
-    @pytest.mark.filterwarnings(r"ignore:.*NO VALID SENTENSES IN DOC")
+    @pytest.mark.filterwarnings(r"ignore:.*Traceback")
     def test_safe_build_catch_error(
         self,
         nlp_ja,
@@ -479,5 +321,5 @@ class TestReflectionBuilder:
         result = builder.safe_build(doc)
 
         # rootの選出時にエラーとなるはずなので、エラー用テキストを返す想定
-        excepted = builder.message_when_not_valid_doc
+        excepted = builder.message_when_error
         assert result == excepted
