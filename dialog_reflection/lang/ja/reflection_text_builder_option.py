@@ -1,14 +1,16 @@
 from typing import Callable, Set
-from dialog_reflection.reflection_cancelled import (
-    ReflectionCancelled,
+from dialog_reflection.lang.ja.cancelled_reason import (
+    WhTokenNotSupported,
+    DialectNotSupported,
 )
 import attr
 import re
 import spacy
 
 ExceptionToText = Callable[[BaseException], str]
-ReflectionCancelledToText = Callable[[ReflectionCancelled], str]
-DocToText = Callable[[spacy.tokens.Doc], str]
+WhTokenNotSupportedToText = Callable[[WhTokenNotSupported], str]
+DialectNotSupportedToText = Callable[[DialectNotSupported], str]
+TokensToText = Callable[[spacy.tokens.Span], str]
 TokenToText = Callable[[spacy.tokens.Token], str]
 
 
@@ -150,5 +152,13 @@ class JaSpacyPlainTextBuilderOption:
     # For Error Handling
     # ========================================================================
     fn_message_when_error: ExceptionToText = lambda _: "そうなんですね。"
-    fn_message_when_wh_token: ReflectionCancelledToText = lambda _: "んー。"
-    fn_suffix_ambiguous: DocToText = lambda doc: list(doc.sents)[-1].root.text + "、ですか。"
+    fn_message_cancelled_by_token: TokenToText = (
+        lambda token: "そう思うんですね。" if token.norm_ in {"か", "の", "かしら"} else "そうなんですね。"
+    )
+    fn_message_when_wh_token: WhTokenNotSupportedToText = lambda _: "んー。"
+    fn_message_dialect_not_supported: DialectNotSupportedToText = (
+        lambda _: "すみません、方言はわからない言葉が多いです。出来れば標準語でお願いします。"
+    )
+    fn_suffix_ambiguous: TokensToText = (
+        lambda tokens: tokens[-1].sent.root.text + "、ですか。"
+    )

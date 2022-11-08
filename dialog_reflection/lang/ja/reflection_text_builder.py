@@ -255,16 +255,22 @@ class JaSpacyPlainReflectionTextBuilder(ISpacyReflectionTextBuilder):
 
     def build_instead_of_error(self, e: BaseException) -> str:
         if isinstance(e, ReflectionCancelled):
-            match e.reason:
+            match (reason := e.reason):
                 case NoValidSentence():
-                    if (doc := e.reason.doc) is None:
+                    if (doc := reason.doc) is None:
                         return self.op.fn_message_when_error(e)
                     sents = list(doc.sents)
                     if not sents:
                         return self.op.fn_message_when_error(e)
-                    return self.op.fn_suffix_ambiguous(doc)
+                    return self.op.fn_suffix_ambiguous(sents[-1])
+                case NoValidToken():
+                    return self.op.fn_suffix_ambiguous(reason.tokens)
+                case CancelledByToken():
+                    return self.op.fn_message_cancelled_by_token(reason.token)
                 case WhTokenNotSupported():
-                    return self.op.fn_message_when_wh_token(e)
+                    return self.op.fn_message_when_wh_token(reason)
+                case DialectNotSupported():
+                    return self.op.fn_message_dialect_not_supported(reason)
 
         return self.op.fn_message_when_error(e)
 
