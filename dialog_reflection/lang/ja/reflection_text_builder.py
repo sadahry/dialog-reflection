@@ -4,19 +4,19 @@ from dialog_reflection.reflection_cancelled import (
 )
 from dialog_reflection.cancelled_reason import (
     NoValidSentence,
+    NoValidToken,
+    CancelledByToken,
 )
 from dialog_reflection.reflector import (
     ISpacyReflectionTextBuilder,
 )
 from dialog_reflection.lang.ja.cancelled_reason import (
     WhTokenNotSupported,
+    DialectNotSupported,
 )
 import re
 import warnings
 import spacy
-
-# TODO あとでちゃんと実装
-from tests.lang.ja.test_detector import cut_suffix_until_valid
 
 
 class JaPlainReflectionTextBuilder(ISpacyReflectionTextBuilder):
@@ -42,6 +42,94 @@ class JaPlainReflectionTextBuilder(ISpacyReflectionTextBuilder):
             "幾つ",
             "?",
         },
+        invalid_jodoushi_types: Set[str] = {
+            "助動詞-ダ",
+            "助動詞-デス",
+            "助動詞-マス",
+        },
+        valid_jodoushi_types: Set[str] = {
+            "助動詞-タ",
+            "助動詞-タイ",
+            "助動詞-ナイ",
+            "助動詞-レル",
+            "助動詞-ラシイ",
+        },
+        # 網羅はしない。あくまでWARNINGとして出すため
+        dialect_jodoushi_types: Set[str] = {
+            "助動詞-ジャ",
+            "助動詞-ドス",
+            "助動詞-ナンダ",
+            "助動詞-ヘン",
+            "助動詞-ヤ",
+            "助動詞-ヤス",
+        },
+        invalid_setsuzokujoshi_norms: Set[str] = {
+            "が",
+            "し",
+            "て",
+            "で",
+            "に",
+            "から",
+            "けど",
+            "けれど",
+        },
+        valid_setsuzokujoshi_norms: Set[str] = {
+            "と",
+            "ど",
+            "ば",
+            "つつ",
+            "ては",
+            "とも",
+            "とて",
+            "なり",
+            "たって",
+            "ながら",
+            "し",  # 終助詞的に扱われる用例が多いためVALIDに
+            "というか",  # TODO ユーザー辞書での対応(spaCyモデルの再学習を含め)を実現する
+        },
+        dialect_setsuzokujoshi_norms={"きに", "けん", "すけ", "さかい", "ばってん"},
+        invalid_shujoshi_norms={
+            "い",
+            "え",
+            "さ",
+            "ぜ",
+            "ぞ",
+            "や",
+            "な",
+            "ね",
+            "よ",
+            "わ",
+            "もの",
+            "よん",
+            "じゃん",
+        },
+        valid_shujoshi_norms: Set[str] = {
+            "とも",  # 接続助詞「とも」の代用
+        },
+        dialect_shujoshi_norms: Set[str] = {
+            "で",
+            "ど",
+            "ラ",
+            "かし",
+            "ぞい",
+            "たい",
+            "ちょ",
+            "てん",
+            "ねん",
+            "のう",
+            "のん",
+            "ばい",
+            "ばや",
+            "べい",
+        },
+        invalid_fukujoshi_norms: Set[str] = {
+            "って",  # 終助詞的に扱われる用例が多いためVALIDに
+        },
+        valid_fukujoshi_norms: Set[str] = set(),
+        invalid_keijoshi_norms: Set[str] = set(),
+        valid_keijoshi_norms: Set[str] = set(),
+        invalid_kakuoshi_norms: Set[str] = set(),
+        valid_kakuoshi_norms: Set[str] = set(),
         taigen_suffix_regexp: str = ".*(名|代名|形状|助)詞",
     ) -> None:
         # TODO 柔軟に設定できるようにする
@@ -52,6 +140,21 @@ class JaPlainReflectionTextBuilder(ISpacyReflectionTextBuilder):
         self.message_when_wh_token = "んー。"
         self.allowed_root_pos_tags = allowed_root_pos_tags
         self.forbidden_wh_norms = forbidden_wh_norms
+        self.invalid_jodoushi_types = invalid_jodoushi_types
+        self.valid_jodoushi_types = valid_jodoushi_types
+        self.dialect_jodoushi_types = dialect_jodoushi_types
+        self.invalid_setsuzokujoshi_norms = invalid_setsuzokujoshi_norms
+        self.valid_setsuzokujoshi_norms = valid_setsuzokujoshi_norms
+        self.dialect_setsuzokujoshi_norms = dialect_setsuzokujoshi_norms
+        self.invalid_shujoshi_norms = invalid_shujoshi_norms
+        self.valid_shujoshi_norms = valid_shujoshi_norms
+        self.dialect_shujoshi_norms = dialect_shujoshi_norms
+        self.valid_fukujoshi_norms = valid_fukujoshi_norms
+        self.invalid_fukujoshi_norms = invalid_fukujoshi_norms
+        self.invalid_keijoshi_norms = invalid_keijoshi_norms
+        self.valid_keijoshi_norms = valid_keijoshi_norms
+        self.invalid_kakuoshi_norms = invalid_kakuoshi_norms
+        self.valid_kakuoshi_norms = valid_kakuoshi_norms
         self.taigen_suffix_pattern = re.compile(taigen_suffix_regexp)
 
     def extract_tokens(
@@ -60,6 +163,7 @@ class JaPlainReflectionTextBuilder(ISpacyReflectionTextBuilder):
     ) -> spacy.tokens.Span:
         root = self._extract_root_token(doc)
         tokens = self._extract_tokens_with_nearest_heads(root)
+        assert len(tokens) > 0
         return tokens
 
     def _extract_root_token(
@@ -125,23 +229,143 @@ class JaPlainReflectionTextBuilder(ISpacyReflectionTextBuilder):
             return token
 
         head_token = _extract_head_token(root)
+        # TODO テスト強化
         return root.sent[head_token.i :]
 
     def build_text(
         self,
         tokens: spacy.tokens.Span,
     ) -> str:
-        _tokens = cut_suffix_until_valid(tokens)
-        # TODO tokenがないときの対処
-        # if _tokens is None:
-        #     return self.message_when_error
+        _tokens = self._cut_suffix(tokens)
         return self._finalize(_tokens)
 
-    def _finalize(self, sent: spacy.tokens.Span) -> str:
-        if len(sent) == 0:
-            return ""
+    def _cut_suffix(self, tokens: spacy.tokens.Span) -> spacy.tokens.Span:
+        assert len(tokens) > 0
 
-        last_token = sent[-1]
+        for i in reversed(range(-1, len(tokens))):
+            # 最後のtokenまでinvalidだった場合エラーを返す
+            if i == -1:
+                raise ReflectionCancelled(
+                    reason=NoValidToken(
+                        message=f"All Tokens Are Cut As invalid. tokens: {tokens} ",
+                        tokens=tokens,
+                    )
+                )
+
+            token = tokens[i]
+            tag = token.tag_
+            conjugation_type, _ = get_conjugation(token)
+
+            # break -> VALID
+            # continue -> invalid
+            # raise -> CANCEL
+
+            match tag:
+                case ("感動詞-一般" | "感動詞-フィラー" | "連体詞" | "助詞-準体助詞" | "補助記号-読点"):
+                    continue
+                case ("補助記号-句点"):
+                    if token.norm_ == "?":
+                        raise ReflectionCancelled(
+                            reason=CancelledByToken(tokens=tokens, token=token)
+                        )
+                    continue
+                case "助動詞":
+                    if conjugation_type in self.invalid_jodoushi_types:
+                        continue
+                    # 助動詞以外の活用型は用言としてVALIDに
+                    if "助動詞" not in conjugation_type:
+                        break
+                    # VALID判定候補がない場合は無条件でVALIDに
+                    if not self.valid_jodoushi_types:
+                        break
+                    if conjugation_type in self.valid_jodoushi_types:
+                        break
+                    if conjugation_type in self.dialect_jodoushi_types:
+                        raise ReflectionCancelled(
+                            reason=DialectNotSupported(tokens, token)
+                        )
+                    # 未登録はCANCEL
+                    raise ReflectionCancelled(
+                        reason=CancelledByToken(tokens=tokens, token=token)
+                    )
+                case "助詞-接続助詞":
+                    if token.norm_ in self.invalid_setsuzokujoshi_norms:
+                        continue
+                    # VALID判定候補がない場合は無条件でVALIDに
+                    if not self.valid_setsuzokujoshi_norms:
+                        break
+                    if token.norm_ in self.valid_setsuzokujoshi_norms:
+                        break
+                    if token.norm_ in self.dialect_setsuzokujoshi_norms:
+                        raise ReflectionCancelled(
+                            reason=DialectNotSupported(tokens, token)
+                        )
+                    # 未登録はCANCEL
+                    raise ReflectionCancelled(
+                        reason=CancelledByToken(tokens=tokens, token=token)
+                    )
+                case "助詞-終助詞":
+                    if token.norm_ in self.invalid_shujoshi_norms:
+                        continue
+                    # VALID判定候補がない場合は無条件でVALIDに
+                    if not self.valid_shujoshi_norms:
+                        break
+                    if token.norm_ in self.valid_shujoshi_norms:
+                        break
+                    if token.norm_ in self.dialect_shujoshi_norms:
+                        raise ReflectionCancelled(
+                            reason=DialectNotSupported(tokens, token)
+                        )
+                    # 未登録はCANCEL
+                    raise ReflectionCancelled(
+                        reason=CancelledByToken(tokens=tokens, token=token)
+                    )
+                case "助詞-副助詞":
+                    if token.norm_ in self.invalid_fukujoshi_norms:
+                        continue
+                    # VALID判定候補がない場合は無条件でVALIDに
+                    if not self.valid_fukujoshi_norms:
+                        break
+                    if token.norm_ in self.valid_fukujoshi_norms:
+                        continue
+                    # 未登録はCANCEL
+                    raise ReflectionCancelled(
+                        reason=CancelledByToken(tokens=tokens, token=token)
+                    )
+                case "助詞-係助詞":
+                    if token.norm_ in self.invalid_keijoshi_norms:
+                        continue
+                    # VALID判定候補がない場合は無条件でVALIDに
+                    if not self.valid_keijoshi_norms:
+                        break
+                    if token.norm_ in self.valid_keijoshi_norms:
+                        continue
+                    # 未登録はCANCEL
+                    raise ReflectionCancelled(
+                        reason=CancelledByToken(tokens=tokens, token=token)
+                    )
+                case "助詞-格助詞":
+                    if token.norm_ in self.invalid_kakuoshi_norms:
+                        continue
+                    # VALID判定候補がない場合は無条件でVALIDに
+                    if not self.valid_kakuoshi_norms:
+                        break
+                    if token.norm_ in self.valid_kakuoshi_norms:
+                        continue
+                    # 未登録はCANCEL
+                    raise ReflectionCancelled(
+                        reason=CancelledByToken(tokens=tokens, token=token)
+                    )
+
+            # その他はVALIDに
+            break
+
+        return tokens[: i + 1]
+
+    def _finalize(self, tokens: spacy.tokens.Span) -> str:
+        assert len(tokens) > 0
+
+        last_token = tokens[-1]
 
         tag = last_token.tag_
         is_taigen = self.taigen_suffix_pattern.match(tag) is not None
@@ -149,7 +373,7 @@ class JaPlainReflectionTextBuilder(ISpacyReflectionTextBuilder):
         last_text = last_token.text if is_taigen else last_token.lemma_
         suffix = self.suffix_taigen if is_taigen else self.suffix_yougen
 
-        return sent[:-1].text + last_text + suffix
+        return tokens[:-1].text + last_text + suffix
 
     def build_instead_of_error(self, e: BaseException) -> str:
         if isinstance(e, ReflectionCancelled):
@@ -165,3 +389,21 @@ class JaPlainReflectionTextBuilder(ISpacyReflectionTextBuilder):
                     return self.message_when_wh_token  # 固定
 
         return self.message_when_error
+
+
+def get_conjugation(token):
+    # sudachiの形態素解析結果(part_of_speech)5つ目以降(活用タイプ、活用形)が格納される
+    # 品詞によっては活用タイプ、活用形が存在しないため、ここでは配列の取得のみ行う
+    # e.g. 動詞
+    # > m.part_of_speech() # => ['動詞', '一般', '*', '*', '下一段-バ行', '連用形-一般']
+    # ref. https://github.com/explosion/spaCy/blob/v3.4.1/spacy/lang/ja/__init__.py#L102
+    # ref. https://github.com/WorksApplications/SudachiPy/blob/v0.5.4/README.md
+    # > Returns the part of speech as a six-element tuple. Tuple elements are four POS levels, conjugation type and conjugation form.
+    # ref. https://worksapplications.github.io/sudachi.rs/python/api/sudachipy.html#sudachipy.Morpheme.part_of_speech
+    inflection = token.morph.get("Inflection")
+    if not inflection:
+        return None, None
+    inflection = inflection[0].split(";")
+    conjugation_type = inflection[0]
+    conjugation_form = inflection[1]
+    return conjugation_type, conjugation_form

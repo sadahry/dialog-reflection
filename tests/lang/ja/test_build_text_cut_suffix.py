@@ -1,246 +1,26 @@
-# NOTE: あくまでテスト用
-# TODO JaPlainReflectionTextBuilder に移植
-from typing import Optional, Union, Set
+from dialog_reflection.reflection_cancelled import (
+    ReflectionCancelled,
+)
+from dialog_reflection.cancelled_reason import (
+    NoValidToken,
+)
+from dialog_reflection.lang.ja.cancelled_reason import (
+    DialectNotSupported,
+)
 import pytest
-import spacy
 
 
-class CancelledReason:
-    pass
-
-
-class UnexpectedError(CancelledReason):
-    pass
-
-
-class DialectNotSupported(CancelledReason):
-    def __init__(self, token: Union[spacy.tokens.Token, str]):
-        self.token = token
-
-
-class CancelledByToken(CancelledReason):
-    def __init__(self, sent: spacy.tokens.Span, token: Union[spacy.tokens.Token, str]):
-        self.sent = sent
-        self.token = token
-
-
-class ReflectionCancelled(Exception):
-    def __init__(
-        self, *args: object, reason: CancelledReason = UnexpectedError()
-    ) -> None:
-        self.reason = reason
-        super().__init__(*args)
-
-
-INVALID_JODOUSHI_TYPES = {
-    "助動詞-ダ",
-    "助動詞-デス",
-    "助動詞-マス",
-}
-VALID_JODOUSHI_TYPES = {
-    "助動詞-タ",
-    "助動詞-タイ",
-    "助動詞-ナイ",
-    "助動詞-レル",
-    "助動詞-ラシイ",
-}
-# 網羅はしない。あくまでWARNINGとして出すため
-DIALECT_JODOUSHI_TYPES = {
-    "助動詞-ジャ",
-    "助動詞-ドス",
-    "助動詞-ナンダ",
-    "助動詞-ヘン",
-    "助動詞-ヤ",
-    "助動詞-ヤス",
-}
-INVALID_SETSUZOKUJOSHI_NORMS = {"が", "し", "て", "で", "に", "から", "けど", "けれど"}
-VALID_SETSUZOKUJOSHI_NORMS: Set[str] = {
-    "と",
-    "ど",
-    "ば",
-    "つつ",
-    "ては",
-    "とも",
-    "とて",
-    "なり",
-    "たって",
-    "ながら",
-    "し",  # 終助詞的に扱われる用例が多いためVALIDに
-    "というか",  # TODO ユーザー辞書での対応(spaCyモデルの再学習を含め)を実現する
-}
-DIALECT_SETSUZOKUJOSHI_NORMS = {"きに", "けん", "すけ", "さかい", "ばってん"}
-INVALID_SHUJOSHI_NORMS = {
-    "い",
-    "え",
-    "さ",
-    "ぜ",
-    "ぞ",
-    "や",
-    "な",
-    "ね",
-    "よ",
-    "わ",
-    "もの",
-    "よん",
-    "じゃん",
-}
-VALID_SHUJOSHI_NORMS: Set[str] = {
-    "とも",  # 接続助詞「とも」の代用
-}
-DIALECT_SHUJOSHI_NORMS = {
-    "で",
-    "ど",
-    "ラ",
-    "かし",
-    "ぞい",
-    "たい",
-    "ちょ",
-    "てん",
-    "ねん",
-    "のう",
-    "のん",
-    "ばい",
-    "ばや",
-    "べい",
-}
-INVALID_FUKUJOSHI_NORMS = {
-    "って",  # 終助詞的に扱われる用例が多いためVALIDに
-}
-VALID_FUKUJOSHI_NORMS: Set[str] = set()
-INVALID_KEIJOSHI_NORMS: Set[str] = set()
-VALID_KEIJOSHI_NORMS: Set[str] = set()
-INVALID_KAKUOSHI_NORMS: Set[str] = set()
-VALID_KAKUOSHI_NORMS: Set[str] = set()
-
-
-def cut_suffix_until_valid(sent: spacy.tokens.Span) -> Optional[spacy.tokens.Span]:
-    if len(sent) == 0:
-        return None
-
-    for i in reversed(range(-1, len(sent))):
-        # 最後のtokenがcontinueだった場合、Noneを返す
-        if i == -1:
-            return None
-
-        token = sent[i]
-        tag = token.tag_
-        conjugation_type, _ = get_conjugation(token)
-
-        # break -> VALID
-        # continue -> INVALID
-        # raise -> CANCEL
-
-        match tag:
-            case ("感動詞-一般" | "感動詞-フィラー" | "連体詞" | "助詞-準体助詞" | "補助記号-読点"):
-                continue
-            case ("補助記号-句点"):
-                if token.norm_ == "?":
-                    raise ReflectionCancelled(reason=CancelledByToken(sent, token))
-                continue
-            case "助動詞":
-                if conjugation_type in INVALID_JODOUSHI_TYPES:
-                    continue
-                # 助動詞以外の活用型は用言としてVALIDに
-                if "助動詞" not in conjugation_type:
-                    break
-                # VALID判定候補がない場合は無条件でVALIDに
-                if not VALID_JODOUSHI_TYPES:
-                    break
-                if conjugation_type in VALID_JODOUSHI_TYPES:
-                    break
-                if conjugation_type in DIALECT_JODOUSHI_TYPES:
-                    raise ReflectionCancelled(reason=DialectNotSupported(token))
-                # 未登録はCANCEL
-                raise ReflectionCancelled(reason=CancelledByToken(sent, token))
-            case "助詞-接続助詞":
-                if token.norm_ in INVALID_SETSUZOKUJOSHI_NORMS:
-                    continue
-                # VALID判定候補がない場合は無条件でVALIDに
-                if not VALID_SETSUZOKUJOSHI_NORMS:
-                    break
-                if token.norm_ in VALID_SETSUZOKUJOSHI_NORMS:
-                    break
-                if token.norm_ in DIALECT_SETSUZOKUJOSHI_NORMS:
-                    raise ReflectionCancelled(reason=DialectNotSupported(token))
-                # 未登録はCANCEL
-                raise ReflectionCancelled(reason=CancelledByToken(sent, token))
-            case "助詞-終助詞":
-                if token.norm_ in INVALID_SHUJOSHI_NORMS:
-                    continue
-                # VALID判定候補がない場合は無条件でVALIDに
-                if not VALID_SHUJOSHI_NORMS:
-                    break
-                if token.norm_ in VALID_SHUJOSHI_NORMS:
-                    break
-                if token.norm_ in DIALECT_SHUJOSHI_NORMS:
-                    raise ReflectionCancelled(reason=DialectNotSupported(token))
-                # 未登録はCANCEL
-                raise ReflectionCancelled(reason=CancelledByToken(sent, token))
-            case "助詞-副助詞":
-                if token.norm_ in INVALID_FUKUJOSHI_NORMS:
-                    continue
-                # VALID判定候補がない場合は無条件でVALIDに
-                if not VALID_FUKUJOSHI_NORMS:
-                    break
-                if token.norm_ in VALID_FUKUJOSHI_NORMS:
-                    continue
-                # 未登録はCANCEL
-                raise ReflectionCancelled(reason=CancelledByToken(sent, token))
-            case "助詞-係助詞":
-                if token.norm_ in INVALID_KEIJOSHI_NORMS:
-                    continue
-                # VALID判定候補がない場合は無条件でVALIDに
-                if not VALID_KEIJOSHI_NORMS:
-                    break
-                if token.norm_ in VALID_KEIJOSHI_NORMS:
-                    continue
-                # 未登録はCANCEL
-                raise ReflectionCancelled(reason=CancelledByToken(sent, token))
-            case "助詞-格助詞":
-                if token.norm_ in INVALID_KAKUOSHI_NORMS:
-                    continue
-                # VALID判定候補がない場合は無条件でVALIDに
-                if not VALID_KAKUOSHI_NORMS:
-                    break
-                if token.norm_ in VALID_KAKUOSHI_NORMS:
-                    continue
-                # 未登録はCANCEL
-                raise ReflectionCancelled(reason=CancelledByToken(sent, token))
-
-        # その他はVALIDに
-        break
-
-    return sent[: i + 1]
-
-
-def get_conjugation(token):
-    # sudachiの形態素解析結果(part_of_speech)5つ目以降(活用タイプ、活用形)が格納される
-    # 品詞によっては活用タイプ、活用形が存在しないため、ここでは配列の取得のみ行う
-    # e.g. 動詞
-    # > m.part_of_speech() # => ['動詞', '一般', '*', '*', '下一段-バ行', '連用形-一般']
-    # ref. https://github.com/explosion/spaCy/blob/v3.4.1/spacy/lang/ja/__init__.py#L102
-    # ref. https://github.com/WorksApplications/SudachiPy/blob/v0.5.4/README.md
-    # > Returns the part of speech as a six-element tuple. Tuple elements are four POS levels, conjugation type and conjugation form.
-    # ref. https://worksapplications.github.io/sudachi.rs/python/api/sudachipy.html#sudachipy.Morpheme.part_of_speech
-    inflection = token.morph.get("Inflection")
-    if not inflection:
-        return None, None
-    inflection = inflection[0].split(";")
-    conjugation_type = inflection[0]
-    conjugation_form = inflection[1]
-    return conjugation_type, conjugation_form
-
-
-def test_no_sentence(nlp_ja):
+def test_no_sentence(nlp_ja, builder):
     sent = next(nlp_ja("あ").sents)
-    tokens = cut_suffix_until_valid(sent[:0])
-    assert tokens is None, "tokens is None when empy sentence"
+    with pytest.raises(AssertionError):
+        builder._cut_suffix(sent[:0])
 
 
-def test_cut_all_sentence(nlp_ja):
+def test_cut_all_sentence(nlp_ja, builder):
     sent = next(nlp_ja("ほら").sents)
-    tokens = cut_suffix_until_valid(sent)
-    assert tokens is None, "tokens is None when empy sentence"
+    with pytest.raises(ReflectionCancelled) as e:
+        builder._cut_suffix(sent)
+    type(e.value.reason) is NoValidToken
 
 
 # NOTE: 形態素解析のように正しく文書を分離することが目的ではないため
@@ -541,9 +321,9 @@ def test_cut_all_sentence(nlp_ja):
         ),
     ],
 )
-def test_spacy_katsuyo_text_detector(nlp_ja, msg, text, expected):
+def test_spacy_katsuyo_text_detector(nlp_ja, builder, msg, text, expected):
     sent = next(nlp_ja(text).sents)
-    result = cut_suffix_until_valid(sent)
+    result = builder._cut_suffix(sent)
     assert result.text == expected, msg
 
 
@@ -581,12 +361,12 @@ def test_spacy_katsuyo_text_detector(nlp_ja, msg, text, expected):
     ],
 )
 def test_spacy_katsuyo_text_detector_with_no_error_as_conjugation_form(
-    nlp_ja, msg, text
+    nlp_ja, builder, msg, text
 ):
     sent = next(nlp_ja(text).sents)
     # 活用形を取り出しやすくするために付与した単語を除く
     tokens = sent[:-1]
-    tokens = cut_suffix_until_valid(tokens)
+    tokens = builder._cut_suffix(tokens)
     assert tokens is not None, msg
 
 
@@ -923,9 +703,9 @@ def test_spacy_katsuyo_text_detector_with_no_error_as_conjugation_form(
         ),
     ],
 )
-def test_spacy_katsuyo_text_detector_joshi(nlp_ja, msg, text, expected):
+def test_spacy_katsuyo_text_detector_joshi(nlp_ja, builder, msg, text, expected):
     sent = next(nlp_ja(text).sents)
-    result = cut_suffix_until_valid(sent)
+    result = builder._cut_suffix(sent)
     assert result.text == expected, msg
 
 
@@ -949,9 +729,9 @@ def test_spacy_katsuyo_text_detector_joshi(nlp_ja, msg, text, expected):
         ),
     ],
 )
-def test_spacy_katsuyo_text_detector_kigo(nlp_ja, msg, text, expected):
+def test_spacy_katsuyo_text_detector_kigo(nlp_ja, builder, msg, text, expected):
     sent = next(nlp_ja(text).sents)
-    result = cut_suffix_until_valid(sent)
+    result = builder._cut_suffix(sent)
     assert result.text == expected, msg
 
 
@@ -975,14 +755,16 @@ def test_spacy_katsuyo_text_detector_kigo(nlp_ja, msg, text, expected):
         ),
     ],
 )
-def test_spacy_katsuyo_text_detector_kigo_cancel(nlp_ja, msg, text, will_cancel):
+def test_spacy_katsuyo_text_detector_kigo_cancel(
+    nlp_ja, builder, msg, text, will_cancel
+):
     sent = next(nlp_ja(text).sents)
     if will_cancel:
         with pytest.raises(ReflectionCancelled):
-            cut_suffix_until_valid(sent)
+            builder._cut_suffix(sent)
             assert False, msg
     else:
-        cut_suffix_until_valid(sent)
+        builder._cut_suffix(sent)
 
 
 @pytest.mark.parametrize(
@@ -1060,9 +842,9 @@ def test_spacy_katsuyo_text_detector_kigo_cancel(nlp_ja, msg, text, will_cancel)
         ),
     ],
 )
-def test_spacy_katsuyo_text_detector_shujoshi(nlp_ja, msg, text, expected):
+def test_spacy_katsuyo_text_detector_shujoshi(nlp_ja, builder, msg, text, expected):
     sent = next(nlp_ja(text).sents)
-    result = cut_suffix_until_valid(sent)
+    result = builder._cut_suffix(sent)
     assert result.text == expected, msg
 
 
@@ -1086,14 +868,16 @@ def test_spacy_katsuyo_text_detector_shujoshi(nlp_ja, msg, text, expected):
         ),
     ],
 )
-def test_spacy_katsuyo_text_detector_shujoshi_cancel(nlp_ja, msg, text, will_cancel):
+def test_spacy_katsuyo_text_detector_shujoshi_cancel(
+    nlp_ja, builder, msg, text, will_cancel
+):
     sent = next(nlp_ja(text).sents)
     if will_cancel:
         with pytest.raises(ReflectionCancelled):
-            cut_suffix_until_valid(sent)
+            builder._cut_suffix(sent)
             assert False, msg
     else:
-        cut_suffix_until_valid(sent)
+        builder._cut_suffix(sent)
 
 
 @pytest.mark.parametrize(
@@ -1215,16 +999,16 @@ def test_spacy_katsuyo_text_detector_shujoshi_cancel(nlp_ja, msg, text, will_can
     ],
 )
 def test_spacy_katsuyo_text_detector_joshi_dialect_cancel(
-    nlp_ja, msg, text, will_cancel
+    nlp_ja, builder, msg, text, will_cancel
 ):
     sent = next(nlp_ja(text).sents)
     if will_cancel:
         with pytest.raises(ReflectionCancelled) as e:
-            cut_suffix_until_valid(sent)
+            builder._cut_suffix(sent)
             assert False, msg
         type(e.value.reason) is DialectNotSupported, msg
     else:
-        cut_suffix_until_valid(sent)
+        builder._cut_suffix(sent)
 
 
 @pytest.mark.parametrize(
@@ -1320,9 +1104,9 @@ def test_spacy_katsuyo_text_detector_joshi_dialect_cancel(
         ),
     ],
 )
-def test_spacy_katsuyo_text_detector_jodoushi(nlp_ja, msg, text, expected):
+def test_spacy_katsuyo_text_detector_jodoushi(nlp_ja, builder, msg, text, expected):
     sent = next(nlp_ja(text).sents)
-    result = cut_suffix_until_valid(sent)
+    result = builder._cut_suffix(sent)
     assert result.text == expected, msg
 
 
@@ -1407,15 +1191,17 @@ def test_spacy_katsuyo_text_detector_jodoushi(nlp_ja, msg, text, expected):
         ),
     ],
 )
-def test_spacy_katsuyo_text_detector_jodoushi_cancel(nlp_ja, msg, text, will_cancel):
+def test_spacy_katsuyo_text_detector_jodoushi_cancel(
+    nlp_ja, builder, msg, text, will_cancel
+):
     sent = next(nlp_ja(text).sents)
     if will_cancel:
         with pytest.raises(ReflectionCancelled) as e:
-            cut_suffix_until_valid(sent)
+            builder._cut_suffix(sent)
             assert False, msg
         type(e.value.reason) is DialectNotSupported, msg
     else:
-        cut_suffix_until_valid(sent)
+        builder._cut_suffix(sent)
 
 
 @pytest.mark.parametrize(
@@ -1456,12 +1242,12 @@ def test_spacy_katsuyo_text_detector_jodoushi_cancel(nlp_ja, msg, text, will_can
     ],
 )
 def test_spacy_katsuyo_text_detector_jodoushi_dialect_cancel(
-    nlp_ja, msg, text, will_cancel
+    nlp_ja, builder, msg, text, will_cancel
 ):
     sent = next(nlp_ja(text).sents)
     if will_cancel:
         with pytest.raises(ReflectionCancelled):
-            cut_suffix_until_valid(sent)
+            builder._cut_suffix(sent)
             assert False, msg
     else:
-        cut_suffix_until_valid(sent)
+        builder._cut_suffix(sent)

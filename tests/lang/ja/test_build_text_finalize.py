@@ -1,5 +1,4 @@
 import pytest
-from tests.lang.ja.test_detector import cut_suffix_until_valid
 
 
 # NOTE: 形態素解析のように正しく文書を分離することが目的ではないため
@@ -549,6 +548,5 @@ def test_spacy_katsuyo_text_detector_jodoushi(nlp_ja, builder, msg, text, expect
     sent = next(nlp_ja(text).sents)
     # 助動詞の場合、文末調整を行ってから処理したほうが
     # 末尾の「んですね」が正しく付与されるためテストでもそうする
-    tokens = cut_suffix_until_valid(sent)
-    result = builder._finalize(tokens)
+    result = builder.build_text(sent)
     assert result == expected, msg
