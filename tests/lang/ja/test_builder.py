@@ -8,8 +8,6 @@ from tests.lang.ja.test_detector import cut_suffix_until_valid
 
 # 体言的に語尾を扱う品詞
 TAIGEN_SUFFIX_REGEXP = re.compile(r".*(名|代名|形状|助)詞")
-# 文語助動詞は、語尾を扱う際は体言的に扱う
-TAIGEN_TYPE_SUFFIX_REGEXP = re.compile(r".*文語助動詞")
 
 
 def build(sent: spacy.tokens.Span) -> str:
@@ -19,11 +17,7 @@ def build(sent: spacy.tokens.Span) -> str:
     last_token = sent[-1]
 
     tag = last_token.tag_
-    conjugation_type, _ = get_conjugation(last_token)
-
     is_taigen = TAIGEN_SUFFIX_REGEXP.match(tag)
-    if conjugation_type is not None:
-        is_taigen = is_taigen or TAIGEN_TYPE_SUFFIX_REGEXP.match(conjugation_type)
 
     last_text = last_token.text if is_taigen else last_token.lemma_
     suffix = "なんですね。" if is_taigen else "んですね。"
