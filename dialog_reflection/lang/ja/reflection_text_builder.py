@@ -266,7 +266,7 @@ class JaSpacyPlainReflectionTextBuilder(ISpacyReflectionTextBuilder):
                 case NoValidToken():
                     return self.op.fn_suffix_ambiguous(reason.tokens)
                 case CancelledByToken():
-                    return self.op.fn_message_cancelled_by_token(reason.token)
+                    return self.op.fn_message_cancelled_by_token(reason)
                 case WhTokenNotSupported():
                     return self.op.fn_message_when_wh_token(reason)
                 case DialectNotSupported():
