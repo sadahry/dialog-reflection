@@ -157,7 +157,7 @@ class JaSpacyPlainTextBuilderOption:
     )
     fn_message_cancelled_by_token: TokenToText = (
         # 少しでもバリエーションを増やすため、用例の多いケースに例外的に対応
-        lambda token: token.doc[token.sent.root.i :].text + "、と。"
+        lambda token: token.doc[token.sent.root.i : token.sent[-1].i + 1].text + "、と。"
         if token.tag_ == "助詞-終助詞" and token.norm_ in {"か", "の", "かしら"}
         else "そうなんですね。"
     )
