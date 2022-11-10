@@ -1,4 +1,7 @@
 from typing import Callable, Set
+from dialog_reflection.cancelled_reason import (
+    CancelledByToken,
+)
 from dialog_reflection.lang.ja.cancelled_reason import (
     WhTokenNotSupported,
     DialectNotSupported,
@@ -12,6 +15,7 @@ WhTokenNotSupportedToText = Callable[[WhTokenNotSupported], str]
 DialectNotSupportedToText = Callable[[DialectNotSupported], str]
 TokensToText = Callable[[spacy.tokens.Span], str]
 TokenToText = Callable[[spacy.tokens.Token], str]
+CancelledByTokenToText = Callable[[CancelledByToken], str]
 
 
 @attr.define(frozen=True)
@@ -157,10 +161,12 @@ class JaSpacyPlainTextBuilderOption:
     fn_suffix_ambiguous: TokensToText = (
         lambda tokens: tokens[-1].sent.root.text + "、ですか。"
     )
-    fn_message_cancelled_by_token: TokenToText = (
+    fn_message_cancelled_by_token: CancelledByTokenToText = (
         # 少しでもバリエーションを増やすため、用例の多いケースに例外的に対応
-        lambda token: token.doc[token.sent.root.i :].text + "、と。"
-        if token.tag_ == "助詞-終助詞" and token.norm_ in {"か", "の", "かしら"}
+        lambda reason: reason.tokens.text + "、と。"
+        if reason.tokens is not None
+        and reason.token.tag_ == "助詞-終助詞"  # noqa W503
+        and reason.token.norm_ in {"か", "の", "かしら"}  # noqa W503
         else "そうなんですね。"
     )
     fn_message_when_wh_token: WhTokenNotSupportedToText = lambda _: "んー。"
