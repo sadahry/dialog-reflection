@@ -145,9 +145,11 @@ class JaSpacyPlainTextBuilderOption:
     # ========================================================================
     # For Building Text (finalize)
     # ========================================================================
-    fn_suffix_taigen: TokenToText = lambda _: "なんですね。"
-    fn_suffix_yougen: TokenToText = lambda _: "んですね。"
-    taigen_suffix_pattern: re.Pattern = re.compile(r".*(名|代名|形状|助)詞")
+    fn_last_token_taigen: TokenToText = lambda token: token.text + "なんですね。"
+    fn_last_token_yougen: TokenToText = lambda token: token.lemma_ + "んですね。"
+    fn_last_token_special_form: TokenToText = lambda token: token.text + "、ですか。"
+    last_token_taigen_tag_pattern: re.Pattern = re.compile(r".*(名|代名|形状|助)詞")
+    last_token_special_form_pattern: re.Pattern = re.compile(r".*命令形")
     # ========================================================================
     # For Error Handling
     # ========================================================================

@@ -550,3 +550,26 @@ def test_spacy_katsuyo_text_detector_jodoushi(nlp_ja, builder, msg, text, expect
     # 末尾の「んですね」が正しく付与されるためテストでもそうする
     result = builder.build_text(sent)
     assert result == expected, msg
+
+
+@pytest.mark.parametrize(
+    "msg, text, expected",
+    [
+        (
+            "命令形",
+            "早くしろ",
+            "早くしろ、ですか。",
+        ),
+        (
+            "命令形",
+            "いってください",
+            "いってください、ですか。",
+        ),
+    ],
+)
+def test_spacy_katsuyo_text_detector_special_form(nlp_ja, builder, msg, text, expected):
+    sent = next(nlp_ja(text).sents)
+    # 助動詞の場合、文末調整を行ってから処理したほうが
+    # 末尾の「んですね」が正しく付与されるためテストでもそうする
+    result = builder.build_text(sent)
+    assert result == expected, msg
