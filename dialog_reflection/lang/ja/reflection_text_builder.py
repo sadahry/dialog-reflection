@@ -241,17 +241,20 @@ class JaSpacyPlainReflectionTextBuilder(ISpacyReflectionTextBuilder):
         return tokens[:-1].text + last_token_text
 
     def _finalize_last_token(self, last_token: spacy.tokens.Token) -> str:
-        tag = last_token.tag_
-        is_taigen = self.op.taigen_suffix_pattern.match(tag) is not None
-
-        last_text = last_token.text if is_taigen else last_token.lemma_
-        suffix = (
-            self.op.fn_suffix_taigen(last_token)
-            if is_taigen
-            else self.op.fn_suffix_yougen(last_token)
+        _, conjugation_form = get_conjugation(last_token)
+        is_special_form = (conjugation_form is not None) and (
+            self.op.last_token_special_form_pattern.match(conjugation_form) is not None
         )
+        tag = last_token.tag_
+        is_taigen = self.op.last_token_taigen_tag_pattern.match(tag) is not None
 
-        return last_text + suffix
+        return (
+            self.op.fn_last_token_special_form(last_token)
+            if is_special_form
+            else self.op.fn_last_token_taigen(last_token)
+            if is_taigen
+            else self.op.fn_last_token_yougen(last_token)
+        )
 
     def build_instead_of_error(self, e: BaseException) -> str:
         if isinstance(e, ReflectionCancelled):
