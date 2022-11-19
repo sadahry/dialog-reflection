@@ -16,6 +16,14 @@ from dialog_reflection.lang.ja.cancelled_reason import (
 from dialog_reflection.lang.ja.reflection_text_builder_option import (
     JaSpacyPlainTextBuilderOption,
 )
+from katsuyo_text.spacy_sentence_converter import (
+    SpacySentenceConverter,
+)
+from katsuyo_text.katsuyo_text_helper import (
+    Teinei,
+    Dantei,
+    DanteiTeinei,
+)
 import warnings
 import spacy
 
@@ -26,6 +34,14 @@ class JaSpacyPlainReflectionTextBuilder(ISpacyReflectionTextBuilder):
         op: JaSpacyPlainTextBuilderOption = JaSpacyPlainTextBuilderOption(),
     ) -> None:
         self.op = op
+        # 「です」「ます」のみ変換
+        # ref. https://github.com/sadahry/dialog-reflection/issues/9
+        self._keigo_converter = SpacySentenceConverter(
+            convertions_dict={
+                Teinei(): None,
+                DanteiTeinei(): Dantei(),
+            }
+        )
 
     def extract_tokens(
         self,
@@ -235,10 +251,28 @@ class JaSpacyPlainReflectionTextBuilder(ISpacyReflectionTextBuilder):
     def _finalize(self, tokens: spacy.tokens.Span) -> str:
         assert len(tokens) > 0
 
+        # 変換処理
+        tokens_text = self._exclude_keigo(tokens)
+
+        # 末尾処理
         last_token = tokens[-1]
         last_token_text = self._finalize_last_token(last_token)
 
-        return tokens[:-1].text + last_token_text
+        # _cutsuffixにより末尾に「です」「ます」は含まれない
+        assert tokens_text.endswith(last_token.text)
+        tokens_text_until_last = tokens_text[: -len(last_token.text)]
+
+        return tokens_text_until_last + last_token_text
+
+    def _exclude_keigo(self, tokens: spacy.tokens.Span) -> str:
+        assert len(tokens) > 0
+
+        # root以降の敬語を除外
+        tokens_until_root = tokens.doc[tokens[0].i : tokens.root.i]
+        tokens_from_root = tokens.doc[tokens.root.i :]
+        text_excluded_keigo = self._keigo_converter.convert(tokens_from_root)
+
+        return tokens_until_root.text + text_excluded_keigo
 
     def _finalize_last_token(self, last_token: spacy.tokens.Token) -> str:
         _, conjugation_form = get_conjugation(last_token)
