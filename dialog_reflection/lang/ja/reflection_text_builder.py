@@ -12,6 +12,7 @@ from dialog_reflection.reflector import (
 from dialog_reflection.lang.ja.cancelled_reason import (
     WhTokenNotSupported,
     DialectNotSupported,
+    KeigoExclusionFailed,
 )
 from dialog_reflection.lang.ja.reflection_text_builder_option import (
     JaSpacyPlainTextBuilderOption,
@@ -24,6 +25,11 @@ from katsuyo_text.katsuyo_text_helper import (
     Dantei,
     DanteiTeinei,
 )
+from katsuyo_text.katsuyo_text import (
+    KatsuyoTextError,
+)
+import sys
+import traceback
 import warnings
 import spacy
 
@@ -267,12 +273,20 @@ class JaSpacyPlainReflectionTextBuilder(ISpacyReflectionTextBuilder):
     def _exclude_keigo(self, tokens: spacy.tokens.Span) -> str:
         assert len(tokens) > 0
 
-        # root以降の敬語を除外
-        tokens_until_root = tokens.doc[tokens[0].i : tokens.root.i]
-        tokens_from_root = tokens.doc[tokens.root.i :]
-        text_excluded_keigo = self._keigo_converter.convert(tokens_from_root)
+        try:
+            # root以降の敬語を除外
+            tokens_until_root = tokens.doc[tokens[0].i : tokens.root.i]
+            tokens_from_root = tokens.doc[tokens.root.i : tokens[-1].i + 1]
+            text_excluded_keigo = self._keigo_converter.convert(tokens_from_root)
 
-        return tokens_until_root.text + text_excluded_keigo
+            return tokens_until_root.text + text_excluded_keigo
+        except KatsuyoTextError as e:
+            type_, value, traceback_ = sys.exc_info()
+            warnings.warn(
+                "\n".join(traceback.format_exception(type_, value, traceback_)),
+                UserWarning,
+            )
+            raise ReflectionCancelled(reason=KeigoExclusionFailed(e, tokens))
 
     def _finalize_last_token(self, last_token: spacy.tokens.Token) -> str:
         _, conjugation_form = get_conjugation(last_token)

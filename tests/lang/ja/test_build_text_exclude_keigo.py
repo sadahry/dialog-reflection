@@ -1,4 +1,7 @@
 import pytest
+from katsuyo_text.katsuyo_text import (
+    KatsuyoTextError,
+)
 
 
 @pytest.mark.parametrize(
@@ -121,3 +124,10 @@ def test_spacy_keigo_exlude(nlp_ja, builder, msg, text, expected):
     sent = next(nlp_ja(text).sents)
     result = builder._exclude_keigo(sent)
     assert result == expected, msg
+
+
+def test_spacy_keigo_exlude_error(nlp_ja, builder):
+    # 実運用上、「でしょう」が末尾にくることは想定されない
+    sent = next(nlp_ja("あなたは美しくあるでしょう").sents)
+    with pytest.raises(KatsuyoTextError):
+        builder._exclude_keigo(sent)

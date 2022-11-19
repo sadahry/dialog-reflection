@@ -1,6 +1,7 @@
 from dialog_reflection.cancelled_reason import (
     ICancelledReason,
 )
+from katsuyo_text.katsuyo_text import KatsuyoTextError
 import spacy
 
 
@@ -20,3 +21,12 @@ class DialectNotSupported(ICancelledReason):
 
     def __str__(self):
         return f"Dialect Token Not Supported. tokens: {self.tokens} token: {self.dialect_token}"
+
+
+class KeigoExclusionFailed(ICancelledReason):
+    def __init__(self, e: KatsuyoTextError, tokens: spacy.tokens.Span):
+        self.e = e
+        self.tokens = tokens
+
+    def __str__(self):
+        return str(self.e)
