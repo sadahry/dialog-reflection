@@ -15,7 +15,7 @@ from dialog_reflection.lang.ja.cancelled_reason import (
     KeigoExclusionFailed,
 )
 from dialog_reflection.lang.ja.reflection_text_builder_option import (
-    JaSpacyPlainTextBuilderOption,
+    JaSpacyPlainRelflectionTextBuilderOption,
 )
 from katsuyo_text.spacy_sentence_converter import (
     SpacySentenceConverter,
@@ -37,7 +37,7 @@ import spacy
 class JaSpacyPlainReflectionTextBuilder(ISpacyReflectionTextBuilder):
     def __init__(
         self,
-        op: JaSpacyPlainTextBuilderOption = JaSpacyPlainTextBuilderOption(),
+        op: JaSpacyPlainRelflectionTextBuilderOption = JaSpacyPlainRelflectionTextBuilderOption(),
     ) -> None:
         self.op = op
         # 「です」「ます」のみ変換
