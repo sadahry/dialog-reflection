@@ -21,7 +21,7 @@ CancelledByTokenToText = Callable[[CancelledByToken], str]
 
 
 @attr.define(frozen=True)
-class JaSpacyPlainTextBuilderOption:
+class JaSpacyPlainRelflectionTextBuilderOption:
     # ========================================================================
     # For Extracting Tokens
     # ========================================================================
