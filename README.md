@@ -99,7 +99,7 @@ print(reflection_text)
 # => 旅行へ行ったんだね。
 ```
 
-その他設定項目は [reflection_text_builder_option.py](https://github.com/sadahry/dialog-reflection/blob/main/dialog_reflection/lang/ja/reflection_text_builder_option.py#L24) を確認してください
+その他設定項目は [reflection_text_builder_option.py](https://github.com/sadahry/dialog-reflection/blob/main/dialog_reflection/lang/ja/reflection_text_builder_option.py#L24) を参照
 
 ### ロジックのカスタマイズ
 
