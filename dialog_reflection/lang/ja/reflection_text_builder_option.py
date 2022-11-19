@@ -5,6 +5,7 @@ from dialog_reflection.cancelled_reason import (
 from dialog_reflection.lang.ja.cancelled_reason import (
     WhTokenNotSupported,
     DialectNotSupported,
+    KeigoExclusionFailed,
 )
 import attr
 import re
@@ -13,6 +14,7 @@ import spacy
 ExceptionToText = Callable[[BaseException], str]
 WhTokenNotSupportedToText = Callable[[WhTokenNotSupported], str]
 DialectNotSupportedToText = Callable[[DialectNotSupported], str]
+KeigoExclusionFailedToText = Callable[[KeigoExclusionFailed], str]
 TokensToText = Callable[[spacy.tokens.Span], str]
 TokenToText = Callable[[spacy.tokens.Token], str]
 CancelledByTokenToText = Callable[[CancelledByToken], str]
@@ -172,4 +174,7 @@ class JaSpacyPlainTextBuilderOption:
     fn_message_when_wh_token: WhTokenNotSupportedToText = lambda _: "んー。"
     fn_message_dialect_not_supported: DialectNotSupportedToText = (
         lambda _: "すみません、方言はわからない言葉が多いです。出来れば標準語でお願いします。"
+    )
+    fn_message_keigo_exclusion_failed: KeigoExclusionFailedToText = (
+        lambda reason: reason.tokens.text + "、ですか。"
     )

@@ -322,6 +322,8 @@ class JaSpacyPlainReflectionTextBuilder(ISpacyReflectionTextBuilder):
                     return self.op.fn_message_when_wh_token(reason)
                 case DialectNotSupported():
                     return self.op.fn_message_dialect_not_supported(reason)
+                case KeigoExclusionFailed():
+                    return self.op.fn_message_keigo_exclusion_failed(reason)
 
         return self.op.fn_message_when_error(e)
 
