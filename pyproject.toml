@@ -9,7 +9,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.10"
 spacy = "^3.4.1"
-katsuyo-text = "0.1.0"
+katsuyo-text = "0.1.2"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.1.3"
