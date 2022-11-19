@@ -1,6 +1,9 @@
 import pytest
-from katsuyo_text.katsuyo_text import (
-    KatsuyoTextError,
+from dialog_reflection.reflection_cancelled import (
+    ReflectionCancelled,
+)
+from dialog_reflection.lang.ja.cancelled_reason import (
+    KeigoExclusionFailed,
 )
 
 
@@ -126,8 +129,10 @@ def test_spacy_keigo_exlude(nlp_ja, builder, msg, text, expected):
     assert result == expected, msg
 
 
+@pytest.mark.filterwarnings("ignore:.*")
 def test_spacy_keigo_exlude_error(nlp_ja, builder):
     # 実運用上、「でしょう」が末尾にくることは想定されない
     sent = next(nlp_ja("あなたは美しくあるでしょう").sents)
-    with pytest.raises(KatsuyoTextError):
+    with pytest.raises(ReflectionCancelled) as e:
         builder._exclude_keigo(sent)
+    type(e.value.reason) is KeigoExclusionFailed
